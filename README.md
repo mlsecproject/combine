@@ -1,4 +1,4 @@
-harvester
-=========
+combine
+=======
 
-Harvester gathers OSINT Threat Intelligence Feeds
+Combine gathers OSINT Threat Intelligence Feeds
