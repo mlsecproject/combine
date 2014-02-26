@@ -1,11 +1,9 @@
 #!/usr/bin/env python
-# Harvest 1.0 
-# Scrapes OSINT data for import into ESM via CEF/Syslog
-# http://www.threatstream.com
-#
+# Harvest
+# Scrapes OSINT data and converts to csv
 #----------------------------------------------------------------------------
-
 #
+# Originally based on ArcOSI / BadHarvest from Greg Martin
 # Copyright 2012 GCM Security LLC.
 #
 #Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -17,6 +15,12 @@
 #
 #The above copyright notice and this permission notice shall be included in
 #all copies or substantial portions of the Software.
+#
+#----------------------------------------------------------------------------
+#
+# Copyright 2014 MLSec Project
+#
+# Licensed under GPLv3 - https://github.com/mlsecproject/combine/blob/master/LICENSE
 #
 #THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 #IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
