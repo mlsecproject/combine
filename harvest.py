@@ -37,7 +37,8 @@ import ConfigParser
 
 def find_content(url, regex, comment_ignore_set):
     try:
-        content = urllib2.urlopen(url).read()
+        req = urllib2.Request(url, headers={ 'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/33.0.1750.152 Safari/537.36' })
+        content = urllib2.urlopen(req).read()
         print 'Grabbing list from: ' + url
         time.sleep(1)
         for ix in xrange(len(COMMENT_REGEXES)):
