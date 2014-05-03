@@ -25,7 +25,7 @@
               "id": "http://jsonschema.net/indicators/0/direction",
               "required":true
             },
-            "type": {
+            "datatype": {
               "type":"string",
               "id": "http://jsonschema.net/indicators/0/type",
               "required":true
