@@ -9,6 +9,13 @@ You can run the original harvest.py tool with a cmd line like this:
 ./harvest.py -config harvest-outbound.cfg -output sample-output.txt
 `````
 
+The output will actually be a CSV with the following schema:
+```
+address, direction, source, date
+```
+
+The `address` field consists of a FQDN or IPv4 address. The `direction` field will be either `inbound` or `outbound`. The `date` field will be in `YYYY-MM-DD` format.
+
 ### Copyright Info
 Originally based on ArcOSI / BadHarvest from Greg Martin
 
