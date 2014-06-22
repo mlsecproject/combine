@@ -30,22 +30,30 @@
 #OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 #THE SOFTWARE.
 #
+import argparse
 import csv
-import urllib2, re, socket, time, os, argparse, sys
+import os
+import re 
+import requests
+import socket
+import sys
+import time
 import ConfigParser
 
 
-def find_content(url, regex, comment_ignore_set):
+def find_content(url, regex, comment_ignore_set, proxies):
     try:
-        req = urllib2.Request(url, headers={ 'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/33.0.1750.152 Safari/537.36' })
-        content = urllib2.urlopen(req).read()
+        headers={ 'User-Agent': 'harvest.py' }
         print 'Grabbing list from: ' + url
+        r = requests.get(url, headers=headers)
+        content = r.text
         time.sleep(1)
         for ix in xrange(len(COMMENT_REGEXES)):
             if not COMMENT_REGEXES_NAMES[ix] in comment_ignore_set:
                 content = re.sub(COMMENT_REGEXES[ix],
                                  "\n" if COMMENT_REGEXES[ix].pattern.find("\\n") >= 0 else "", content)
         return re.finditer(regex, content)
+    # TODO: this is too broad
     except:
         print 'Failed connection to: ' + url + ' skipping...'
         return None
@@ -86,7 +94,7 @@ def build_intel():
             categories = [CONFIG["DEFAULTS"]["category"]]
             if src_nam in CONFIG[sources_cat_cgf]:
                 categories = [x.strip() for x in CONFIG[sources_cat_cgf][src_nam].split(",")]
-            matches = find_content(src_url, val_regex, comment_ignore_set)
+            matches = find_content(src_url, val_regex, comment_ignore_set, proxies)
             added_set = set()
             if matches is not None:
                 for reg_match in matches:
@@ -104,8 +112,7 @@ def build_intel():
     if localfile:
         file_handler.close()
 
-if __name__ == "__main__":
-
+def main():
     SECTIONS = ['PROXY', 'DEFAULTS',
                 'IPSOURCES', 'IPSOURCESREGEX', 'IPSOURCESCOMMENTIGNORE', 'IPSOURCESCATEGORIES', 'IPWHITELIST',
                 'DOMAINSOURCES', 'DOMAINSOURCESREGEX', 'DOMAINSOURCESCOMMENTIGNORE',
@@ -226,11 +233,15 @@ if __name__ == "__main__":
 
     #Check/Initialize  Config
     if 'enabled' in CONFIG and CONFIG['PROXY']['enabled'] in ['y', 'yes']:
-        proxy_support = urllib2.ProxyHandler({
+        proxies = {
             "http": "http://%(user)s:%(pass)s@%(host)s:%(port)s" % CONFIG['PROXY'],
-            "https": "http://%(user)s:%(pass)s@%(host)s:%(port)s" % CONFIG['PROXY']})
-        opener = urllib2.build_opener(proxy_support, urllib2.HTTPHandler)
-        urllib2.install_opener(opener)
+            "https": "http://%(user)s:%(pass)s@%(host)s:%(port)s" % CONFIG['PROXY']}
+    else:
+        proxies = None
 
     # Go scraper
-    build_intel()
+    build_intel(proxies)
+
+
+if __name__ == "__main__":
+    main()
