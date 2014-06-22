@@ -11,10 +11,10 @@ You can run the original harvest.py tool with a cmd line like this:
 
 The output will actually be a CSV with the following schema:
 ```
-entity, type, direction, source, notes, date
+entity, datatype, direction, source, notes, date
 ```
 - The `entity` field consists of a FQDN or IPv4 address (supported entities at the moment)
-- The `type` field consists of either `FQDN` or `IPv4`, classifying the type of the entity
+- The `datatype` field consists of either `FQDN` or `IPv4`, classifying the type of the entity
 - The `direction` field will be either `inbound` or `outbound`
 - The `notes` field should cover any extra tag info we may want to persist with the data
 - The `date` field will be in `YYYY-MM-DD` format.
