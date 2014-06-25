@@ -37,3 +37,6 @@ nosetests.xml
 
 # virtualenv
 venv
+
+# IDE config
+.idea
