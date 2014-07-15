@@ -13,7 +13,7 @@ def main():
 
     reqs = [grequests.get(url, headers=headers) for url in urls]
     responses = grequests.map(reqs)
-    harvest = [(response.url, response.text) for response in responses]
+    harvest = [(response.url, response.status_code, response.text) for response in responses]
 
     with open('harvest.json', 'wb') as f:
         json.dump(harvest, f, indent=2)
