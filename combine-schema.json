@@ -30,7 +30,12 @@
               "id": "http://jsonschema.net/indicators/0/type",
               "required":true
             },
-            "value": {
+            "notes": {
+              "type":"string",
+              "id": "http://jsonschema.net/indicators/0/type",
+              "required":false
+            },
+            "entity": {
               "type":"string",
               "id": "http://jsonschema.net/indicators/0/value",
               "required":true
