@@ -1,4 +1,3 @@
-import argparse
 import json
 import grequests
 
@@ -18,6 +17,7 @@ def main():
 
     with open('harvest.json', 'wb') as f:
         json.dump(harvest, f, indent=2)
+
 
 if __name__ == "__main__":
     main()
