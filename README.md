@@ -34,9 +34,6 @@ bgr.runk.pl,FQDN,outbound,mtc_malwaredns,Malware,2014-06-01
 ```
 
 ### Copyright Info
-Originally based on ArcOSI / BadHarvest from Greg Martin
-
-Copyright 2012 GCM Security LLC.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
