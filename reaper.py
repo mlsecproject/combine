@@ -1,17 +1,20 @@
 import argparse
 import json
-import requests
+import grequests
+
+
+def exception_handler(request, exception):
+    print "Request %r failed: %r" % (request, exception)
 
 
 def main():
-    harvest = []
     with open('urls.txt', 'rb') as f:
         urls = f.readlines()
-
     headers = {'User-Agent': 'harvest.py'}
-    for url in urls:
-        r = requests.get(url, headers=headers)
-        harvest.append((url, r.text))
+
+    reqs = [grequests.get(url, headers=headers) for url in urls]
+    grequests.map(reqs, exception_handler=exception_handler)
+    harvest = [req.text for req in reqs]
 
     with open('harvest.json', 'wb') as f:
         json.dump(harvest, f)
