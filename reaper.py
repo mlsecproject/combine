@@ -9,15 +9,15 @@ def exception_handler(request, exception):
 
 def main():
     with open('urls.txt', 'rb') as f:
-        urls = f.readlines()
+        urls = [url.rstrip('\n') for url in f.readlines()]
     headers = {'User-Agent': 'harvest.py'}
 
     reqs = [grequests.get(url, headers=headers) for url in urls]
-    grequests.map(reqs, exception_handler=exception_handler)
-    harvest = [req.text for req in reqs]
+    responses = grequests.map(reqs)
+    harvest = [(response.url, response.text) for response in responses]
 
     with open('harvest.json', 'wb') as f:
-        json.dump(harvest, f)
+        json.dump(harvest, f, indent=2)
 
 if __name__ == "__main__":
     main()
