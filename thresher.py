@@ -19,8 +19,8 @@ def process_simple_list(response, source, direction):
     return [(i, indicator_type(i), direction, source, '', '%s' % datetime.date.today()) for i in response.split('\n')]
 
 
-def thresh(file_name):
-    with open(file_name, 'rb') as f:
+def thresh(input_file, output_file):
+    with open(input_file, 'rb') as f:
         crop = json.load(f)
 
     harvest = []
@@ -30,11 +30,14 @@ def thresh(file_name):
         if response[1] == 200:
             if 'blocklist.de' in response[0]:
                 harvest += thresher_map['blocklist'](response[2], response[0], 'inbound')
-            else:
+            else:  # include other site types
                 pass
-        else:
+        else:  # how to handle non-200 non-404?
             pass
+
+    with open(output_file, 'wb') as f:
+        json.dump(harvest, f)
 
 
 if __name__ == "__main__":
-    thresh('harvest.json')
+    thresh('harvest.json', 'crop.json')
