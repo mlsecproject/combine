@@ -44,3 +44,6 @@ venv
 
 #virtualenv
 venv
+
+# vim swap files
+*.swp
