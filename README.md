@@ -6,7 +6,9 @@ Combine gathers OSINT Threat Intelligence Feeds
 You can run the original harvest.py tool with a cmd line like this:
 
 ````
-./harvest.py -config harvest-outbound.cfg -output sample-output.txt
+python reaper.py 
+python thresher.py
+python baler.py
 `````
 
 The output will actually be a CSV with the following schema:
@@ -16,6 +18,7 @@ entity, datatype, direction, source, notes, date
 - The `entity` field consists of a FQDN or IPv4 address (supported entities at the moment)
 - The `datatype` field consists of either `FQDN` or `IPv4`, classifying the type of the entity
 - The `direction` field will be either `inbound` or `outbound`
+- The `source` field contains the original URL.
 - The `notes` field should cover any extra tag info we may want to persist with the data
 - The `date` field will be in `YYYY-MM-DD` format.
 
@@ -34,9 +37,6 @@ bgr.runk.pl,FQDN,outbound,mtc_malwaredns,Malware,2014-06-01
 ```
 
 ### Copyright Info
-Originally based on ArcOSI / BadHarvest from Greg Martin
-
-Copyright 2012 GCM Security LLC.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
