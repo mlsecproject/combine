@@ -36,7 +36,7 @@ def thresh(input_file, output_file):
             pass
 
     with open(output_file, 'wb') as f:
-        json.dump(harvest, f)
+        json.dump(harvest, f, indent=2)
 
 
 if __name__ == "__main__":
