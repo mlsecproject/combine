@@ -47,3 +47,7 @@ venv
 
 # vim swap files
 *.swp
+
+# other data files
+crop.json
+harvest.csv
