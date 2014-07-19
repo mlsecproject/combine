@@ -48,6 +48,15 @@ def process_alienvault(response, source, direction):
     return data
 
 
+def process_packetmail(response, source, direction):
+    data = []
+    for line in response.split('\n'):
+        if not line.startswith('#') and len(line) > 0:
+            i = line.partition(';')[0].strip()
+            data.append((i, indicator_type(i), direction, source, '', '%s' % datetime.date.today()))
+    return data
+
+
 def thresh(input_file, output_file):
     with open(input_file, 'rb') as f:
         crop = json.load(f)
@@ -61,6 +70,7 @@ def thresh(input_file, output_file):
                     'rulez': process_alienvault,
                     'sans': process_simple_list,
                     'nothink': process_simple_list,
+                    'packetmail': process_packetmail,
                     'dragonresearchgroup': process_drg}
 
     for response in crop:
