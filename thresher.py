@@ -25,6 +25,15 @@ def process_simple_list(response, source, direction):
     return data
 
 
+def process_virbl(response, source, direction):
+    data = []
+    for line in response.split('\n'):
+        if not line.startswith('E') and len(line) > 0:
+            i = line.split()[0]
+            data.append((i, indicator_type(i), direction, source, '', '%s' % datetime.date.today()))
+    return data
+
+
 def process_project_honeypot(response, source, direction):
     soup = bs4.BeautifulSoup(response)
     return [(i.text, indicator_type(i.text), direction, source, '', '%s' % datetime.date.today()) for i in soup.find_all('a', 'bnone')]
@@ -91,6 +100,7 @@ def thresh(input_file, output_file):
                     'packetmail': process_packetmail,
                     'autoshun': process_autoshun,
                     'the-haleys': process_haleys,
+                    'virbl': process_simple_list,
                     'dragonresearchgroup': process_drg}
 
     for response in crop:
