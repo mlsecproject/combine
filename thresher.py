@@ -41,8 +41,8 @@ def process_drg(response, source, direction):
 def process_alienvault(response, source, direction):
     data = []
     for line in response.split('\n'):
-        if not line.startswith('#'):
-            i = line.partition('#')[0]
+        if not line.startswith('#') and len(line) > 0:
+            i = line.partition('#')[0].strip()
             data.append((i, indicator_type(i), direction, source, '', '%s' % datetime.date.today()))
     return data
 
@@ -57,6 +57,7 @@ def thresh(input_file, output_file):
                     'projecthoneypot': process_project_honeypot,
                     'ciarmy': process_simple_list,
                     'alienvault': process_alienvault,
+                    'danger.rulez.sk': process_alienvault,
                     'dragonresearchgroup': process_drg}
 
     for response in crop:
