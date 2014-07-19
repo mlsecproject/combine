@@ -4,7 +4,7 @@ import json
 
 def bale_csv(harvest, output_file):
     with open(output_file, 'wb') as csv_file:
-        bale_writer = csv.writer(csv_file)
+        bale_writer = csv.writer(csv_file, quoting=csv.QUOTE_ALL)
 
         # header row
         bale_writer.writerow(('entity', 'type', 'direction', 'source', 'notes', 'date'))
