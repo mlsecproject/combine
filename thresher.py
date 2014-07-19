@@ -1,3 +1,4 @@
+import bs4
 import datetime
 import json
 import re
@@ -16,7 +17,71 @@ def indicator_type(indicator):
 
 
 def process_simple_list(response, source, direction):
-    return [(i, indicator_type(i), direction, source, '', '%s' % datetime.date.today()) for i in response.split('\n')]
+    data = []
+    for line in response.split('\n'):
+        if not line.startswith('#') and len(line) > 0:
+            i = line.split()[0]
+            data.append((i, indicator_type(i), direction, source, '', '%s' % datetime.date.today()))
+    return data
+
+
+def process_virbl(response, source, direction):
+    data = []
+    for line in response.split('\n'):
+        if not line.startswith('E') and len(line) > 0:
+            i = line.split()[0]
+            data.append((i, indicator_type(i), direction, source, '', '%s' % datetime.date.today()))
+    return data
+
+
+def process_project_honeypot(response, source, direction):
+    soup = bs4.BeautifulSoup(response)
+    return [(i.text, indicator_type(i.text), direction, source, '', '%s' % datetime.date.today()) for i in soup.find_all('a', 'bnone')]
+
+
+def process_drg(response, source, direction):
+    data = []
+    for line in response.split('\n'):
+        if not line.startswith('#') and len(line) > 0:
+            i = line.split('|')[2].strip()
+            data.append((i, indicator_type(i), direction, source, '', '%s' % datetime.date.today()))
+    return data
+
+
+def process_alienvault(response, source, direction):
+    data = []
+    for line in response.split('\n'):
+        if not line.startswith('#') and len(line) > 0:
+            i = line.partition('#')[0].strip()
+            data.append((i, indicator_type(i), direction, source, '', '%s' % datetime.date.today()))
+    return data
+
+
+def process_packetmail(response, source, direction):
+    data = []
+    for line in response.split('\n'):
+        if not line.startswith('#') and len(line) > 0:
+            i = line.partition(';')[0].strip()
+            data.append((i, indicator_type(i), direction, source, '', '%s' % datetime.date.today()))
+    return data
+
+
+def process_autoshun(response, source, direction):
+    data = []
+    for line in response.split('\n'):
+        if not line.startswith('S') and len(line) > 0:
+            i = line.partition(',')[0].strip()
+            data.append((i, indicator_type(i), direction, source, '', '%s' % datetime.date.today()))
+    return data
+
+
+def process_haleys(response, source, direction):
+    data = []
+    for line in response.split('\n'):
+        if not line.startswith('#') and len(line) > 0:
+            i = line.partition(':')[2].strip()
+            data.append((i, indicator_type(i), direction, source, '', '%s' % datetime.date.today()))
+    return data
 
 
 def thresh(input_file, output_file):
@@ -24,14 +89,27 @@ def thresh(input_file, output_file):
         crop = json.load(f)
 
     harvest = []
-    thresher_map = {'blocklist': process_simple_list}
+    thresher_map = {'blocklist.de': process_simple_list,
+                    'openbl': process_simple_list,
+                    'projecthoneypot': process_project_honeypot,
+                    'ciarmy': process_simple_list,
+                    'alienvault': process_alienvault,
+                    'rulez': process_alienvault,
+                    'sans': process_simple_list,
+                    'nothink': process_simple_list,
+                    'packetmail': process_packetmail,
+                    'autoshun': process_autoshun,
+                    'the-haleys': process_haleys,
+                    'virbl': process_simple_list,
+                    'dragonresearchgroup': process_drg}
 
     for response in crop:
         if response[1] == 200:
-            if 'blocklist.de' in response[0]:
-                harvest += thresher_map['blocklist'](response[2], response[0], 'inbound')
-            else:  # include other site types
-                pass
+            for site in thresher_map:
+                if site in response[0]:
+                    harvest += thresher_map[site](response[2], response[0], 'inbound')
+                else:  # how to handle non-mapped sites?
+                    pass
         else:  # how to handle non-200 non-404?
             pass
 
