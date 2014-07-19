@@ -21,19 +21,20 @@ entity, datatype, direction, source, notes, date
 - The `source` field contains the original URL.
 - The `notes` field should cover any extra tag info we may want to persist with the data
 - The `date` field will be in `YYYY-MM-DD` format.
+- All fields are quoted with double-quotes (`"`).
 
 An output example:
 ```
-entity, type, direction, source, notes, date
-24.210.174.91,IPv4,inbound,openbl,SSH scan,2014-06-01
-201.216.191.174,IPv4,inbound,openbl,SSH scan,2014-06-01
-114.130.9.21,IPv4,inbound,openbl,FTP scan,2014-06-01
-175.45.187.30,IPv4,inbound,openbl,SSH scan,2014-06-01
-118.69.201.55,IPv4,inbound,openbl,SSH scan,2014-06-01
-citi-bank.ru,FQDN,outbound,mtc_malwaredns,Malware,2014-06-01
-ilo.brenz.pl,FQDN,outbound,mtc_malwaredns,Malware,2014-06-01
-utenti.lycos.it,FQDN,outbound,mtc_malwaredns,Malware,2014-06-01
-bgr.runk.pl,FQDN,outbound,mtc_malwaredns,Malware,2014-06-01
+"entity","type","direction","source","notes","date"
+"24.210.174.91","IPv4","inbound","openbl","SSHscan","2014-06-01"
+"201.216.191.174","IPv4","inbound","openbl","SSHscan","2014-06-01"
+"114.130.9.21","IPv4","inbound","openbl","FTPscan","2014-06-01"
+"175.45.187.30","IPv4","inbound","openbl","SSHscan","2014-06-01"
+"118.69.201.55","IPv4","inbound","openbl","SSHscan","2014-06-01"
+"citi-bank.ru","FQDN","outbound","mtc_malwaredns","Malware","2014-06-01"
+"ilo.brenz.pl","FQDN","outbound","mtc_malwaredns","Malware","2014-06-01"
+"utenti.lycos.it","FQDN","outbound","mtc_malwaredns","Malware","2014-06-01"
+"bgr.runk.pl","FQDN","outbound","mtc_malwaredns","Malware","2014-06-01"
 ```
 
 ### Copyright Info
