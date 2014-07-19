@@ -60,6 +60,7 @@ def thresh(input_file, output_file):
                     'alienvault': process_alienvault,
                     'rulez': process_alienvault,
                     'sans': process_simple_list,
+                    'nothink': process_simple_list,
                     'dragonresearchgroup': process_drg}
 
     for response in crop:
