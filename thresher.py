@@ -1,3 +1,4 @@
+import bs4
 import datetime
 import json
 import re
@@ -19,17 +20,25 @@ def process_simple_list(response, source, direction):
     return [(i, indicator_type(i), direction, source, '', '%s' % datetime.date.today()) for i in response.split('\n')]
 
 
+def process_project_honeypot(response, source, direction):
+    soup = bs4.BeautifulSoup(response)
+    return [(i.text, indicator_type(i.text), direction, source, '', '%s' % datetime.date.today()) for i in soup.find_all('a', 'bnone')]
+
+
 def thresh(input_file, output_file):
     with open(input_file, 'rb') as f:
         crop = json.load(f)
 
     harvest = []
-    thresher_map = {'blocklist': process_simple_list}
+    thresher_map = {'blocklist.de': process_simple_list,
+                    'projecthoneypot': process_project_honeypot}
 
     for response in crop:
         if response[1] == 200:
             if 'blocklist.de' in response[0]:
-                harvest += thresher_map['blocklist'](response[2], response[0], 'inbound')
+                harvest += thresher_map['blocklist.de'](response[2], response[0], 'inbound')
+            elif 'projecthoneypot' in response[0]:
+                harvest += thresher_map['projecthoneypot'](response[2], response[0], 'inbound')
             else:  # include other site types
                 pass
         else:  # how to handle non-200 non-404?
