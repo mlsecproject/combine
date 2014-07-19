@@ -18,9 +18,10 @@ def indicator_type(indicator):
 
 def process_simple_list(response, source, direction):
     data = []
-    for line in response.split('\n'):
-        if not line.startswith('#'):
-            data += (i, indicator_type(i), direction, source, '', '%s' % datetime.date.today())
+    for i in response.split('\n'):
+        if not i.startswith('#'):
+            data.append((i, indicator_type(i), direction, source, '', '%s' % datetime.date.today()))
+    return data
 
 
 def process_project_honeypot(response, source, direction):
@@ -31,9 +32,19 @@ def process_project_honeypot(response, source, direction):
 def process_drg(response, source, direction):
     data = []
     for line in response.split('\n'):
+        if not line.startswith('#') and len(line) > 0:
+            i = line.split('|')[2].strip()
+            data.append((i, indicator_type(i), direction, source, '', '%s' % datetime.date.today()))
+    return data
+
+
+def process_alienvault(response, source, direction):
+    data = []
+    for line in response.split('\n'):
         if not line.startswith('#'):
-            i = line.split('|').strip()
-            data += (i, indicator_type(i), direction, source, '', '%s' % datetime.date.today())
+            i = line.partition('#')[0]
+            data.append((i, indicator_type(i), direction, source, '', '%s' % datetime.date.today()))
+    return data
 
 
 def thresh(input_file, output_file):
@@ -44,6 +55,8 @@ def thresh(input_file, output_file):
     thresher_map = {'blocklist.de': process_simple_list,
                     'openbl': process_simple_list,
                     'projecthoneypot': process_project_honeypot,
+                    'ciarmy': process_simple_list,
+                    'alienvault': process_alienvault,
                     'dragonresearchgroup': process_drg}
 
     for response in crop:
