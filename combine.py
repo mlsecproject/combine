@@ -8,4 +8,3 @@ from baler import bale
 reap('harvest.json')
 thresh('harvest.json', 'crop.json')
 bale('crop.json', 'harvest.csv', 'csv')
-

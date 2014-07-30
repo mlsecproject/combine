@@ -15,7 +15,7 @@ def bale(input_file, output_file, output_format):
     with open(input_file, 'rb') as f:
         harvest = json.load(f)
 
-    format_funcs = { 'csv': bale_csv }
+    format_funcs = {'csv': bale_csv}
     format_funcs[output_format](harvest, output_file)
 
 
