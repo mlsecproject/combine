@@ -98,7 +98,9 @@ def process_autoshun(response, source, direction):
     for line in response.splitlines():
         if not line.startswith('S') and len(line) > 0:
             i = line.partition(',')[0].strip()
-            data.append((i, indicator_type(i), direction, source, '', '%s' % datetime.date.today()))
+            date = line.split(',')[1].split()[0]
+            note = line.split(',')[-1]
+            data.append((i, indicator_type(i), direction, source, note, date))
     return data
 
 
