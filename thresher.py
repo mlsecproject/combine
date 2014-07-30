@@ -19,7 +19,7 @@ def indicator_type(indicator):
 
 def process_simple_list(response, source, direction):
     data = []
-    for line in response.split('\n'):
+    for line in response.splitlines():
         if not line.startswith('#') and len(line) > 0:
             i = line.split()[0]
             data.append((i, indicator_type(i), direction, source, '', '%s' % datetime.date.today()))
@@ -28,7 +28,7 @@ def process_simple_list(response, source, direction):
 
 def process_virbl(response, source, direction):
     data = []
-    for line in response.split('\n'):
+    for line in response.splitlines():
         if not line.startswith('E') and len(line) > 0:
             i = line.split()[0]
             data.append((i, indicator_type(i), direction, source, '', '%s' % datetime.date.today()))
@@ -46,7 +46,7 @@ def process_project_honeypot(response, source, direction):
 
 def process_drg(response, source, direction):
     data = []
-    for line in response.split('\n'):
+    for line in response.splitlines():
         if not line.startswith('#') and len(line) > 0:
             i = line.split('|')[2].strip()
             data.append((i, indicator_type(i), direction, source, '', '%s' % datetime.date.today()))
@@ -55,7 +55,7 @@ def process_drg(response, source, direction):
 
 def process_alienvault(response, source, direction):
     data = []
-    for line in response.split('\n'):
+    for line in response.splitlines():
         if not line.startswith('#') and len(line) > 0:
             i = line.partition('#')[0].strip()
             note = line.split('#')[3].strip()
@@ -65,7 +65,7 @@ def process_alienvault(response, source, direction):
 
 def process_rulez(response, source, direction):
     data = []
-    for line in response.split('\n'):
+    for line in response.splitlines():
         if not line.startswith('#') and len(line) > 0:
             i = line.partition('#')[0].strip()
             date = line.partition('#')[2].split(' ')[1]
@@ -75,7 +75,7 @@ def process_rulez(response, source, direction):
 
 def process_packetmail(response, source, direction):
     data = []
-    for line in response.split('\n'):
+    for line in response.splitlines():
         if not line.startswith('#') and len(line) > 0:
             i = line.partition(';')[0].strip()
             date = line.split('; ')[1].split(' ')[0]
@@ -85,7 +85,7 @@ def process_packetmail(response, source, direction):
 
 def process_autoshun(response, source, direction):
     data = []
-    for line in response.split('\n'):
+    for line in response.splitlines():
         if not line.startswith('S') and len(line) > 0:
             i = line.partition(',')[0].strip()
             data.append((i, indicator_type(i), direction, source, '', '%s' % datetime.date.today()))
@@ -94,7 +94,7 @@ def process_autoshun(response, source, direction):
 
 def process_haleys(response, source, direction):
     data = []
-    for line in response.split('\n'):
+    for line in response.splitlines():
         if not line.startswith('#') and len(line) > 0:
             i = line.partition(':')[2].strip()
             data.append((i, indicator_type(i), direction, source, '', '%s' % datetime.date.today()))
