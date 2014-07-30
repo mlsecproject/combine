@@ -1,5 +1,6 @@
 import bs4
 import datetime
+import feedparser
 import json
 import re
 
@@ -35,8 +36,12 @@ def process_virbl(response, source, direction):
 
 
 def process_project_honeypot(response, source, direction):
-    soup = bs4.BeautifulSoup(response)
-    return [(i.text, indicator_type(i.text), direction, source, '', '%s' % datetime.date.today()) for i in soup.find_all('a', 'bnone')]
+    data = []
+    for entry in feedparse.parse(response):
+        i = entry.title.partition(' ')[0]
+        i_date = entry.description.split(' ')[-1]
+        data.append((i, indicator_type(i), direction, source, '', i_date))
+    return data
 
 
 def process_drg(response, source, direction):
