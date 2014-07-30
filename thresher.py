@@ -111,7 +111,7 @@ def thresh(input_file, output_file):
                     'projecthoneypot': process_project_honeypot,
                     'ciarmy': process_simple_list,
                     'alienvault': process_alienvault,
-                    'rulez': process_alienvault,
+                    'rulez': process_rulez,
                     'sans': process_simple_list,
                     'nothink': process_simple_list,
                     'packetmail': process_packetmail,
