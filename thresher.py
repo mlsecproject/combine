@@ -26,6 +26,16 @@ def process_simple_list(response, source, direction):
     return data
 
 
+def process_sans(response, source, direction):
+    data = []
+    for line in response.splitlines():
+        if not line.startswith('#') and len(line) > 0:
+            i = line.split()[0]
+            date = line.split()[-1]
+            data.append((i, indicator_type(i), direction, source, '', date))
+    return data
+
+
 def process_virbl(response, source, direction):
     data = []
     for line in response.splitlines():
@@ -112,7 +122,7 @@ def thresh(input_file, output_file):
                     'ciarmy': process_simple_list,
                     'alienvault': process_alienvault,
                     'rulez': process_rulez,
-                    'sans': process_simple_list,
+                    'sans': process_sans,
                     'nothink': process_simple_list,
                     'packetmail': process_packetmail,
                     'autoshun': process_autoshun,
