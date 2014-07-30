@@ -132,7 +132,7 @@ def thresh(input_file, output_file):
                     'virbl': process_simple_list,
                     'dragonresearchgroup': process_drg}
 
-    for response in crop:
+    for response in crop['inbound']:
         if response[1] == 200:
             for site in thresher_map:
                 if site in response[0]:
