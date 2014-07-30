@@ -1,5 +1,6 @@
 import bs4
 import datetime
+import feedparser
 import json
 import re
 
@@ -18,16 +19,26 @@ def indicator_type(indicator):
 
 def process_simple_list(response, source, direction):
     data = []
-    for line in response.split('\n'):
+    for line in response.splitlines():
         if not line.startswith('#') and len(line) > 0:
             i = line.split()[0]
             data.append((i, indicator_type(i), direction, source, '', '%s' % datetime.date.today()))
     return data
 
 
+def process_sans(response, source, direction):
+    data = []
+    for line in response.splitlines():
+        if not line.startswith('#') and len(line) > 0:
+            i = line.split()[0]
+            date = line.split()[-1]
+            data.append((i, indicator_type(i), direction, source, '', date))
+    return data
+
+
 def process_virbl(response, source, direction):
     data = []
-    for line in response.split('\n'):
+    for line in response.splitlines():
         if not line.startswith('E') and len(line) > 0:
             i = line.split()[0]
             data.append((i, indicator_type(i), direction, source, '', '%s' % datetime.date.today()))
@@ -35,13 +46,17 @@ def process_virbl(response, source, direction):
 
 
 def process_project_honeypot(response, source, direction):
-    soup = bs4.BeautifulSoup(response)
-    return [(i.text, indicator_type(i.text), direction, source, '', '%s' % datetime.date.today()) for i in soup.find_all('a', 'bnone')]
+    data = []
+    for entry in feedparse.parse(response):
+        i = entry.title.partition(' ')[0]
+        i_date = entry.description.split(' ')[-1]
+        data.append((i, indicator_type(i), direction, source, '', i_date))
+    return data
 
 
 def process_drg(response, source, direction):
     data = []
-    for line in response.split('\n'):
+    for line in response.splitlines():
         if not line.startswith('#') and len(line) > 0:
             i = line.split('|')[2].strip()
             data.append((i, indicator_type(i), direction, source, '', '%s' % datetime.date.today()))
@@ -50,34 +65,48 @@ def process_drg(response, source, direction):
 
 def process_alienvault(response, source, direction):
     data = []
-    for line in response.split('\n'):
+    for line in response.splitlines():
         if not line.startswith('#') and len(line) > 0:
             i = line.partition('#')[0].strip()
-            data.append((i, indicator_type(i), direction, source, '', '%s' % datetime.date.today()))
+            note = line.split('#')[3].strip()
+            data.append((i, indicator_type(i), direction, source, note, '%s' % datetime.date.today()))
+    return data
+
+
+def process_rulez(response, source, direction):
+    data = []
+    for line in response.splitlines():
+        if not line.startswith('#') and len(line) > 0:
+            i = line.partition('#')[0].strip()
+            date = line.partition('#')[2].split(' ')[1]
+            data.append((i, indicator_type(i), direction, source, '', date))
     return data
 
 
 def process_packetmail(response, source, direction):
     data = []
-    for line in response.split('\n'):
+    for line in response.splitlines():
         if not line.startswith('#') and len(line) > 0:
             i = line.partition(';')[0].strip()
-            data.append((i, indicator_type(i), direction, source, '', '%s' % datetime.date.today()))
+            date = line.split('; ')[1].split(' ')[0]
+            data.append((i, indicator_type(i), direction, source, '', date))
     return data
 
 
 def process_autoshun(response, source, direction):
     data = []
-    for line in response.split('\n'):
+    for line in response.splitlines():
         if not line.startswith('S') and len(line) > 0:
             i = line.partition(',')[0].strip()
-            data.append((i, indicator_type(i), direction, source, '', '%s' % datetime.date.today()))
+            date = line.split(',')[1].split()[0]
+            note = line.split(',')[-1]
+            data.append((i, indicator_type(i), direction, source, note, date))
     return data
 
 
 def process_haleys(response, source, direction):
     data = []
-    for line in response.split('\n'):
+    for line in response.splitlines():
         if not line.startswith('#') and len(line) > 0:
             i = line.partition(':')[2].strip()
             data.append((i, indicator_type(i), direction, source, '', '%s' % datetime.date.today()))
@@ -94,8 +123,8 @@ def thresh(input_file, output_file):
                     'projecthoneypot': process_project_honeypot,
                     'ciarmy': process_simple_list,
                     'alienvault': process_alienvault,
-                    'rulez': process_alienvault,
-                    'sans': process_simple_list,
+                    'rulez': process_rulez,
+                    'sans': process_sans,
                     'nothink': process_simple_list,
                     'packetmail': process_packetmail,
                     'autoshun': process_autoshun,
