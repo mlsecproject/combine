@@ -37,6 +37,20 @@ An output example:
 "bgr.runk.pl","FQDN","outbound","mtc_malwaredns","Malware","2014-06-01"
 ```
 
+The output can optionally be filtered and enriched with additional data. The enrichments look like the following:
+```
+"entity","type","direction","source","notes","date","asnumber","asname","country","host","rhost"
+"1.234.23.28","IPv4","outbound","alienvault","MLSec-Export","2014-04-03","9318","Hanaro Telecom Inc.","KR",,
+"1.234.35.198","IPv4","outbound","alienvault","MLSec-Export","2014-04-03","9318","Hanaro Telecom Inc.","KR",,
+"1.25.36.76","IPv4","outbound","alienvault","MLSec-Export","2014-04-03","4837","CNCGROUP China169 Backbone","CN",,
+"1.93.1.162","IPv4","outbound","alienvault","MLSec-Export","2014-04-03","4808","CNCGROUP IP network China169 Beijing Province Network","CN",,
+"1.93.44.147","IPv4","outbound","alienvault","MLSec-Export","2014-04-03","4808","CNCGROUP IP network China169 Beijing Province Network","CN",,
+"100.42.218.250","IPv4","outbound","alienvault","MLSec-Export","2014-04-03","18450","WebNX, Inc.","US",,"100-42-218-250.static.webnx.com"
+"100.42.55.2","IPv4","outbound","alienvault","MLSec-Export","2014-04-03","36351","SoftLayer Technologies Inc.","US",,"stats.wren.arvixe.com"
+"100.42.55.220","IPv4","outbound","alienvault","MLSec-Export","2014-04-03","36351","SoftLayer Technologies Inc.","US",,"stats.warthog.arvixe.com"
+"100.42.58.137","IPv4","outbound","alienvault","MLSec-Export","2014-04-03","36351","SoftLayer Technologies Inc.","US",,"100.42.58.137-static.reverse.mysitehosted.com"
+```
+
 ### Copyright Info
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
