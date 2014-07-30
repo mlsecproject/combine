@@ -58,7 +58,18 @@ def process_alienvault(response, source, direction):
     for line in response.split('\n'):
         if not line.startswith('#') and len(line) > 0:
             i = line.partition('#')[0].strip()
-            data.append((i, indicator_type(i), direction, source, '', '%s' % datetime.date.today()))
+            note = line.split('#')[3].strip()
+            data.append((i, indicator_type(i), direction, source, note, '%s' % datetime.date.today()))
+    return data
+
+
+def process_rulez(response, source, direction):
+    data = []
+    for line in response.split('\n'):
+        if not line.startswith('#') and len(line) > 0:
+            i = line.partition('#')[0].strip()
+            date = line.partition('#')[2].split(' ')[1]
+            data.append((i, indicator_type(i), direction, source, '', date))
     return data
 
 
