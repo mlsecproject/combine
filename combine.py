@@ -2,6 +2,7 @@
 
 import argparse
 import os
+import sys
 
 # Combine components
 from reaper import reap
@@ -14,12 +15,12 @@ parser.add_argument('-f', '--file', help="Specify output file. Defaults to harve
 parser.add_argument('-d', '--delete', help="Delete intermediate files", action="store_true")
 args = parser.parse_args()
 
-reap('harvest.json')
-thresh('harvest.json', 'crop.json')
+possible_types = ['csv']
+
 if not args.type:
     out_type = 'csv'
-elif args.type not in ['csv']:
-    raise
+elif args.type not in possible_types:
+    sys.exit('Invalid file type specified. Possible types are: %s' % possible_types)
 else:
     out_type = args.type
 
@@ -28,6 +29,8 @@ if args.file:
 else:
     out_file = 'harvest.'+out_type
 
+reap('harvest.json')
+thresh('harvest.json', 'crop.json')
 bale('crop.json', out_file, out_type)
 
 if args.delete:
