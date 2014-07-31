@@ -21,13 +21,13 @@ def enrich_IPv4(address):
 
 # honestly this bit can wait since we're not processing DNS right now
 def enrich_DNS(address):
-    for ip_addr in dnsdb(address, "A")
+    for ip_addr in dnsdb(address, "A"):
         # how do we add this back?
         harvest += IPv4(ip_addr, host=FQDN.value)
         # and return this?
         enrich_IPv4(ip_addr)
 
-        
+
 def enrich(data):
     enrichment = []
     for indicator in data:
@@ -42,7 +42,7 @@ def enrich(data):
 
 def reserved(address):
     # from http://en.wikipedia.org/wiki/Reserved_IP_addresses:
-    ranges = ['0.0.0.0/8', 
+    ranges = ['0.0.0.0/8',
               '10.0.0.0/8',
               '100.64.0.0/10',
               '127.0.0.0/8',
