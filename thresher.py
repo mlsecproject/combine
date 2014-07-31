@@ -138,6 +138,7 @@ def thresh(input_file, output_file):
                     'sans': process_sans,
                     'http://www.nothink.org/blacklist/blacklist_ssh': process_simple_list,
                     'http://www.nothink.org/blacklist/blacklist_malware': process_simple_list,
+                    'abuse.ch': process_simple_list,
                     'packetmail': process_packetmail,
                     'autoshun': process_autoshun,
                     'the-haleys': process_haleys,
