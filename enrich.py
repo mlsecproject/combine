@@ -1,11 +1,27 @@
-# The following is ACTUALLY just pseudocode. Don't run this shit.
+#! /usr/bin/env python
 
-for each in IPv4_addresses:
-    (ASN, AS_name, country) = maxmind(each)
+
+def enrich_IPv4(address):
+    (ASN, AS_name, country) = maxmind(address)
     hostname = maxhits(dnsdb(each, "PTR"))
-    each.enrichment = (ASN, AS_name, country, hostname)
+    return (address, ASN, AS_name, country, hostname)
 
-for each in FQDN:
-    for everyone in dnsdb(each, "A"):
-        harvest += as.IPv4(everyone, host=FQDN.value)
+
+def enrich_DNS(address):
+    for ip_addr in dnsdb(address, "A")
+        harvest += IPv4(ip_addr, host=FQDN.value)
         enrich(everyone)
+
+        
+def enrich(data):
+    enrichment = []
+    for indicator in data:
+        if indicator_type(indicator) == 'IPv4':
+            enrichment.append(enrich_IPv4(indicator))
+        elif indicator_type(indicator) == 'DNS':
+            enrichment.append(enrich_DNS(indicator))
+        else:
+            print "Can't determine type: %s" % indicator
+    return enrichment
+
+
