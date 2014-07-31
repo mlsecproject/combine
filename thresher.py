@@ -113,6 +113,17 @@ def process_haleys(response, source, direction):
     return data
 
 
+def process_malwaregroup(response, source, direction):
+    data = []
+    soup = bs4.BeautifulSoup(response)
+    for row in soup.find_all('tr'):
+        if row.td:
+            i = row.td.text
+            date = row.contents[-1].text
+            data.append((i, indicator_type(i), direction, source, note, date))
+    return data
+
+
 def thresh(input_file, output_file):
     with open(input_file, 'rb') as f:
         crop = json.load(f)
@@ -130,7 +141,8 @@ def thresh(input_file, output_file):
                     'autoshun': process_autoshun,
                     'the-haleys': process_haleys,
                     'virbl': process_simple_list,
-                    'dragonresearchgroup': process_drg}
+                    'dragonresearchgroup': process_drg,
+                    'malwaregroup': process_malwaregroup}
 
     for response in crop['inbound']:
         if response[1] == 200:
@@ -142,6 +154,15 @@ def thresh(input_file, output_file):
         else:  # how to handle non-200 non-404?
             pass
 
+    for response in crop['outbound']:
+        if response[1] == 200:
+            for site in thresher_map:
+                if site in response[0]:
+                    harvest += thresher_map[site](response[2], response[0], 'outbound')
+                else:  # how to handle non-mapped sites?
+                    pass
+        else:  # how to handle non-200 non-404?
+            pass
     with open(output_file, 'wb') as f:
         json.dump(harvest, f, indent=2)
 
