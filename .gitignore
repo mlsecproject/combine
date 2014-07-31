@@ -51,3 +51,5 @@ venv
 # other data files
 crop.json
 harvest.csv
+
+.ipynb_checkpoints
