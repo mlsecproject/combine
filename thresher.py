@@ -120,7 +120,7 @@ def process_malwaregroup(response, source, direction):
         if row.td:
             i = row.td.text
             date = row.contents[-1].text
-            data.append((i, indicator_type(i), direction, source, note, date))
+            data.append((i, indicator_type(i), direction, source, '', date))
     return data
 
 
