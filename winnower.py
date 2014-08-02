@@ -2,8 +2,12 @@
 import csv
 import json
 import pygeoip
+import sys
 
 from netaddr import IPAddress, IPRange, IPSet
+
+org_data = []
+geo_data = pygeoip.GeoIP('data/GeoIP.dat', pygeoip.MEMORY_CACHE)
 
 def load_gi_org(filename):
     gi_org = {}
@@ -14,8 +18,14 @@ def load_gi_org(filename):
     return gi_org
 
 
-def maxmind(address):
-    pass
+def org_by_addr(address):
+    as_num = None
+    as_name = None
+    for org in org_data:
+        if address in org_data[org]:
+            as_num, sep, as_name = org.partition(' ')
+            break
+    return as_num, as_name
 
 
 def maxhits(dns_records):
@@ -27,7 +37,8 @@ def dnsdb(address, record_type):
 
 
 def enrich_IPv4(address):
-    as_num, as_name, country = maxmind(address)
+    as_num, as_name = org_by_addr(address)
+    country = geo_data.country_code_by_addr(address)
     hostname = maxhits(dnsdb(address, "PTR"))
     return (address, as_num, as_name, country, hostname)
 
@@ -61,9 +72,9 @@ def winnow(in_file, out_file, enr_file):
             ipaddr = IPAddress(addr)
             if not reserved(ipaddr):
                 wheat.append(each)
-                #enriched.append(enrich_IPv4(ipaddr))
+                enriched.append(enrich_IPv4(ipaddr))
             else:
-                print "%s is reserved, sorry" % addr
+                sys.stderr.write("%s is reserved, sorry" % addr)
 
 
     with open(out_file, 'wb') as f:
