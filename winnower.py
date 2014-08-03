@@ -9,15 +9,6 @@ import sys
 from netaddr import IPAddress, IPRange, IPSet
 
 
-def setup_dnsdb():
-    config = ConfigParser.ConfigParser()
-    config.read('combine.cfg')
-    server = config.get('Winnower', 'dnsdb_server')
-    api = config.get('Winnower', 'dnsdb_api')
-    sys.stderr.write('Setting up DNSDB client\n')
-    return dnsdb_query.DnsdbClient(server, api)
-
-
 def load_gi_org(filename):
     gi_org = {}
     with open(filename, 'rb') as f:
@@ -57,6 +48,22 @@ def enrich_IPv4(address, org_data, geo_data, dnsdb):
     return (as_num, as_name, country, None, hostname)
 
 
+def enrich_DNS(address, date, dnsdb):
+    records = dnsdb.query_rrset(address, rrtype='A')
+    records = filter_date(records, date)
+    ip_addr = maxhits(records)
+    if ip_addr:
+        sys.stderr.write('Mapped %s to %s\n' % (address, ip_addr))
+    return ip_addr
+
+
+def filter_date(records, date):
+    date_dt = datetime.strptime(date, '%Y-%m-%d')
+    start_dt = datetime.combine(date_dt, datetime.time.min)
+    end_dt = datetime.combine(date_dt, datetime.time.max)
+    return dnsdb_query.filter_before(dnsdb_query.filter_after(records, start_dt), end_dt)
+
+
 def reserved(address):
     # from http://en.wikipedia.org/wiki/Reserved_IP_addresses:
     ranges = IPSet(['0.0.0.0/8', '100.64.0.0/10', '127.0.0.0/8', '192.88.99.0/24',
@@ -71,6 +78,25 @@ def reserved(address):
 
 
 def winnow(in_file, out_file, enr_file):
+    config = ConfigParser.ConfigParser(allow_no_value=True)
+    config.read('combine.cfg')
+    server = config.get('Winnower', 'dnsdb_server')
+    api = config.get('Winnower', 'dnsdb_api')
+    enrich_ip = config.get('Winnower', 'enrich_ip')
+    if enrich_ip:
+        sys.stderr.write('Enriching IPv4 indicators: TRUE\n')
+    else:
+        sys.stderr.write('Enriching IPv4 indicators: FALSE\n')
+
+    enrich_dns = config.get('Winnower', 'enrich_dns')
+    if enrich_dns:
+        sys.stderr.write('Enriching DNS indicators: TRUE\n')
+    else:
+        sys.stderr.write('Enriching DNS indicators: FALSE\n')
+
+    sys.stderr.write('Setting up DNSDB client\n')
+    dnsdb = dnsdb_query.DnsdbClient(server, api)
+
     with open(in_file, 'rb') as f:
         crop = json.load(f)
 
@@ -89,12 +115,16 @@ def winnow(in_file, out_file, enr_file):
             ipaddr = IPAddress(addr)
             if not reserved(ipaddr):
                 wheat.append(each)
-                # TODO: gracefully handle case of no DNSDB availability (other sources? cf. #38)
-                e_data = (addr, addr_type, direction, source, note, date, enrich_IPv4(ipaddr, org_data, geo_data, dnsdb))
+                if enrich_ip:
+                    # TODO: gracefully handle case of no DNSDB availability (other sources? cf. #38)
+                    e_data = (addr, addr_type, direction, source, note, date, enrich_IPv4(ipaddr, org_data, geo_data, dnsdb))
+                    enriched.append(e_data)
+        elif addr_type == 'DNS':
+            # TODO: validate these (cf. https://github.com/mlsecproject/combine/issues/15 )
+            wheat.append(each)
+            if enrich_dns:
+                e_data = (addr, addr_type, direction, source, note, date, enrich_DNS(ipaddr, date, dnsdb))
                 enriched.append(e_data)
-            else:
-                sys.stderr.write("%s is reserved, sorry\n" % addr)
-        # Notice that this means we filter out ALL non-IPv4 indicators
 
     with open(out_file, 'wb') as f:
         json.dump(wheat, f, indent=2)
