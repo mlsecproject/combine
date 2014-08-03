@@ -7,12 +7,15 @@ import sys
 # Combine components
 from reaper import reap
 from thresher import thresh
-from baler import bale
+from baler import bale, tiq_output
+from winnower import winnow
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-t', '--type', help="Specify output type. Currently supported: CSV")
 parser.add_argument('-f', '--file', help="Specify output file. Defaults to harvest.FILETYPE")
 parser.add_argument('-d', '--delete', help="Delete intermediate files", action="store_true")
+parser.add_argument('-e', '--enrich', help="Enrich data", action="store_true")
+parser.add_argument('--tiq-test', help="Output in tiq-test format", action="store_true")
 args = parser.parse_args()
 
 possible_types = ['csv', 'CSV']
@@ -31,9 +34,12 @@ else:
 
 reap('harvest.json')
 thresh('harvest.json', 'crop.json')
+if args.enrich:
+    winnow('crop.json', 'crop.json', 'enrich.json')
 bale('crop.json', out_file, out_type)
 
-# TODO: handle output requirements for tiq-test (cf. #29)
+if args.tiq-test:
+    tiq_output('crop.json', 'enrich.json')
 
 if args.delete:
     # be careful with this when we support a JSON output type
