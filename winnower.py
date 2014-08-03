@@ -51,6 +51,8 @@ def enrich_IPv4(address, org_data, geo_data, dnsdb):
     as_num, as_name = org_by_addr(address, org_data)
     country = geo_data.country_code_by_addr('%s' % address)
     hostname = maxhits(dnsdb.query_rdata_ip('%s' % address))
+    if hostname:
+        sys.stderr.write('Mapped %s to %s\n' % (address, hostname))
 
     return (address, as_num, as_name, country, hostname)
 
@@ -72,6 +74,7 @@ def winnow(in_file, out_file, enr_file):
     with open(in_file, 'rb') as f:
         crop = json.load(f)
 
+    # TODO: make these locations configurable?
     org_data = load_gi_org('data/GeoIPASNum2.csv')
     geo_data = pygeoip.GeoIP('data/GeoIP.dat')
     dnsdb = setup_dnsdb()
@@ -81,6 +84,7 @@ def winnow(in_file, out_file, enr_file):
 
     for each in crop:
         (addr, addr_type, direction, source, note, date) = each
+        # TODO: enrich DNS indicators as well
         if addr_type == 'IPv4':
             ipaddr = IPAddress(addr)
             if not reserved(ipaddr):

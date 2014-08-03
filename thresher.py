@@ -11,6 +11,7 @@ def indicator_type(indicator):
 
     if re.match(ip_regex, indicator):
         return "IPv4"
+    # TODO: Update domain name validation (cf. #15)
     elif re.match(domain_regex, indicator):
         return "DNS"
     else:
@@ -133,6 +134,7 @@ def thresh(input_file, output_file):
         crop = json.load(f)
 
     harvest = []
+    # TODO: replace with a proper plugin system (cf. #23)
     thresher_map = {'blocklist.de': process_simple_list,
                     'openbl': process_simple_list,
                     'projecthoneypot': process_project_honeypot,
@@ -151,7 +153,9 @@ def thresh(input_file, output_file):
                     'malwaregroup': process_malwaregroup,
                     'malc0de': process_simple_list}
 
+    # When we have plugins, this hack won't be necessary
     for response in crop['inbound']:
+        # TODO: logging
         if response[1] == 200:
             for site in thresher_map:
                 if site in response[0]:
