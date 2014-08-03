@@ -54,7 +54,7 @@ def enrich_IPv4(address, org_data, geo_data, dnsdb):
     if hostname:
         sys.stderr.write('Mapped %s to %s\n' % (address, hostname))
 
-    return (address, as_num, as_name, country, hostname)
+    return (as_num, as_name, country, None, hostname)
 
 
 def reserved(address):
@@ -90,9 +90,11 @@ def winnow(in_file, out_file, enr_file):
             if not reserved(ipaddr):
                 wheat.append(each)
                 # TODO: gracefully handle case of no DNSDB availability (other sources? cf. #38)
+                e_data = (addr, addr_type, direction, source, note, date, enrich_IPv4(ipaddr, org_data, geo_data, dnsdb))
                 enriched.append(enrich_IPv4(ipaddr, org_data, geo_data, dnsdb))
             else:
                 sys.stderr.write("%s is reserved, sorry\n" % addr)
+        # Notice that this means we filter out ALL non-IPv4 indicators
 
     with open(out_file, 'wb') as f:
         json.dump(wheat, f, indent=2)
@@ -102,4 +104,4 @@ def winnow(in_file, out_file, enr_file):
 
 
 if __name__ == "__main__":
-    winnow('crop.json', 'wheat.json', 'enriched.json')
+    winnow('crop.json', 'crop.json', 'enriched.json')
