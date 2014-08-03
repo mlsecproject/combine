@@ -91,7 +91,7 @@ def winnow(in_file, out_file, enr_file):
                 wheat.append(each)
                 # TODO: gracefully handle case of no DNSDB availability (other sources? cf. #38)
                 e_data = (addr, addr_type, direction, source, note, date, enrich_IPv4(ipaddr, org_data, geo_data, dnsdb))
-                enriched.append(enrich_IPv4(ipaddr, org_data, geo_data, dnsdb))
+                enriched.append(e_data)
             else:
                 sys.stderr.write("%s is reserved, sorry\n" % addr)
         # Notice that this means we filter out ALL non-IPv4 indicators
