@@ -89,6 +89,7 @@ def winnow(in_file, out_file, enr_file):
             ipaddr = IPAddress(addr)
             if not reserved(ipaddr):
                 wheat.append(each)
+                # TODO: gracefully handle case of no DNSDB availability (other sources? cf. #38)
                 enriched.append(enrich_IPv4(ipaddr, org_data, geo_data, dnsdb))
             else:
                 sys.stderr.write("%s is reserved, sorry\n" % addr)

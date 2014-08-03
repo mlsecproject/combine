@@ -15,7 +15,7 @@ parser.add_argument('-f', '--file', help="Specify output file. Defaults to harve
 parser.add_argument('-d', '--delete', help="Delete intermediate files", action="store_true")
 args = parser.parse_args()
 
-possible_types = ['csv']
+possible_types = ['csv', 'CSV']
 
 if not args.type:
     out_type = 'csv'
@@ -33,6 +33,9 @@ reap('harvest.json')
 thresh('harvest.json', 'crop.json')
 bale('crop.json', out_file, out_type)
 
+# TODO: handle output requirements for tiq-test (cf. #29)
+
 if args.delete:
+    # be careful with this when we support a JSON output type
     os.remove('harvest.json')
     os.remove('crop.json')
