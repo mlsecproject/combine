@@ -3,11 +3,26 @@ combine
 
 Combine gathers OSINT Threat Intelligence Feeds
 
-You can run the original harvest.py tool with a cmd line like this:
+You can run the core tool with `combine.py`:
+```
+usage: combine.py [-h] [-t TYPE] [-f FILE] [-d] [-e] [--tiq-test]
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -t TYPE, --type TYPE  Specify output type. Currently supported: CSV
+  -f FILE, --file FILE  Specify output file. Defaults to harvest.FILETYPE
+  -d, --delete          Delete intermediate files
+  -e, --enrich          Enrich data
+  --tiq-test            Output in tiq-test format
+```
+
+Alternately, you can run each phase individually:
+
 
 ````
 python reaper.py 
 python thresher.py
+python winnower.py
 python baler.py
 `````
 
@@ -66,3 +81,19 @@ all copies or substantial portions of the Software.
 Copyright 2014 MLSec Project
 
 Licensed under GPLv3 - https://github.com/mlsecproject/combine/blob/master/LICENSE
+
+### DNSDB used under license
+
+Copyright (c) 2013 by Farsight Security, Inc.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+	http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
