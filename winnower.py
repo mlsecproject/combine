@@ -1,6 +1,7 @@
 #! /usr/bin/env python
 import ConfigParser
 import csv
+import datetime
 import dnsdb_query
 import json
 import pygeoip
@@ -38,13 +39,13 @@ def maxhits(dns_records):
     return hostname
 
 
-def enrich_IPv4(address, org_data, geo_data, dnsdb):
+def enrich_IPv4(address, org_data, geo_data, dnsdb=None):
     as_num, as_name = org_by_addr(address, org_data)
     country = geo_data.country_code_by_addr('%s' % address)
-    hostname = maxhits(dnsdb.query_rdata_ip('%s' % address))
-    if hostname:
-        sys.stderr.write('Mapped %s to %s\n' % (address, hostname))
-
+    if dnsdb:
+        hostname = maxhits(dnsdb.query_rdata_ip('%s' % address))
+    else:
+        hostname = None
     return (as_num, as_name, country, None, hostname)
 
 
@@ -58,7 +59,7 @@ def enrich_DNS(address, date, dnsdb):
 
 
 def filter_date(records, date):
-    date_dt = datetime.strptime(date, '%Y-%m-%d')
+    date_dt = datetime.datetime.strptime(date, '%Y-%m-%d')
     start_dt = datetime.combine(date_dt, datetime.time.min)
     end_dt = datetime.combine(date_dt, datetime.time.max)
     return dnsdb_query.filter_before(dnsdb_query.filter_after(records, start_dt), end_dt)
@@ -83,15 +84,19 @@ def winnow(in_file, out_file, enr_file):
     server = config.get('Winnower', 'dnsdb_server')
     api = config.get('Winnower', 'dnsdb_api')
     enrich_ip = config.get('Winnower', 'enrich_ip')
-    if enrich_ip:
+    if enrich_ip == '1':
+        enrich_ip = True
         sys.stderr.write('Enriching IPv4 indicators: TRUE\n')
     else:
+        enrich_ip = False
         sys.stderr.write('Enriching IPv4 indicators: FALSE\n')
 
     enrich_dns = config.get('Winnower', 'enrich_dns')
-    if enrich_dns:
+    if enrich_dns == '1':
+        enrich_dns = True
         sys.stderr.write('Enriching DNS indicators: TRUE\n')
     else:
+        enrich_dns = False
         sys.stderr.write('Enriching DNS indicators: FALSE\n')
 
     sys.stderr.write('Setting up DNSDB client\n')
@@ -101,13 +106,14 @@ def winnow(in_file, out_file, enr_file):
         crop = json.load(f)
 
     # TODO: make these locations configurable?
+    sys.stderr.write('Loading GeoIP data\n')
     org_data = load_gi_org('data/GeoIPASNum2.csv')
     geo_data = pygeoip.GeoIP('data/GeoIP.dat')
-    dnsdb = setup_dnsdb()
 
     wheat = []
     enriched = []
 
+    sys.stderr.write('Beginning winnowing process\n')
     for each in crop:
         (addr, addr_type, direction, source, note, date) = each
         # TODO: enrich DNS indicators as well
@@ -116,8 +122,10 @@ def winnow(in_file, out_file, enr_file):
             if not reserved(ipaddr):
                 wheat.append(each)
                 if enrich_ip:
-                    # TODO: gracefully handle case of no DNSDB availability (other sources? cf. #38)
                     e_data = (addr, addr_type, direction, source, note, date, enrich_IPv4(ipaddr, org_data, geo_data, dnsdb))
+                    enriched.append(e_data)
+                else:
+                    e_data = (addr, addr_type, direction, source, note, date, enrich_IPv4(ipaddr, org_data, geo_data))
                     enriched.append(e_data)
         elif addr_type == 'DNS':
             # TODO: validate these (cf. https://github.com/mlsecproject/combine/issues/15 )
@@ -126,6 +134,7 @@ def winnow(in_file, out_file, enr_file):
                 e_data = (addr, addr_type, direction, source, note, date, enrich_DNS(ipaddr, date, dnsdb))
                 enriched.append(e_data)
 
+    sys.stderr.write('Dumping results\n')
     with open(out_file, 'wb') as f:
         json.dump(wheat, f, indent=2)
 
