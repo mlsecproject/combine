@@ -1,4 +1,4 @@
-http://www.projecthoneypot.org/list_of_ips.php
+http://www.projecthoneypot.org/list_of_ips.php?rss=1
 http://www.openbl.org/lists/base_30days.txt
 http://www.blocklist.de/lists/ssh.txt
 http://www.blocklist.de/lists/apache.txt
