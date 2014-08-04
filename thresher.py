@@ -32,7 +32,8 @@ def process_sans(response, source, direction):
     data = []
     for line in response.splitlines():
         if not line.startswith('#') and len(line) > 0:
-            i = line.split()[0]
+            i = line.split()[0].lstrip('0')
+            re.sub('0{1,2}\.', '', i)
             date = line.split()[-1]
             data.append((i, indicator_type(i), direction, source, '', date))
     return data
