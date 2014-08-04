@@ -3,6 +3,7 @@ import datetime
 import feedparser
 import json
 import re
+import sys
 
 
 def indicator_type(indicator):
@@ -130,6 +131,7 @@ def process_malwaregroup(response, source, direction):
 
 
 def thresh(input_file, output_file):
+    sys.stderr.write('Loading raw feed data from %s\n' % input_file)
     with open(input_file, 'rb') as f:
         crop = json.load(f)
 
@@ -159,6 +161,7 @@ def thresh(input_file, output_file):
         if response[1] == 200:
             for site in thresher_map:
                 if site in response[0]:
+                    sys.stderr.write('Parsing feed from %s\n' % response[0])
                     harvest += thresher_map[site](response[2], response[0], 'inbound')
                 else:  # how to handle non-mapped sites?
                     pass
@@ -169,11 +172,14 @@ def thresh(input_file, output_file):
         if response[1] == 200:
             for site in thresher_map:
                 if site in response[0]:
+                    sys.stderr.write('Parsing feed from %s\n' % response[0])
                     harvest += thresher_map[site](response[2], response[0], 'outbound')
                 else:  # how to handle non-mapped sites?
                     pass
         else:  # how to handle non-200 non-404?
             pass
+
+    sys.stderr.write('Storing parsed data in %s\n' % output_file)
     with open(output_file, 'wb') as f:
         json.dump(harvest, f, indent=2)
 

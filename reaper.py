@@ -1,7 +1,7 @@
-import json
-import grequests
-
 import ConfigParser
+import grequests
+import json
+import sys
 
 
 def exception_handler(request, exception):
@@ -21,12 +21,17 @@ def reap(file_name):
         outbound_urls = [url.rstrip('\n') for url in f.readlines()]
     headers = {'User-Agent': 'harvest.py'}
 
+    sys.stderr.write('Fetching inbound URLs\n')
     reqs = [grequests.get(url, headers=headers) for url in inbound_urls]
-    reqs = [grequests.get(url, headers=headers) for url in outbound_urls]
     inbound_responses = grequests.map(reqs)
-    outbound_responses = grequests.map(reqs)
     inbound_harvest = [(response.url, response.status_code, response.text) for response in inbound_responses]
+
+    sys.stderr.write('Fetching outbound URLs\n')
+    reqs = [grequests.get(url, headers=headers) for url in outbound_urls]
+    outbound_responses = grequests.map(reqs)
     outbound_harvest = [(response.url, response.status_code, response.text) for response in outbound_responses]
+    
+    sys.stderr.write('Storing raw feeds in %s\n' % file_name)
     harvest = {'inbound': inbound_harvest, 'outbound': outbound_harvest}
 
     with open(file_name, 'wb') as f:

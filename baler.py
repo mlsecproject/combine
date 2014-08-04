@@ -4,6 +4,7 @@ import datetime
 import gzip
 import json
 import os
+import sys
 
 
 def tiq_output(reg_file, enr_file):
@@ -18,6 +19,7 @@ def tiq_output(reg_file, enr_file):
     with open(enr_file, 'rb') as f:
         enr_data = json.load(f)
 
+    sys.stderr.write('Preparing tiq directory structure under %s\n' % tiq_dir)
     if not os.path.isdir(tiq_dir):
         os.makedirs(os.path.join(tiq_dir, 'raw', 'public_inbound'))
         os.makedirs(os.path.join(tiq_dir, 'raw', 'public_inbound'))
@@ -40,6 +42,7 @@ def tiq_output(reg_file, enr_file):
 # oh my god this is such a hack
 
 def bale_reg_csvgz(harvest, output_file):
+    sys.stderr.write('Output regular data as GZip CSV to %s\n' % output_file)
     with gzip.open(output_file, 'wb') as csv_file:
         bale_writer = csv.writer(csv_file, quoting=csv.QUOTE_ALL)
 
@@ -49,6 +52,7 @@ def bale_reg_csvgz(harvest, output_file):
 
 
 def bale_reg_csv(harvest, output_file):
+    sys.stderr.write('Output regular data as CSV to %s\n' % output_file)
     with open(output_file, 'wb') as csv_file:
         bale_writer = csv.writer(csv_file, quoting=csv.QUOTE_ALL)
 
@@ -58,6 +62,7 @@ def bale_reg_csv(harvest, output_file):
 
 
 def bale_enr_csv(harvest, output_file):
+    sys.stderr.write('Output enriched data as CSV to %s\n' % output_file)
     with open(output_file, 'wb') as csv_file:
         bale_writer = csv.writer(csv_file, quoting=csv.QUOTE_ALL)
 
@@ -67,6 +72,7 @@ def bale_enr_csv(harvest, output_file):
 
 
 def bale_enr_csvgz(harvest, output_file):
+    sys.stderr.write('Output enriched data as GZip CSV to %s\n' % output_file)
     with gzip.open(output_file, 'wb') as csv_file:
         bale_writer = csv.writer(csv_file, quoting=csv.QUOTE_ALL)
 
@@ -76,6 +82,7 @@ def bale_enr_csvgz(harvest, output_file):
 
 
 def bale(input_file, output_file, output_format):
+    sys.stderr.write('Reading processed data from %s\n' % input_file)
     with open(input_file, 'rb') as f:
         harvest = json.load(f)
 

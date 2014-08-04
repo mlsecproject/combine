@@ -118,6 +118,7 @@ def winnow(in_file, out_file, enr_file):
         (addr, addr_type, direction, source, note, date) = each
         # TODO: enrich DNS indicators as well
         if addr_type == 'IPv4':
+            sys.stderr.write('Enriching %s\n' % addr)
             ipaddr = IPAddress(addr)
             if not reserved(ipaddr):
                 wheat.append(each)
@@ -127,8 +128,11 @@ def winnow(in_file, out_file, enr_file):
                 else:
                     e_data = (addr, addr_type, direction, source, note, date, enrich_IPv4(ipaddr, org_data, geo_data))
                     enriched.append(e_data)
+            else:
+                sys.stderr.write('Found invalid address: %s\n' % addr)
         elif addr_type == 'DNS':
             # TODO: validate these (cf. https://github.com/mlsecproject/combine/issues/15 )
+            sys.stderr.write('Enriching %s\n' % addr)
             wheat.append(each)
             if enrich_dns:
                 e_data = (addr, addr_type, direction, source, note, date, enrich_DNS(ipaddr, date, dnsdb))
