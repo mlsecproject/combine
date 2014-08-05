@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 import ConfigParser
 import csv
-import datetime
+import datetime as dt
 import dnsdb_query
 import json
 import pygeoip
@@ -59,9 +59,9 @@ def enrich_DNS(address, date, dnsdb):
 
 
 def filter_date(records, date):
-    date_dt = datetime.datetime.strptime(date, '%Y-%m-%d')
-    start_dt = datetime.combine(date_dt, datetime.time.min)
-    end_dt = datetime.combine(date_dt, datetime.time.max)
+    date_dt = dt.datetime.strptime(date, '%Y-%m-%d')
+    start_dt = dt.datetime.combine(date_dt, dt.time.min).strftime('%Y-%m-%d %H:%M:%S')
+    end_dt = dt.datetime.combine(date_dt, dt.time.max).strftime('%Y-%m-%d %H:%M:%S')
     return dnsdb_query.filter_before(dnsdb_query.filter_after(records, start_dt), end_dt)
 
 
@@ -129,7 +129,7 @@ def winnow(in_file, out_file, enr_file):
                     e_data = (addr, addr_type, direction, source, note, date, enrich_IPv4(ipaddr, org_data, geo_data))
                     enriched.append(e_data)
             else:
-                sys.stderr.write('Found invalid address: %s\n' % addr)
+                sys.stderr.write('Found invalid address: %s from: %s\n' % (addr, source))
         elif addr_type == 'DNS':
             # TODO: validate these (cf. https://github.com/mlsecproject/combine/issues/15 )
             sys.stderr.write('Enriching %s\n' % addr)
