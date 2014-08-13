@@ -38,7 +38,7 @@ if args.enrich:
     winnow('crop.json', 'crop.json', 'enrich.json')
 bale('crop.json', out_file, out_type)
 
-if args.tiq-test:
+if args.tiq_test:
     tiq_output('crop.json', 'enrich.json')
 
 if args.delete:
