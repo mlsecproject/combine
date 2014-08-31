@@ -20,7 +20,7 @@ Alternately, you can run each phase individually:
 
 
 ````
-python reaper.py 
+python reaper.py
 python thresher.py
 python winnower.py
 python baler.py
@@ -66,6 +66,16 @@ The output can optionally be filtered and enriched with additional data. The enr
 "100.42.58.137","IPv4","outbound","alienvault","MLSec-Export","2014-04-03","36351","SoftLayer Technologies Inc.","US",,"100.42.58.137-static.reverse.mysitehosted.com"
 ```
 
+The enrichments include:
+* AS Name and Number information gathered from [MaxMind GeoIP ASN Database](http://dev.maxmind.com/geoip/legacy/geolite/)
+* Country Code information gathered from [MaxMind GeoIP2 Database](http://dev.maxmind.com/geoip/geoip2/geolite2/)
+* Host resolution and Reverse Host information is gathered from [Farsight Security's DNSDB](https://api.dnsdb.info/)
+
+In order to use the DNSDB's information you will require an API key from Farsight Security to use the enrichment.
+If you do not have one, you can request one [here](https://www.dnsdb.info/#Apply).
+
+You should configure the API key and endpoint for DNSDB on `config.cfg`
+
 ### Copyright Info
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -82,7 +92,7 @@ Copyright 2014 MLSec Project
 
 Licensed under GPLv3 - https://github.com/mlsecproject/combine/blob/master/LICENSE
 
-### DNSDB used under license
+### DNSDB used under Apache license
 
 Copyright (c) 2013 by Farsight Security, Inc.
 
@@ -97,3 +107,8 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
+
+### MaxMind GeoIP Databases used under CC licence
+
+This product includes GeoLite2 data created by MaxMind, available from
+[http://www.maxmind.com](http://www.maxmind.com).
