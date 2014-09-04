@@ -49,7 +49,7 @@ def enrich_IPv4(address, org_data, geo_data, dnsdb=None):
     return (as_num, as_name, country, None, hostname)
 
 
-def enrich_DNS(address, date, dnsdb):
+def enrich_FQDN(address, date, dnsdb):
     records = dnsdb.query_rrset(address, rrtype='A')
     records = filter_date(records, date)
     ip_addr = maxhits(records)
@@ -130,12 +130,12 @@ def winnow(in_file, out_file, enr_file):
                     enriched.append(e_data)
             else:
                 sys.stderr.write('Found invalid address: %s from: %s\n' % (addr, source))
-        elif addr_type == 'DNS':
+        elif addr_type == 'FQDN':
             # TODO: validate these (cf. https://github.com/mlsecproject/combine/issues/15 )
             sys.stderr.write('Enriching %s\n' % addr)
             wheat.append(each)
             if enrich_dns:
-                e_data = (addr, addr_type, direction, source, note, date, enrich_DNS(ipaddr, date, dnsdb))
+                e_data = (addr, addr_type, direction, source, note, date, enrich_FQDN(ipaddr, date, dnsdb))
                 enriched.append(e_data)
 
     sys.stderr.write('Dumping results\n')
