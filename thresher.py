@@ -102,6 +102,8 @@ def process_packetmail(response, source, direction):
 
 def process_autoshun(response, source, direction):
     data = []
+    if response.startswith("Couldn't select database"):
+        return data
     for line in response.splitlines():
         if not line.startswith('S') and len(line) > 0:
             i = line.partition(',')[0].strip()
