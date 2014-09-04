@@ -13,8 +13,8 @@ def indicator_type(indicator):
     if re.match(ip_regex, indicator):
         return "IPv4"
     # TODO: Update domain name validation (cf. #15)
-    elif re.match(domain_regex, indicator):
-        return "DNS"
+    elif re.match(domain_regex, indicator, re.IGNORECASE):
+        return "FQDN"
     else:
         return None
 
