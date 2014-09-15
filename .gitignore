@@ -57,3 +57,6 @@ enriched.json
 .ipynb_checkpoints
 combine.cfg
 .cfg
+
+# test local files
+test*.txt
