@@ -24,28 +24,28 @@ def reap(file_name):
     inbound_files=[]
     for url in inbound_urls:
         if url.startswith('file://'):
-            inbound_files.add(url.partition('://')[2])
+            inbound_files.append(url.partition('://')[2])
             inbound_urls.remove(url)
     headers = {'User-Agent': 'harvest.py'}
     reqs = [grequests.get(url, headers=headers) for url in inbound_urls]
     inbound_responses = grequests.map(reqs)
-    inbound_harvest = [(response.url, response.status_code, response.text) for response in inbound_responses]
+    inbound_harvest = [(response.url, response.status_code, response.text) for response in inbound_responses if response]
     for each in inbound_files:
         with open(each,'rb') as f:
-            inbound_harvest.add(f.readlines())
+            inbound_harvest.append((each, '200', f.read()))
 
     sys.stderr.write('Fetching outbound URLs\n')
     outbound_files=[]
     for url in outbound_urls:
         if url.startswith('file://'):
-            outbound_files.add(url.partition('://')[2])
+            outbound_files.append(url.partition('://')[2])
             outbound_urls.remove(url)
     reqs = [grequests.get(url, headers=headers) for url in outbound_urls]
     outbound_responses = grequests.map(reqs)
-    outbound_harvest = [(response.url, response.status_code, response.text) for response in outbound_responses]
+    outbound_harvest = [(response.url, response.status_code, response.text) for response in outbound_responses if response]
     for each in outbound_files:
         with open(each,'rb') as f:
-            outbound_harvest.add(f.readlines())
+            outbound_harvest.append((each, '200', f.read()))
     
     sys.stderr.write('Storing raw feeds in %s\n' % file_name)
     harvest = {'inbound': inbound_harvest, 'outbound': outbound_harvest}
