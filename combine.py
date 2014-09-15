@@ -34,7 +34,7 @@ else:
 
 reap('harvest.json')
 thresh('harvest.json', 'crop.json')
-if args.enrich:
+if args.enrich or args.tiq_test:
     winnow('crop.json', 'crop.json', 'enrich.json')
 bale('crop.json', out_file, out_type)
 
