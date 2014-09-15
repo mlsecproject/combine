@@ -9,7 +9,12 @@ import sys
 
 def tiq_output(reg_file, enr_file):
     config = ConfigParser.ConfigParser()
-    config.read('combine.cfg')
+    cfg_success = config.read('combine.cfg')
+    if not cfg_success:
+        sys.stderr.write('Could not read combine.cfg.\n')
+        sys.stderr.write('HINT: edit combine-example.cfg and save as combine.cfg.\n')
+        return
+
     tiq_dir = os.path.join(config.get('Baler', 'tiq_directory'), 'data')
     today = dt.datetime.today().strftime('%Y%m%d')
 
