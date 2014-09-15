@@ -52,5 +52,6 @@ venv
 crop.json
 harvest.csv
 harvest.json
+enriched.json
 
 .ipynb_checkpoints
