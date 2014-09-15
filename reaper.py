@@ -32,7 +32,7 @@ def reap(file_name):
     inbound_harvest = [(response.url, response.status_code, response.text) for response in inbound_responses if response]
     for each in inbound_files:
         with open(each,'rb') as f:
-            inbound_harvest.append((each, '200', f.read()))
+            inbound_harvest.append(('file://'+each, '200', f.read()))
 
     sys.stderr.write('Fetching outbound URLs\n')
     outbound_files=[]
@@ -45,7 +45,7 @@ def reap(file_name):
     outbound_harvest = [(response.url, response.status_code, response.text) for response in outbound_responses if response]
     for each in outbound_files:
         with open(each,'rb') as f:
-            outbound_harvest.append((each, '200', f.read()))
+            outbound_harvest.append(('file://'+each, '200', f.read()))
     
     sys.stderr.write('Storing raw feeds in %s\n' % file_name)
     harvest = {'inbound': inbound_harvest, 'outbound': outbound_harvest}
