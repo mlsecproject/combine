@@ -129,10 +129,10 @@ def winnow(in_file, out_file, enr_file):
             if not reserved(ipaddr):
                 wheat.append(each)
                 if enrich_ip:
-                    e_data = (addr, addr_type, direction, source, note, date, enrich_IPv4(ipaddr, org_data, geo_data, dnsdb))
+                    e_data = (addr, addr_type, direction, source, note, date) + enrich_IPv4(ipaddr, org_data, geo_data, dnsdb)
                     enriched.append(e_data)
                 else:
-                    e_data = (addr, addr_type, direction, source, note, date, enrich_IPv4(ipaddr, org_data, geo_data))
+                    e_data = (addr, addr_type, direction, source, note, date) + enrich_IPv4(ipaddr, org_data, geo_data)
                     enriched.append(e_data)
             else:
                 sys.stderr.write('Found invalid address: %s from: %s\n' % (addr, source))
@@ -141,7 +141,7 @@ def winnow(in_file, out_file, enr_file):
             sys.stderr.write('Enriching %s\n' % addr)
             wheat.append(each)
             if enrich_dns:
-                e_data = (addr, addr_type, direction, source, note, date, enrich_FQDN(ipaddr, date, dnsdb))
+                e_data = (addr, addr_type, direction, source, note, date, enrich_FQDN(addr, date, dnsdb))
                 enriched.append(e_data)
 
     sys.stderr.write('Dumping results\n')
