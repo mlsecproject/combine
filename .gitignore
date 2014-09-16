@@ -51,8 +51,10 @@ venv
 # other data files
 crop.json
 harvest.csv
+enriched.csv
 harvest.json
 enriched.json
+tiq_test/
 
 .ipynb_checkpoints
 combine.cfg

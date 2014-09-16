@@ -34,9 +34,11 @@ else:
 
 reap('harvest.json')
 thresh('harvest.json', 'crop.json')
+bale('crop.json', out_file, out_type, True)
+
 if args.enrich or args.tiq_test:
     winnow('crop.json', 'crop.json', 'enrich.json')
-bale('crop.json', out_file, out_type)
+    bale('enrich.json', 'enriched.'+out_type, out_type, False)
 
 if args.tiq_test:
     tiq_output('crop.json', 'enrich.json')
@@ -45,3 +47,4 @@ if args.delete:
     # be careful with this when we support a JSON output type
     os.remove('harvest.json')
     os.remove('crop.json')
+    os.remove('enrich.json')
