@@ -8,7 +8,7 @@ import sys
 
 
 def tiq_output(reg_file, enr_file):
-    config = ConfigParser.ConfigParser()
+    config = ConfigParser.SafeConfigParser()
     cfg_success = config.read('combine.cfg')
     if not cfg_success:
         sys.stderr.write('Could not read combine.cfg.\n')
