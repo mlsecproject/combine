@@ -1,7 +1,7 @@
 combine
 =======
 
-Combine gathers OSINT Threat Intelligence Feeds
+Combine gathers Threat Intelligence Feeds from publicly available sources
 
 You can run the core tool with `combine.py`:
 ```
@@ -13,7 +13,7 @@ optional arguments:
   -f FILE, --file FILE  Specify output file. Defaults to harvest.FILETYPE
   -d, --delete          Delete intermediate files
   -e, --enrich          Enrich data
-  --tiq-test            Output in tiq-test format
+  --tiq-test            Output in tiq-test format (implies -e)
 ```
 
 Alternately, you can run each phase individually:
@@ -28,10 +28,10 @@ python baler.py
 
 The output will actually be a CSV with the following schema:
 ```
-entity, datatype, direction, source, notes, date
+entity, type, direction, source, notes, date
 ```
 - The `entity` field consists of a FQDN or IPv4 address (supported entities at the moment)
-- The `datatype` field consists of either `FQDN` or `IPv4`, classifying the type of the entity
+- The `type` field consists of either `FQDN` or `IPv4`, classifying the type of the entity
 - The `direction` field will be either `inbound` or `outbound`
 - The `source` field contains the original URL.
 - The `notes` field should cover any extra tag info we may want to persist with the data
@@ -68,13 +68,13 @@ The output can optionally be filtered and enriched with additional data. The enr
 
 The enrichments include:
 * AS Name and Number information gathered from [MaxMind GeoIP ASN Database](http://dev.maxmind.com/geoip/legacy/geolite/)
-* Country Code information gathered from [MaxMind GeoIP2 Database](http://dev.maxmind.com/geoip/geoip2/geolite2/)
+* Country Code information gathered from [MaxMind GeoIP Database](http://dev.maxmind.com/geoip/legacy/geolite/)
 * Host resolution and Reverse Host information is gathered from [Farsight Security's DNSDB](https://api.dnsdb.info/)
 
 In order to use the DNSDB's information you will require an API key from Farsight Security to use the enrichment.
 If you do not have one, you can request one [here](https://www.dnsdb.info/#Apply).
 
-You should configure the API key and endpoint for DNSDB on `config.cfg`
+You should configure the API key and endpoint for DNSDB on `combine.cfg`. Copy the example configuration file from `combine-example.cfg` and add your information there.
 
 ### Copyright Info
 
@@ -88,7 +88,7 @@ furnished to do so, subject to the following conditions:
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
 
-Copyright 2014 MLSec Project
+Copyright (c) 2014 MLSec Project
 
 Licensed under GPLv3 - https://github.com/mlsecproject/combine/blob/master/LICENSE
 
@@ -110,5 +110,5 @@ limitations under the License.
 
 ### MaxMind GeoIP Databases used under CC licence
 
-This product includes GeoLite2 data created by MaxMind, available from
+This product includes GeoLite data created by MaxMind, available from
 [http://www.maxmind.com](http://www.maxmind.com).
