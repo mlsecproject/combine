@@ -1,3 +1,4 @@
+import ConfigParser
 import bs4
 import datetime
 import feedparser
@@ -134,6 +135,14 @@ def process_malwaregroup(response, source, direction):
 
 
 def thresh(input_file, output_file):
+
+    config = ConfigParser.SafeConfigParser(allow_no_value=False)
+    cfg_success = config.read('combine.cfg')
+    if not cfg_success:
+        sys.stderr.write('Thresher: Could not read combine.cfg.\n')
+        sys.stderr.write('HINT: edit combine-example.cfg and save as combine.cfg.\n')
+        return
+
     sys.stderr.write('Loading raw feed data from %s\n' % input_file)
     with open(input_file, 'rb') as f:
         crop = json.load(f)

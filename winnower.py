@@ -80,8 +80,13 @@ def reserved(address):
 
 
 def winnow(in_file, out_file, enr_file):
-    config = ConfigParser.ConfigParser(allow_no_value=True)
-    config.read('combine.cfg')
+    config = ConfigParser.SafeConfigParser(allow_no_value=True)
+    cfg_success = config.read('combine.cfg')
+    if not cfg_success:
+        sys.stderr.write('Winnower: Could not read combine.cfg.\n')
+        sys.stderr.write('HINT: edit combine-example.cfg and save as combine.cfg.\n')
+        return
+
     server = config.get('Winnower', 'dnsdb_server')
     api = config.get('Winnower', 'dnsdb_api')
     enrich_ip = config.get('Winnower', 'enrich_ip')
