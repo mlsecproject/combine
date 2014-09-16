@@ -92,7 +92,7 @@ def bale_enr_csvgz(harvest, output_file):
         bale_writer.writerows(harvest)
 
 
-def bale(input_file, output_file, output_format):
+def bale(input_file, output_file, output_format, is_regular):
     config = ConfigParser.SafeConfigParser()
     cfg_success = config.read('combine.cfg')
     if not cfg_success:
@@ -105,9 +105,11 @@ def bale(input_file, output_file, output_format):
         harvest = json.load(f)
 
     # TODO: also need plugins here (cf. #23)
-    format_funcs = {'csv': bale_reg_csv}
+    if is_regular:
+        format_funcs = {'csv': bale_reg_csv}
+    else:
+        format_funcs = {'csv': bale_enr_csv}
     format_funcs[output_format](harvest, output_file)
 
-
 if __name__ == "__main__":
-    bale('crop.json', 'harvest.csv', 'csv')
+    bale('crop.json', 'harvest.csv', 'csv', True)
