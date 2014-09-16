@@ -25,6 +25,7 @@ def org_by_addr(address, org_data):
     for iprange in org_data:
         if address in iprange:
             as_num, sep, as_name = org_data[iprange].partition(' ')
+            as_num = as_num.replace("AS", "") # Making sure the variable only has the number
             break
     return as_num, as_name
 
