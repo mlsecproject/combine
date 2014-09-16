@@ -15,16 +15,17 @@ def load_gi_org(filename):
     with open(filename, 'rb') as f:
         org_reader = csv.DictReader(f, fieldnames=['start', 'end', 'org'])
         for row in org_reader:
-            gi_org[row['org']] = IPRange(row['start'], row['end'])
+            gi_org[IPRange(row['start'], row['end'])] = row['org']
     return gi_org
 
 
 def org_by_addr(address, org_data):
     as_num = None
     as_name = None
-    for org in org_data:
-        if address in org_data[org]:
-            as_num, sep, as_name = org.partition(' ')
+    for iprange in org_data:
+        if address in iprange:
+            as_num, sep, as_name = org_data[iprange].partition(' ')
+            as_num = as_num.replace("AS", "") # Making sure the variable only has the number
             break
     return as_num, as_name
 
@@ -79,8 +80,13 @@ def reserved(address):
 
 
 def winnow(in_file, out_file, enr_file):
-    config = ConfigParser.ConfigParser(allow_no_value=True)
-    config.read('combine.cfg')
+    config = ConfigParser.SafeConfigParser(allow_no_value=True)
+    cfg_success = config.read('combine.cfg')
+    if not cfg_success:
+        sys.stderr.write('Winnower: Could not read combine.cfg.\n')
+        sys.stderr.write('HINT: edit combine-example.cfg and save as combine.cfg.\n')
+        return
+
     server = config.get('Winnower', 'dnsdb_server')
     api = config.get('Winnower', 'dnsdb_api')
     enrich_ip = config.get('Winnower', 'enrich_ip')

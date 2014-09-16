@@ -9,8 +9,12 @@ def exception_handler(request, exception):
 
 
 def reap(file_name):
-    config = ConfigParser.ConfigParser()
-    config.read('combine.cfg')
+    config = ConfigParser.SafeConfigParser(allow_no_value=False)
+    cfg_success = config.read('combine.cfg')
+    if not cfg_success:
+        sys.stderr.write('Reaper: Could not read combine.cfg.\n')
+        sys.stderr.write('HINT: edit combine-example.cfg and save as combine.cfg.\n')
+        return
 
     inbound_url_file = config.get('Reaper', 'inbound_urls')
     outbound_url_file = config.get('Reaper', 'outbound_urls')
@@ -46,7 +50,7 @@ def reap(file_name):
     for each in outbound_files:
         with open(each,'rb') as f:
             outbound_harvest.append(('file://'+each, 200, f.read()))
-    
+
     sys.stderr.write('Storing raw feeds in %s\n' % file_name)
     harvest = {'inbound': inbound_harvest, 'outbound': outbound_harvest}
 

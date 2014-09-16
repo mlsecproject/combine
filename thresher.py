@@ -1,3 +1,4 @@
+import ConfigParser
 import bs4
 import datetime
 import feedparser
@@ -22,7 +23,7 @@ def indicator_type(indicator):
 def process_simple_list(response, source, direction):
     data = []
     for line in response.splitlines():
-        if not line.startswith('#') and not line.startswith('/') and len(line) > 0:
+        if not line.startswith('#') and not line.startswith('/') and not line.startswith('Export date') and len(line) > 0:
             i = line.split()[0]
             data.append((i, indicator_type(i), direction, source, '', '%s' % datetime.date.today()))
     return data
@@ -134,6 +135,14 @@ def process_malwaregroup(response, source, direction):
 
 
 def thresh(input_file, output_file):
+
+    config = ConfigParser.SafeConfigParser(allow_no_value=False)
+    cfg_success = config.read('combine.cfg')
+    if not cfg_success:
+        sys.stderr.write('Thresher: Could not read combine.cfg.\n')
+        sys.stderr.write('HINT: edit combine-example.cfg and save as combine.cfg.\n')
+        return
+
     sys.stderr.write('Loading raw feed data from %s\n' % input_file)
     with open(input_file, 'rb') as f:
         crop = json.load(f)
