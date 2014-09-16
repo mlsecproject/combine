@@ -165,10 +165,12 @@ def thresh(input_file, output_file):
                     'virbl': process_simple_list,
                     'dragonresearchgroup': process_drg,
                     'malwaregroup': process_malwaregroup,
-                    'malc0de': process_simple_list}
+                    'malc0de': process_simple_list,
+                    'file://': process_simple_list}
 
     # When we have plugins, this hack won't be necessary
     for response in crop['inbound']:
+        sys.stderr.write('Evaluating %s\n' % response[0])
         # TODO: logging
         if response[1] == 200:
             for site in thresher_map:
@@ -178,7 +180,7 @@ def thresh(input_file, output_file):
                 else:  # how to handle non-mapped sites?
                     pass
         else:  # how to handle non-200 non-404?
-            pass
+            sys.stderr.write('Could not handle %s: %s\n' % (response[0], response[1]))
 
     for response in crop['outbound']:
         if response[1] == 200:
