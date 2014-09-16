@@ -11,7 +11,7 @@ def tiq_output(reg_file, enr_file):
     config = ConfigParser.SafeConfigParser()
     cfg_success = config.read('combine.cfg')
     if not cfg_success:
-        sys.stderr.write('Could not read combine.cfg.\n')
+        sys.stderr.write('tiq_output: Could not read combine.cfg.\n')
         sys.stderr.write('HINT: edit combine-example.cfg and save as combine.cfg.\n')
         return
 
@@ -93,6 +93,13 @@ def bale_enr_csvgz(harvest, output_file):
 
 
 def bale(input_file, output_file, output_format):
+    config = ConfigParser.SafeConfigParser()
+    cfg_success = config.read('combine.cfg')
+    if not cfg_success:
+        sys.stderr.write('Baler: Could not read combine.cfg.\n')
+        sys.stderr.write('HINT: edit combine-example.cfg and save as combine.cfg.\n')
+        return
+
     sys.stderr.write('Reading processed data from %s\n' % input_file)
     with open(input_file, 'rb') as f:
         harvest = json.load(f)

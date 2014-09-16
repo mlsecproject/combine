@@ -82,7 +82,7 @@ def winnow(in_file, out_file, enr_file):
     config = ConfigParser.SafeConfigParser(allow_no_value=True)
     cfg_success = config.read('combine.cfg')
     if not cfg_success:
-        sys.stderr.write('Could not read combine.cfg.\n')
+        sys.stderr.write('Winnower: Could not read combine.cfg.\n')
         sys.stderr.write('HINT: edit combine-example.cfg and save as combine.cfg.\n')
         return
 

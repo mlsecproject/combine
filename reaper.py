@@ -12,7 +12,7 @@ def reap(file_name):
     config = ConfigParser.SafeConfigParser(allow_no_value=False)
     cfg_success = config.read('combine.cfg')
     if not cfg_success:
-        sys.stderr.write('Could not read combine.cfg.\n')
+        sys.stderr.write('Reaper: Could not read combine.cfg.\n')
         sys.stderr.write('HINT: edit combine-example.cfg and save as combine.cfg.\n')
         return
 
