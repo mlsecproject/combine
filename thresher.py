@@ -22,7 +22,7 @@ def indicator_type(indicator):
 def process_simple_list(response, source, direction):
     data = []
     for line in response.splitlines():
-        if not line.startswith('#') and not line.startswith('/') and len(line) > 0:
+        if not line.startswith('#') and not line.startswith('/') and not line.startswith('Export date') and len(line) > 0:
             i = line.split()[0]
             data.append((i, indicator_type(i), direction, source, '', '%s' % datetime.date.today()))
     return data
