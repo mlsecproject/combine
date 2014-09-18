@@ -54,6 +54,7 @@ harvest.csv
 enriched.csv
 harvest.json
 enriched.json
+enrich.json
 tiq_test/
 
 .ipynb_checkpoints
