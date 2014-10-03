@@ -42,9 +42,6 @@ venv
 # IDE config
 .idea
 
-#virtualenv
-venv
-
 # vim swap files
 *.swp
 

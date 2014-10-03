@@ -5,14 +5,16 @@ import gzip
 import json
 import os
 import sys
+import logging
 
+logger = logging.getLogger('combine')
 
 def tiq_output(reg_file, enr_file):
     config = ConfigParser.SafeConfigParser()
     cfg_success = config.read('combine.cfg')
     if not cfg_success:
-        sys.stderr.write('tiq_output: Could not read combine.cfg.\n')
-        sys.stderr.write('HINT: edit combine-example.cfg and save as combine.cfg.\n')
+        logger.error('tiq_output: Could not read combine.cfg.')
+        logger.error('HINT: edit combine-example.cfg and save as combine.cfg.')
         return
 
     tiq_dir = os.path.join(config.get('Baler', 'tiq_directory'), 'data')
@@ -24,7 +26,7 @@ def tiq_output(reg_file, enr_file):
     with open(enr_file, 'rb') as f:
         enr_data = json.load(f)
 
-    sys.stderr.write('Preparing tiq directory structure under %s\n' % tiq_dir)
+    logger.info('Preparing tiq directory structure under %s' % tiq_dir)
     if not os.path.isdir(tiq_dir):
         os.makedirs(os.path.join(tiq_dir, 'raw', 'public_inbound'))
         os.makedirs(os.path.join(tiq_dir, 'raw', 'public_outbound'))
@@ -53,7 +55,7 @@ def tiq_output(reg_file, enr_file):
 # oh my god this is such a hack
 
 def bale_reg_csvgz(harvest, output_file):
-    sys.stderr.write('Output regular data as GZip CSV to %s\n' % output_file)
+    logger.info('Output regular data as GZip CSV to %s' % output_file)
     with gzip.open(output_file, 'wb') as csv_file:
         bale_writer = csv.writer(csv_file, quoting=csv.QUOTE_ALL)
 
@@ -63,7 +65,7 @@ def bale_reg_csvgz(harvest, output_file):
 
 
 def bale_reg_csv(harvest, output_file):
-    sys.stderr.write('Output regular data as CSV to %s\n' % output_file)
+    logger.info('Output regular data as CSV to %s' % output_file)
     with open(output_file, 'wb') as csv_file:
         bale_writer = csv.writer(csv_file, quoting=csv.QUOTE_ALL)
 
@@ -73,7 +75,7 @@ def bale_reg_csv(harvest, output_file):
 
 
 def bale_enr_csv(harvest, output_file):
-    sys.stderr.write('Output enriched data as CSV to %s\n' % output_file)
+    logger.info('Output enriched data as CSV to %s' % output_file)
     with open(output_file, 'wb') as csv_file:
         bale_writer = csv.writer(csv_file, quoting=csv.QUOTE_ALL)
 
@@ -83,7 +85,7 @@ def bale_enr_csv(harvest, output_file):
 
 
 def bale_enr_csvgz(harvest, output_file):
-    sys.stderr.write('Output enriched data as GZip CSV to %s\n' % output_file)
+    logger.info('Output enriched data as GZip CSV to %s' % output_file)
     with gzip.open(output_file, 'wb') as csv_file:
         bale_writer = csv.writer(csv_file, quoting=csv.QUOTE_ALL)
 
@@ -96,11 +98,11 @@ def bale(input_file, output_file, output_format, is_regular):
     config = ConfigParser.SafeConfigParser()
     cfg_success = config.read('combine.cfg')
     if not cfg_success:
-        sys.stderr.write('Baler: Could not read combine.cfg.\n')
-        sys.stderr.write('HINT: edit combine-example.cfg and save as combine.cfg.\n')
+        logger.error('Baler: Could not read combine.cfg.')
+        logger.error('HINT: edit combine-example.cfg and save as combine.cfg.')
         return
 
-    sys.stderr.write('Reading processed data from %s\n' % input_file)
+    logger.info('Reading processed data from %s' % input_file)
     with open(input_file, 'rb') as f:
         harvest = json.load(f)
 

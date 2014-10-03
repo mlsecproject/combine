@@ -6,9 +6,11 @@ import dnsdb_query
 import json
 import pygeoip
 import sys
+import logging
 
 from netaddr import IPAddress, IPRange, IPSet
 
+logger = logging.getLogger('combine')
 
 def load_gi_org(filename):
     gi_org = {}
@@ -55,7 +57,7 @@ def enrich_FQDN(address, date, dnsdb):
     records = filter_date(records, date)
     ip_addr = maxhits(records)
     if ip_addr:
-        sys.stderr.write('Mapped %s to %s\n' % (address, ip_addr))
+        logger.info('Mapped %s to %s' % (address, ip_addr))
     return ip_addr
 
 
@@ -83,8 +85,8 @@ def winnow(in_file, out_file, enr_file):
     config = ConfigParser.SafeConfigParser(allow_no_value=True)
     cfg_success = config.read('combine.cfg')
     if not cfg_success:
-        sys.stderr.write('Winnower: Could not read combine.cfg.\n')
-        sys.stderr.write('HINT: edit combine-example.cfg and save as combine.cfg.\n')
+        logger.error('Winnower: Could not read combine.cfg.')
+        logger.error('HINT: edit combine-example.cfg and save as combine.cfg.')
         return
 
     server = config.get('Winnower', 'dnsdb_server')
@@ -92,39 +94,39 @@ def winnow(in_file, out_file, enr_file):
     enrich_ip = config.get('Winnower', 'enrich_ip')
     if enrich_ip == '1':
         enrich_ip = True
-        sys.stderr.write('Enriching IPv4 indicators: TRUE\n')
+        logger.info('Enriching IPv4 indicators: TRUE')
     else:
         enrich_ip = False
-        sys.stderr.write('Enriching IPv4 indicators: FALSE\n')
+        logger.info('Enriching IPv4 indicators: FALSE')
 
     enrich_dns = config.get('Winnower', 'enrich_dns')
     if enrich_dns == '1':
         enrich_dns = True
-        sys.stderr.write('Enriching DNS indicators: TRUE\n')
+        logger.info('Enriching DNS indicators: TRUE')
     else:
         enrich_dns = False
-        sys.stderr.write('Enriching DNS indicators: FALSE\n')
+        logger.info('Enriching DNS indicators: FALSE')
 
-    sys.stderr.write('Setting up DNSDB client\n')
+    logger.info('Setting up DNSDB client')
     dnsdb = dnsdb_query.DnsdbClient(server, api)
 
     with open(in_file, 'rb') as f:
         crop = json.load(f)
 
     # TODO: make these locations configurable?
-    sys.stderr.write('Loading GeoIP data\n')
+    logger.info('Loading GeoIP data')
     org_data = load_gi_org('data/GeoIPASNum2.csv')
     geo_data = pygeoip.GeoIP('data/GeoIP.dat')
 
     wheat = []
     enriched = []
 
-    sys.stderr.write('Beginning winnowing process\n')
+    logger.info('Beginning winnowing process')
     for each in crop:
         (addr, addr_type, direction, source, note, date) = each
         # TODO: enrich DNS indicators as well
         if addr_type == 'IPv4':
-            sys.stderr.write('Enriching %s\n' % addr)
+            logger.info('Enriching %s' % addr)
             ipaddr = IPAddress(addr)
             if not reserved(ipaddr):
                 wheat.append(each)
@@ -135,16 +137,16 @@ def winnow(in_file, out_file, enr_file):
                     e_data = (addr, addr_type, direction, source, note, date) + enrich_IPv4(ipaddr, org_data, geo_data)
                     enriched.append(e_data)
             else:
-                sys.stderr.write('Found invalid address: %s from: %s\n' % (addr, source))
+                logger.error('Found invalid address: %s from: %s' % (addr, source))
         elif addr_type == 'FQDN':
             # TODO: validate these (cf. https://github.com/mlsecproject/combine/issues/15 )
-            sys.stderr.write('Enriching %s\n' % addr)
+            logger.info('Enriching %s' % addr)
             wheat.append(each)
             if enrich_dns:
                 e_data = (addr, addr_type, direction, source, note, date, enrich_FQDN(addr, date, dnsdb))
                 enriched.append(e_data)
 
-    sys.stderr.write('Dumping results\n')
+    logger.info('Dumping results')
     with open(out_file, 'wb') as f:
         json.dump(wheat, f, indent=2)
 

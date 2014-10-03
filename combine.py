@@ -3,12 +3,22 @@
 import argparse
 import os
 import sys
+import logging
 
 # Combine components
 from reaper import reap
 from thresher import thresh
 from baler import bale, tiq_output
 from winnower import winnow
+
+# Set Logger
+logger = logging.getLogger('combine') # save the name!
+logger.setLevel(logging.DEBUG)
+ch = logging.StreamHandler() # default to sys.stderr
+ch.setLevel(logging.DEBUG) # todo: make it configurable
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+ch.setFormatter(formatter)
+logger.addHandler(ch)
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-t', '--type', help="Specify output type. Currently supported: CSV")

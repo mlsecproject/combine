@@ -5,7 +5,9 @@ import feedparser
 import json
 import re
 import sys
+import logging
 
+logger = logging.getLogger('combine')
 
 def indicator_type(indicator):
     ip_regex = '^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$'
@@ -139,11 +141,11 @@ def thresh(input_file, output_file):
     config = ConfigParser.SafeConfigParser(allow_no_value=False)
     cfg_success = config.read('combine.cfg')
     if not cfg_success:
-        sys.stderr.write('Thresher: Could not read combine.cfg.\n')
-        sys.stderr.write('HINT: edit combine-example.cfg and save as combine.cfg.\n')
+        logger.error('Thresher: Could not read combine.cfg.')
+        logger.error('HINT: edit combine-example.cfg and save as combine.cfg.')
         return
 
-    sys.stderr.write('Loading raw feed data from %s\n' % input_file)
+    logger.info('Loading raw feed data from %s' % input_file)
     with open(input_file, 'rb') as f:
         crop = json.load(f)
 
@@ -170,30 +172,30 @@ def thresh(input_file, output_file):
 
     # When we have plugins, this hack won't be necessary
     for response in crop['inbound']:
-        sys.stderr.write('Evaluating %s\n' % response[0])
+        logger.info('Evaluating %s' % response[0])
         # TODO: logging
         if response[1] == 200:
             for site in thresher_map:
                 if site in response[0]:
-                    sys.stderr.write('Parsing feed from %s\n' % response[0])
+                    logger.info('Parsing feed from %s' % response[0])
                     harvest += thresher_map[site](response[2], response[0], 'inbound')
                 else:  # how to handle non-mapped sites?
                     pass
         else:  # how to handle non-200 non-404?
-            sys.stderr.write('Could not handle %s: %s\n' % (response[0], response[1]))
+            logger.error('Could not handle %s: %s' % (response[0], response[1]))
 
     for response in crop['outbound']:
         if response[1] == 200:
             for site in thresher_map:
                 if site in response[0]:
-                    sys.stderr.write('Parsing feed from %s\n' % response[0])
+                    logger.info('Parsing feed from %s' % response[0])
                     harvest += thresher_map[site](response[2], response[0], 'outbound')
                 else:  # how to handle non-mapped sites?
                     pass
         else:  # how to handle non-200 non-404?
             pass
 
-    sys.stderr.write('Storing parsed data in %s\n' % output_file)
+    logger.info('Storing parsed data in %s' % output_file)
     with open(output_file, 'wb') as f:
         json.dump(harvest, f, indent=2)
 
