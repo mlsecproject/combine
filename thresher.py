@@ -5,9 +5,10 @@ import feedparser
 import json
 import re
 import sys
+from logger import get_logger
 import logging
 
-logger = logging.getLogger('combine')
+logger = get_logger('thresher')
 
 def indicator_type(indicator):
     ip_regex = '^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$'

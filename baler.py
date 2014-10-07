@@ -5,9 +5,10 @@ import gzip
 import json
 import os
 import sys
+from logger import get_logger
 import logging
 
-logger = logging.getLogger('combine')
+logger = get_logger('baler')
 
 def tiq_output(reg_file, enr_file):
     config = ConfigParser.SafeConfigParser()
