@@ -6,11 +6,13 @@ import dnsdb_query
 import json
 import pygeoip
 import sys
-import logging
 
 from netaddr import IPAddress, IPRange, IPSet
 
-logger = logging.getLogger('combine')
+from logger import get_logger
+import logging
+
+logger = get_logger('winnower')
 
 def load_gi_org(filename):
     gi_org = {}

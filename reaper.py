@@ -2,9 +2,11 @@ import ConfigParser
 import grequests
 import json
 import sys
+from logger import get_logger
 import logging
 
-logger = logging.getLogger('combine')
+
+logger = get_logger('reaper')
 
 def exception_handler(request, exception):
     logger.error("Request %r failed: %r" % (request, exception))
