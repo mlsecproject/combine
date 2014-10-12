@@ -11,7 +11,6 @@ logger = get_logger('reaper')
 def exception_handler(request, exception):
     logger.error("Request %r failed: %r" % (request, exception))
 
-
 def reap(file_name):
     config = ConfigParser.SafeConfigParser(allow_no_value=False)
     cfg_success = config.read('combine.cfg')
@@ -45,7 +44,7 @@ def reap(file_name):
             inbound_urls.remove(url)
     headers = {'User-Agent': 'harvest.py'}
     reqs = [grequests.get(url, headers=headers) for url in inbound_urls]
-    inbound_responses = grequests.map(reqs)
+    inbound_responses = grequests.map(reqs, exception_handler=exception_handler)
     inbound_harvest = [(response.url, response.status_code, response.text) for response in inbound_responses if response]
     for each in inbound_files:
         with open(each,'rb') as f:
@@ -58,7 +57,7 @@ def reap(file_name):
             outbound_files.append(url.partition('://')[2])
             outbound_urls.remove(url)
     reqs = [grequests.get(url, headers=headers) for url in outbound_urls]
-    outbound_responses = grequests.map(reqs)
+    outbound_responses = grequests.map(reqs, exception_handler=exception_handler)
     outbound_harvest = [(response.url, response.status_code, response.text) for response in outbound_responses if response]
     for each in outbound_files:
         with open(each,'rb') as f:
