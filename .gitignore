@@ -34,16 +34,12 @@ nosetests.xml
 .mr.developer.cfg
 .project
 .pydevproject
-<<<<<<< HEAD
 
 # virtualenv
 venv
 
 # IDE config
 .idea
-
-#virtualenv
-venv
 
 # vim swap files
 *.swp
