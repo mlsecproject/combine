@@ -5,6 +5,7 @@ import datetime as dt
 import dnsdb_query
 import json
 import pygeoip
+import re
 import sys
 
 from netaddr import IPAddress, IPRange, IPSet
@@ -13,6 +14,7 @@ from logger import get_logger
 import logging
 
 logger = get_logger('winnower')
+
 
 def load_gi_org(filename):
     gi_org = {}
@@ -29,7 +31,7 @@ def org_by_addr(address, org_data):
     for iprange in org_data:
         if address in iprange:
             as_num, sep, as_name = org_data[iprange].partition(' ')
-            as_num = as_num.replace("AS", "") # Making sure the variable only has the number
+            as_num = as_num.replace("AS", "")  # Making sure the variable only has the number
             break
     return as_num, as_name
 
@@ -83,6 +85,20 @@ def reserved(address):
         return False
 
 
+def is_ipv4(address):
+    if re.match('(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)'):
+        return True
+    else:
+        return False
+
+
+def is_fqdn(address):
+    if re.match('(?=^.{4,255}$)(^((?!-)[a-zA-Z0-9-]{1,63}(?<!-)\.)+[a-zA-Z]{2,63}$)'):
+        return True
+    else:
+        return False
+
+
 def winnow(in_file, out_file, enr_file):
     config = ConfigParser.SafeConfigParser(allow_no_value=True)
     cfg_success = config.read('combine.cfg')
@@ -127,7 +143,7 @@ def winnow(in_file, out_file, enr_file):
     for each in crop:
         (addr, addr_type, direction, source, note, date) = each
         # TODO: enrich DNS indicators as well
-        if addr_type == 'IPv4':
+        if addr_type == 'IPv4' and is_ipv4(addr):
             logger.info('Enriching %s' % addr)
             ipaddr = IPAddress(addr)
             if not reserved(ipaddr):
@@ -140,13 +156,15 @@ def winnow(in_file, out_file, enr_file):
                     enriched.append(e_data)
             else:
                 logger.error('Found invalid address: %s from: %s' % (addr, source))
-        elif addr_type == 'FQDN':
+        elif addr_type == 'FQDN' and is_fqdn(addr):
             # TODO: validate these (cf. https://github.com/mlsecproject/combine/issues/15 )
             logger.info('Enriching %s' % addr)
             wheat.append(each)
             if enrich_dns:
                 e_data = (addr, addr_type, direction, source, note, date, enrich_FQDN(addr, date, dnsdb))
                 enriched.append(e_data)
+        else:
+            logger.error('Could not determine address type for %s listed as %s' % (addr, addr_type))
 
     logger.info('Dumping results')
     with open(out_file, 'wb') as f:
