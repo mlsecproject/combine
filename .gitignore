@@ -63,3 +63,5 @@ combine.cfg
 
 # test local files
 test*.txt
+combine.cfg
+todo.txt

@@ -5,6 +5,9 @@ import gzip
 import json
 import os
 import sys
+import requests
+import time
+import re
 
 
 def tiq_output(reg_file, enr_file):
@@ -53,6 +56,7 @@ def tiq_output(reg_file, enr_file):
 # oh my god this is such a hack
 
 def bale_reg_csvgz(harvest, output_file):
+    """ bale the data as a gziped csv file"""
     sys.stderr.write('Output regular data as GZip CSV to %s\n' % output_file)
     with gzip.open(output_file, 'wb') as csv_file:
         bale_writer = csv.writer(csv_file, quoting=csv.QUOTE_ALL)
@@ -63,6 +67,7 @@ def bale_reg_csvgz(harvest, output_file):
 
 
 def bale_reg_csv(harvest, output_file):
+    """ bale the data as a csv file"""
     sys.stderr.write('Output regular data as CSV to %s\n' % output_file)
     with open(output_file, 'wb') as csv_file:
         bale_writer = csv.writer(csv_file, quoting=csv.QUOTE_ALL)
@@ -73,6 +78,7 @@ def bale_reg_csv(harvest, output_file):
 
 
 def bale_enr_csv(harvest, output_file):
+    """ output the data as an enriched csv file"""
     sys.stderr.write('Output enriched data as CSV to %s\n' % output_file)
     with open(output_file, 'wb') as csv_file:
         bale_writer = csv.writer(csv_file, quoting=csv.QUOTE_ALL)
@@ -81,8 +87,8 @@ def bale_enr_csv(harvest, output_file):
         bale_writer.writerow(('entity', 'type', 'direction', 'source', 'notes', 'date', 'asnumber', 'asname', 'country', 'host', 'rhost'))
         bale_writer.writerows(harvest)
 
-
 def bale_enr_csvgz(harvest, output_file):
+    """ output the data as an enriched gziped csv file"""
     sys.stderr.write('Output enriched data as GZip CSV to %s\n' % output_file)
     with gzip.open(output_file, 'wb') as csv_file:
         bale_writer = csv.writer(csv_file, quoting=csv.QUOTE_ALL)
@@ -91,6 +97,88 @@ def bale_enr_csvgz(harvest, output_file):
         bale_writer.writerow(('entity', 'type', 'direction', 'source', 'notes', 'date', 'asnumber', 'asname', 'country', 'host', 'rhost'))
         bale_writer.writerows(harvest)
 
+def bale_CRITs(harvest,filename):
+    """ taking the output from combine and pushing it to the CRITs web API"""
+    # checking the minimum requirements for parameters
+    # it would be nice to have some metadata on the feeds that can be imported in the intel library:
+    #   -> confidence
+    #   -> type of feed (bot vs spam vs ddos, you get the picture)
+    data={'confidence':'medium'}
+    config = ConfigParser.SafeConfigParser()
+    cfg_success = config.read('combine.cfg')
+    if not cfg_success:
+        sys.stderr.write('tiq_output: Could not read combine.cfg.\n')
+        sys.stderr.write('HINT: edit combine-example.cfg and save as combine.cfg.\n')
+        return
+    if config.has_option('Baler','username'):
+        data['username']=config.get('Baler', 'username')
+    else:
+        raise 'Please check the combine.cnf file for the username field in the [Baler] section'
+    if config.has_option('Baler','api_key'):
+        data['api_key']=config.get('Baler', 'api_key')
+    else:
+        raise 'Please check the combine.cnf file for the api_key field in the [Baler] section'
+    if config.has_option('Baler','campaign'):
+        data['campaign']=config.get('Baler', 'campaign')
+    else:
+        sys.stderr.write('Lacking a campaign name, we will default to "combine." Errors might ensue if it does not exist in CRITs')
+        data['campaign']='combine'
+    if config.has_option('Baler','url'):
+        base_url=config.get('Baler','url')
+    else:
+        raise 'Please check the combine.cnf file for the url field in the [Baler] section'
+    # instituting some counts for less verbose output
+    data['source']='Combine'
+    data['method']='trawl'
+    domain_count=0
+    ip_count=0
+    sources=[]
+
+    for indicator in harvest:
+        if indicator[1] == 'IPv4':
+            # using the IP API
+            url=base_url+'ips/'
+            data['add_indicator']="true"
+            data['ip']=indicator[0]
+            data['ip_type']='Address - ipv4-addr'
+            data['reference']=indicator[3]
+            # getting the source automatically:  
+            source=re.findall(r'\/\/(.*?)\/',data['reference'])
+            if source:
+                data['source']=source[0]
+                if not data['source'] in sources:
+                    sources.append(data['source'])
+            res = requests.post(url,data=data,verify=False)
+            if res.status_code == 201 or res.status_code == 200:
+                ip_count+=1
+            else:
+                sys.stderr.write("Issues with adding: %s" % data['ip'])
+                sys.stderr.write(res.text)
+                print res.status_code
+        elif indicator[1] == "FQDN":
+            # using the Domain API
+            url=base_url+'domains/'
+            data['add_indicator']="true"
+            data['domain']=indicator[0]
+            data['reference']=indicator[3]
+            # getting the source automatically:
+            source=re.findall(r'\/\/(.*?)\/',data['reference'])
+            if source:
+                data['source']=source[0]
+                if not data['source'] in sources:
+                    sources.append(data['source'])
+            res = requests.post(url,data=data,verify=False)
+            if not res.status_code == 201 or res.status_code == 200:
+                domain_count+=1
+            else:
+                sys.stderr.write("Issues with adding: %s" % data['domain'])
+                sys.stderr.write(res.text)
+                sys.stderr.write(res.status_code)
+        else:
+            sys.stderr.write("don't yet know what to do with: %s[%s]" % (indicator[1],indicator[0]))
+    sys.stderr.write("successfully added %d IP addresses and %d domains" % (ip_count, domain_count))
+    print "make sure you have the following sources in CRITs:",sources
+    
 
 def bale(input_file, output_file, output_format, is_regular):
     config = ConfigParser.SafeConfigParser()
@@ -106,9 +194,9 @@ def bale(input_file, output_file, output_format, is_regular):
 
     # TODO: also need plugins here (cf. #23)
     if is_regular:
-        format_funcs = {'csv': bale_reg_csv}
+        format_funcs = {'csv': bale_reg_csv,'crits':bale_CRITs}
     else:
-        format_funcs = {'csv': bale_enr_csv}
+        format_funcs = {'csv': bale_enr_csv,'crits':bale_CRITs}
     format_funcs[output_format](harvest, output_file)
 
 if __name__ == "__main__":
