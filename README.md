@@ -1,3 +1,4 @@
+[![Stories in Ready](https://badge.waffle.io/mlsecproject/combine.png?label=ready&title=Ready)](https://waffle.io/mlsecproject/combine)
 combine
 =======
 
