@@ -5,17 +5,14 @@ import gzip
 import json
 import os
 import sys
-<<<<<<< HEAD
 import requests
 import time
 import re
 from Queue import Queue
 import threading
-
-=======
 from logger import get_logger
 import logging
->>>>>>> upstream/master
+
 
 logger = get_logger('baler')
 
@@ -35,12 +32,7 @@ def tiq_output(reg_file, enr_file):
 
     with open(enr_file, 'rb') as f:
         enr_data = json.load(f)
-<<<<<<< HEAD
-    sys.stderr.write('Preparing tiq directory structure under %s\n' % tiq_dir)
-=======
-
     logger.info('Preparing tiq directory structure under %s' % tiq_dir)
->>>>>>> upstream/master
     if not os.path.isdir(tiq_dir):
         os.makedirs(os.path.join(tiq_dir, 'raw', 'public_inbound'))
         os.makedirs(os.path.join(tiq_dir, 'raw', 'public_outbound'))
@@ -69,12 +61,8 @@ def tiq_output(reg_file, enr_file):
 # oh my god this is such a hack
 
 def bale_reg_csvgz(harvest, output_file):
-<<<<<<< HEAD
     """ bale the data as a gziped csv file"""
-    sys.stderr.write('Output regular data as GZip CSV to %s\n' % output_file)
-=======
     logger.info('Output regular data as GZip CSV to %s' % output_file)
->>>>>>> upstream/master
     with gzip.open(output_file, 'wb') as csv_file:
         bale_writer = csv.writer(csv_file, quoting=csv.QUOTE_ALL)
 
@@ -84,12 +72,8 @@ def bale_reg_csvgz(harvest, output_file):
 
 
 def bale_reg_csv(harvest, output_file):
-<<<<<<< HEAD
     """ bale the data as a csv file"""
-    sys.stderr.write('Output regular data as CSV to %s\n' % output_file)
-=======
     logger.info('Output regular data as CSV to %s' % output_file)
->>>>>>> upstream/master
     with open(output_file, 'wb') as csv_file:
         bale_writer = csv.writer(csv_file, quoting=csv.QUOTE_ALL)
 
@@ -99,12 +83,8 @@ def bale_reg_csv(harvest, output_file):
 
 
 def bale_enr_csv(harvest, output_file):
-<<<<<<< HEAD
     """ output the data as an enriched csv file"""
-    sys.stderr.write('Output enriched data as CSV to %s\n' % output_file)
-=======
     logger.info('Output enriched data as CSV to %s' % output_file)
->>>>>>> upstream/master
     with open(output_file, 'wb') as csv_file:
         bale_writer = csv.writer(csv_file, quoting=csv.QUOTE_ALL)
 
@@ -113,12 +93,8 @@ def bale_enr_csv(harvest, output_file):
         bale_writer.writerows(harvest)
 
 def bale_enr_csvgz(harvest, output_file):
-<<<<<<< HEAD
     """ output the data as an enriched gziped csv file"""
-    sys.stderr.write('Output enriched data as GZip CSV to %s\n' % output_file)
-=======
     logger.info('Output enriched data as GZip CSV to %s' % output_file)
->>>>>>> upstream/master
     with gzip.open(output_file, 'wb') as csv_file:
         bale_writer = csv.writer(csv_file, quoting=csv.QUOTE_ALL)
 
@@ -143,7 +119,7 @@ def bale_CRITs_indicator(base_url,data,indicator_que):
                 data['source']=source[0]
             res = requests.post(url,data=data,verify=False)
             if not res.status_code in [201,200]:
-                sys.stderr.write("Issues with adding: %s" % data['ip'])
+                logger.info("Issues with adding: %s" % data['ip'])
                 
         elif indicator[1] == "FQDN":
             # using the Domain API
@@ -157,9 +133,9 @@ def bale_CRITs_indicator(base_url,data,indicator_que):
                 data['source']=source[0]
             res = requests.post(url,data=data,verify=False)
             if not res.status_code in [201,200]:
-                sys.stderr.write("Issues with adding: %s" % data['domain'])
+                logger.info("Issues with adding: %s" % data['domain'])
         else:
-            sys.stderr.write("don't yet know what to do with: %s[%s]" % (indicator[1],indicator[0]))
+            logger.info("don't yet know what to do with: %s[%s]" % (indicator[1],indicator[0]))
 
 def bale_CRITs(harvest,filename):
     """ taking the output from combine and pushing it to the CRITs web API"""
@@ -172,8 +148,8 @@ def bale_CRITs(harvest,filename):
     config = ConfigParser.SafeConfigParser()
     cfg_success = config.read('combine.cfg')
     if not cfg_success:
-        sys.stderr.write('tiq_output: Could not read combine.cfg.\n')
-        sys.stderr.write('HINT: edit combine-example.cfg and save as combine.cfg.\n')
+        logger.error('tiq_output: Could not read combine.cfg.\n')
+        logger.error('HINT: edit combine-example.cfg and save as combine.cfg.\n')
         return
     if config.has_option('Baler','username'):
         data['username']=config.get('Baler', 'username')
@@ -186,7 +162,7 @@ def bale_CRITs(harvest,filename):
     if config.has_option('Baler','campaign'):
         data['campaign']=config.get('Baler', 'campaign')
     else:
-        sys.stderr.write('Lacking a campaign name, we will default to "combine." Errors might ensue if it does not exist in CRITs')
+        logger.info('Lacking a campaign name, we will default to "combine." Errors might ensue if it does not exist in CRITs')
         data['campaign']='combine'
     if config.has_option('Baler','url'):
         base_url=config.get('Baler','url')
@@ -195,9 +171,9 @@ def bale_CRITs(harvest,filename):
     if config.has_option('Baler','maxThreads'):
         maxThreads=int(config.get('Baler', 'maxThreads'))
     else:
-        sys.stderr.write('No number of maximum Threads has been given, defaulting to 10')
+        logger.info('No number of maximum Threads has been given, defaulting to 10')
         maxThreads=10
-    # instituting some counts for less verbose output
+    
     data['source']='Combine'
     data['method']='trawl'
     
@@ -216,7 +192,7 @@ def bale_CRITs(harvest,filename):
             continue
         x.join()
         
-    sys.stderr.write('Output %d indicators to CRITs using %d threads. Operation tool %d seconds\n' % (total_iocs,maxThreads,time.time()-start_time))
+    logger.info('Output %d indicators to CRITs using %d threads. Operation tool %d seconds\n' % (total_iocs,maxThreads,time.time()-start_time))
     
 def bale(input_file, output_file, output_format, is_regular):
     config = ConfigParser.SafeConfigParser()
