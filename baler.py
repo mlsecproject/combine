@@ -29,7 +29,6 @@ def tiq_output(reg_file, enr_file):
 
     with open(enr_file, 'rb') as f:
         enr_data = json.load(f)
-
     sys.stderr.write('Preparing tiq directory structure under %s\n' % tiq_dir)
     if not os.path.isdir(tiq_dir):
         os.makedirs(os.path.join(tiq_dir, 'raw', 'public_inbound'))
@@ -104,7 +103,6 @@ def bale_CRITs_indicator(base_url,data,indicator_que):
     """ One thread of adding indicators to CRITs"""
     while not indicator_que.empty():
         indicator=indicator_que.get()
-        #print indicator
         if indicator[1] == 'IPv4':
             # using the IP API
             url=base_url+'ips/'
@@ -136,15 +134,14 @@ def bale_CRITs_indicator(base_url,data,indicator_que):
         else:
             sys.stderr.write("don't yet know what to do with: %s[%s]" % (indicator[1],indicator[0]))
 
-def bale_CRITs_multi(harvest,filename):
+def bale_CRITs(harvest,filename):
     """ taking the output from combine and pushing it to the CRITs web API"""
     # checking the minimum requirements for parameters
     # it would be nice to have some metadata on the feeds that can be imported in the intel library:
     #   -> confidence
     #   -> type of feed (bot vs spam vs ddos, you get the picture)
     data={'confidence':'medium'}
-    start=time.time()
-    print time.time(),"reading configs"
+    start_time=time.time()
     config = ConfigParser.SafeConfigParser()
     cfg_success = config.read('combine.cfg')
     if not cfg_success:
@@ -168,121 +165,31 @@ def bale_CRITs_multi(harvest,filename):
         base_url=config.get('Baler','url')
     else:
         raise 'Please check the combine.cnf file for the url field in the [Baler] section'
+    if config.has_option('Baler','maxThreads'):
+        maxThreads=int(config.get('Baler', 'maxThreads'))
+    else:
+        sys.stderr.write('No number of maximum Threads has been given, defaulting to 10')
+        maxThreads=10
     # instituting some counts for less verbose output
     data['source']='Combine'
     data['method']='trawl'
     
-    print time.time(),"initializing queue"
     # initializing the Queue to the list of indicators in the harvest
     ioc_queue=Queue()
     for indicator in harvest:
         ioc_queue.put(indicator)
-        
-    print time.time(),"starting threads"
-    # setting the number of maximum concomittent threads - if it works, to be read from the config file
-    maxThreads=10
+    total_iocs=ioc_queue.qsize()
+    
     for x in range(maxThreads):
         th=threading.Thread(target=bale_CRITs_indicator, args=(base_url,data,ioc_queue))
         th.start()
         
-
     for x in threading.enumerate():
         if x.name=="MainThread": 
             continue
         x.join()
-    
-    print "\n\n",time.time(),"done in ",time.time()-start," seconds"
-    
-def bale_CRITs_single(harvest,filename):
-    """ taking the output from combine and pushing it to the CRITs web API"""
-    # checking the minimum requirements for parameters
-    # it would be nice to have some metadata on the feeds that can be imported in the intel library:
-    #   -> confidence
-    #   -> type of feed (bot vs spam vs ddos, you get the picture)
-    start=time.time()
-    print time.time(),"reading configs"
-    data={'confidence':'medium'}
-    config = ConfigParser.SafeConfigParser()
-    cfg_success = config.read('combine.cfg')
-    if not cfg_success:
-        sys.stderr.write('tiq_output: Could not read combine.cfg.\n')
-        sys.stderr.write('HINT: edit combine-example.cfg and save as combine.cfg.\n')
-        return
-    if config.has_option('Baler','username'):
-        data['username']=config.get('Baler', 'username')
-    else:
-        raise 'Please check the combine.cnf file for the username field in the [Baler] section'
-    if config.has_option('Baler','api_key'):
-        data['api_key']=config.get('Baler', 'api_key')
-    else:
-        raise 'Please check the combine.cnf file for the api_key field in the [Baler] section'
-    if config.has_option('Baler','campaign'):
-        data['campaign']=config.get('Baler', 'campaign')
-    else:
-        sys.stderr.write('Lacking a campaign name, we will default to "combine." Errors might ensue if it does not exist in CRITs')
-        data['campaign']='combine'
-    if config.has_option('Baler','url'):
-        base_url=config.get('Baler','url')
-    else:
-        raise 'Please check the combine.cnf file for the url field in the [Baler] section'
-    # instituting some counts for less verbose output
-    data['source']='Combine'
-    data['method']='trawl'
-    domain_count=0
-    ip_count=0
-    sources=[]
-    print time.time(),"going through list"
-    for indicator in harvest:
-        if indicator[1] == 'IPv4':
-            # using the IP API
-            url=base_url+'ips/'
-            data['add_indicator']="true"
-            data['ip']=indicator[0]
-            data['ip_type']='Address - ipv4-addr'
-            data['reference']=indicator[3]
-            # getting the source automatically:  
-            source=re.findall(r'\/\/(.*?)\/',data['reference'])
-            if source:
-                data['source']=source[0]
-                if not data['source'] in sources:
-                    sources.append(data['source'])
-            res = requests.post(url,data=data,verify=False)
-            if res.status_code == 201 or res.status_code == 200:
-                ip_count+=1
-            else:
-                sys.stderr.write("Issues with adding: %s" % data['ip'])
-                sys.stderr.write(res.text)
-                print res.status_code
-        elif indicator[1] == "FQDN":
-            # using the Domain API
-            url=base_url+'domains/'
-            data['add_indicator']="true"
-            data['domain']=indicator[0]
-            data['reference']=indicator[3]
-            # getting the source automatically:
-            source=re.findall(r'\/\/(.*?)\/',data['reference'])
-            if source:
-                data['source']=source[0]
-                if not data['source'] in sources:
-                    sources.append(data['source'])
-            res = requests.post(url,data=data,verify=False)
-            if not res.status_code == 201 or res.status_code == 200:
-                domain_count+=1
-            else:
-                sys.stderr.write("Issues with adding: %s" % data['domain'])
-                sys.stderr.write(res.text)
-                sys.stderr.write(res.status_code)
-        else:
-            sys.stderr.write("don't yet know what to do with: %s[%s]" % (indicator[1],indicator[0]))
-    sys.stderr.write("successfully added %d IP addresses and %d domains" % (ip_count, domain_count))
-    print "\n\n",time.time(),"done in ",time.time()-start," seconds"
-    print "make sure you have the following sources in CRITs:",sources
-    
-def bale_CRITs(harvest,filename):
-    print time.time(),"*** trying single thread***"
-    bale_CRITs_single(harvest,filename)
-    print time.time(),"*** trying multi thread***"
-    bale_CRITs_multi(harvest,filename)
+        
+    sys.stderr.write('Output %d indicators to CRITs using %d threads. Operation tool %d seconds\n' % (total_iocs,maxThreads,time.time()-start_time))
     
 def bale(input_file, output_file, output_format, is_regular):
     config = ConfigParser.SafeConfigParser()

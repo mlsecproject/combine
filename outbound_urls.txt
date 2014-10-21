@@ -1,3 +1,9 @@
 http://www.malwaregroup.com/ipaddresses
 http://malc0de.com/bl/IP_Blacklist.txt
+https://zeustracker.abuse.ch/blocklist.php?download=ipblocklist
+https://spyeyetracker.abuse.ch/blocklist.php?download=ipblocklist
+https://palevotracker.abuse.ch/blocklists.php?download=ipblocklist
+http://reputation.alienvault.com/reputation.data
 http://www.nothink.org/blacklist/blacklist_malware_dns.txt
+http://www.nothink.org/blacklist/blacklist_malware_http.txt
+http://www.nothink.org/blacklist/blacklist_malware_irc.txt
