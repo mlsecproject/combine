@@ -137,26 +137,7 @@ def bale_CRITs_indicator(base_url,data,indicator_que):
             sys.stderr.write("don't yet know what to do with: %s[%s]" % (indicator[1],indicator[0]))
 
 def bale_CRITs_multi(harvest,filename):
-    """ taking the output from combine and pushing it to the CRITs web API
-    paul@linux-67o4:~/Documents/dev/combine> time python combine.py -t crits
-Fetching inbound URLs
-Fetching outbound URLs
-Storing raw feeds in harvest.json
-Loading raw feed data from harvest.json
-Evaluating http://www.projecthoneypot.org/list_of_ips.php?rss=1
-Parsing feed from http://www.projecthoneypot.org/list_of_ips.php?rss=1
-Parsing feed from http://malc0de.com/bl/IP_Blacklist.txt
-Storing parsed data in crop.json
-Reading processed data from crop.json
-0.369317 reading configs
-0.369623 initializing queue
-0.372198 starting threads
-6.461888 finished threads
-
-real    1m10.674s
-user    0m5.804s
-sys     0m0.683s
-"""
+    """ taking the output from combine and pushing it to the CRITs web API"""
     # checking the minimum requirements for parameters
     # it would be nice to have some metadata on the feeds that can be imported in the intel library:
     #   -> confidence
@@ -213,24 +194,7 @@ sys     0m0.683s
     print "\n\n",time.time(),"done in ",time.time()-start," seconds"
     
 def bale_CRITs_single(harvest,filename):
-    """ taking the output from combine and pushing it to the CRITs web API
-    paul@linux-67o4:~/Documents/dev/combine> time python combine.py -t crits
-Fetching inbound URLs
-Fetching outbound URLs
-Storing raw feeds in harvest.json
-Loading raw feed data from harvest.json
-Evaluating http://www.projecthoneypot.org/list_of_ips.php?rss=1
-Parsing feed from http://www.projecthoneypot.org/list_of_ips.php?rss=1
-Parsing feed from http://malc0de.com/bl/IP_Blacklist.txt
-Storing parsed data in crop.json
-Reading processed data from crop.json
-successfully added 1271 IP addresses and 0 domainsmake sure you have the following sources in CRITs: [u'www.projecthoneypot.org', u'malc0de.com']
-
-real    1m18.975s
-user    0m6.163s
-sys     0m0.627s
-
-    """
+    """ taking the output from combine and pushing it to the CRITs web API"""
     # checking the minimum requirements for parameters
     # it would be nice to have some metadata on the feeds that can be imported in the intel library:
     #   -> confidence
