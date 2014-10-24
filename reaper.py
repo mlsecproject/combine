@@ -71,7 +71,7 @@ def reap(file_name):
             assert isinstance(logger, logging.Logger)
             logger.error('Reaper: Error while opening "%s" - %s' % (each, e.strerror))
 
-    logger.error('Storing raw feeds in %s' % file_name)
+    logger.info('Storing raw feeds in %s' % file_name)
     harvest = {'inbound': inbound_harvest, 'outbound': outbound_harvest}
 
     with open(file_name, 'wb') as f:
