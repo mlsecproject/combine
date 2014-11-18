@@ -92,7 +92,7 @@ crits_maxThreads = 10
 Make sure you have the campaign created on CRITs before exporting the data. The `confidence` field is being
 set as `medium` throughout the export by default. 
 
-Thanks to @paulpc and @mgoffin for this feature.
+Thanks to [@paulpc]((https://github.com/paulpc) for implementing this feature and [@mgoffin]((https://github.com/mgoffin) for moral support ;).
 
 ### Copyright Info
 
