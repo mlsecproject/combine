@@ -60,3 +60,7 @@ combine.cfg
 
 # test local files
 test*.txt
+combine.cfg
+todo.txt
+extra_code.py
+crits_stats

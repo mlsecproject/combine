@@ -22,14 +22,14 @@ parser.add_argument('-e', '--enrich', help="Enrich data", action="store_true")
 parser.add_argument('--tiq-test', help="Output in tiq-test format", action="store_true")
 args = parser.parse_args()
 
-possible_types = ['csv', 'CSV']
+possible_types = ['csv', 'json','crits']
 
 if not args.type:
     out_type = 'csv'
-elif args.type not in possible_types:
+elif args.type.lower() not in possible_types:
     sys.exit('Invalid file type specified. Possible types are: %s' % possible_types)
 else:
-    out_type = args.type
+    out_type = args.type.lower()
 
 if args.file:
     out_file = args.file
