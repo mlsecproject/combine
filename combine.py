@@ -15,7 +15,7 @@ from winnower import winnow
 logger = get_logger()
 
 parser = argparse.ArgumentParser()
-parser.add_argument('-t', '--type', help="Specify output type. Currently supported: CSV")
+parser.add_argument('-t', '--type', help="Specify output type. Currently supported: CSV and exporting to CRITs")
 parser.add_argument('-f', '--file', help="Specify output file. Defaults to harvest.FILETYPE")
 parser.add_argument('-d', '--delete', help="Delete intermediate files", action="store_true")
 parser.add_argument('-e', '--enrich', help="Enrich data", action="store_true")

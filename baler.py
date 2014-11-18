@@ -113,14 +113,14 @@ def bale_CRITs_indicator(base_url,data,indicator_que):
             data['ip']=indicator[0]
             data['ip_type']='Address - ipv4-addr'
             data['reference']=indicator[3]
-            # getting the source automatically:  
+            # getting the source automatically:
             source=re.findall(r'\/\/(.*?)\/',data['reference'])
             if source:
                 data['source']=source[0]
             res = requests.post(url,data=data,verify=False)
             if not res.status_code in [201,200]:
                 logger.info("Issues with adding: %s" % data['ip'])
-                
+
         elif indicator[1] == "FQDN":
             # using the Domain API
             url=base_url+'domains/'
@@ -151,49 +151,49 @@ def bale_CRITs(harvest,filename):
         logger.error('tiq_output: Could not read combine.cfg.\n')
         logger.error('HINT: edit combine-example.cfg and save as combine.cfg.\n')
         return
-    if config.has_option('Baler','username'):
-        data['username']=config.get('Baler', 'username')
+    if config.has_option('Baler','crits_username'):
+        data['username']=config.get('Baler', 'crits_username')
     else:
-        raise 'Please check the combine.cnf file for the username field in the [Baler] section'
-    if config.has_option('Baler','api_key'):
-        data['api_key']=config.get('Baler', 'api_key')
+        raise 'Please check the combine.cnf file for the crits_username field in the [Baler] section'
+    if config.has_option('Baler','crits_api_key'):
+        data['api_key']=config.get('Baler', 'crits_api_key')
     else:
-        raise 'Please check the combine.cnf file for the api_key field in the [Baler] section'
-    if config.has_option('Baler','campaign'):
-        data['campaign']=config.get('Baler', 'campaign')
+        raise 'Please check the combine.cnf file for the crits_api_key field in the [Baler] section'
+    if config.has_option('Baler','crits_campaign'):
+        data['campaign']=config.get('Baler', 'crits_campaign')
     else:
         logger.info('Lacking a campaign name, we will default to "combine." Errors might ensue if it does not exist in CRITs')
         data['campaign']='combine'
-    if config.has_option('Baler','url'):
-        base_url=config.get('Baler','url')
+    if config.has_option('Baler','crits_url'):
+        base_url=config.get('Baler','crits_url')
     else:
-        raise 'Please check the combine.cnf file for the url field in the [Baler] section'
-    if config.has_option('Baler','maxThreads'):
-        maxThreads=int(config.get('Baler', 'maxThreads'))
+        raise 'Please check the combine.cnf file for the crits_url field in the [Baler] section'
+    if config.has_option('Baler','crits_maxThreads'):
+        maxThreads=int(config.get('Baler', 'crits_maxThreads'))
     else:
         logger.info('No number of maximum Threads has been given, defaulting to 10')
         maxThreads=10
-    
+
     data['source']='Combine'
     data['method']='trawl'
-    
+
     # initializing the Queue to the list of indicators in the harvest
     ioc_queue=Queue()
     for indicator in harvest:
         ioc_queue.put(indicator)
     total_iocs=ioc_queue.qsize()
-    
+
     for x in range(maxThreads):
         th=threading.Thread(target=bale_CRITs_indicator, args=(base_url,data,ioc_queue))
         th.start()
-        
+
     for x in threading.enumerate():
-        if x.name=="MainThread": 
+        if x.name=="MainThread":
             continue
         x.join()
-        
+
     logger.info('Output %d indicators to CRITs using %d threads. Operation tool %d seconds\n' % (total_iocs,maxThreads,time.time()-start_time))
-    
+
 def bale(input_file, output_file, output_format, is_regular):
     config = ConfigParser.SafeConfigParser()
     cfg_success = config.read('combine.cfg')
