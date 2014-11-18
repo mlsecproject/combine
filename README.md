@@ -10,7 +10,7 @@ usage: combine.py [-h] [-t TYPE] [-f FILE] [-d] [-e] [--tiq-test]
 
 optional arguments:
   -h, --help            show this help message and exit
-  -t TYPE, --type TYPE  Specify output type. Currently supported: CSV
+  -t TYPE, --type TYPE  Specify output type. Currently supported: CSV and exporting to CRITs
   -f FILE, --file FILE  Specify output file. Defaults to harvest.FILETYPE
   -d, --delete          Delete intermediate files
   -e, --enrich          Enrich data
@@ -76,6 +76,23 @@ In order to use the DNSDB's information you will require an API key from Farsigh
 If you do not have one, you can request one [here](https://www.dnsdb.info/#Apply).
 
 You should configure the API key and endpoint for DNSDB on `combine.cfg`. Copy the example configuration file from `combine-example.cfg` and add your information there.
+
+### Exporting to CRITs
+
+In order to use the [CRITs](https://crits.github.io/) exporting function, there are some configuration that is
+necessary on the Baler section of the configuration file. Make sure you configure the following entries correctly:
+
+```
+crits_url = http://crits_url:crits_port/api/v1/
+crits_username = CRITS_USERNAME
+crits_api_key = CRITS_API_KEY
+crits_campaign = combine
+crits_maxThreads = 10
+```
+Make sure you have the campaign created on CRITs before exporting the data. The `confidence` field is being
+set as `medium` throughout the export by default. 
+
+Thanks to @paulpc and @mgoffin for this feature.
 
 ### Copyright Info
 
