@@ -134,7 +134,7 @@ def winnow(in_file, out_file, enr_file):
     # TODO: make these locations configurable?
     logger.info('Loading GeoIP data')
     org_data = load_gi_org('data/GeoIPASNum2.csv')
-    geo_data = pygeoip.GeoIP('data/GeoIP.dat')
+    geo_data = pygeoip.GeoIP('data/GeoIP.dat', pygeoip.MEMORY_CACHE)
 
     wheat = []
     enriched = []
