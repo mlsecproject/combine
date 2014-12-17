@@ -118,9 +118,8 @@ def bale_CRITs_indicator(base_url,data,indicator_que):
             if source:
                 data['source']=source[0]
             res = requests.post(url,data=data,verify=False)
-            if not res.status_code in [201,200]:
+            if not res.status_code in [201,200,400]:
                 logger.info("Issues with adding: %s" % data['ip'])
-
         elif indicator[1] == "FQDN":
             # using the Domain API
             url=base_url+'domains/'
@@ -132,7 +131,7 @@ def bale_CRITs_indicator(base_url,data,indicator_que):
             if source:
                 data['source']=source[0]
             res = requests.post(url,data=data,verify=False)
-            if not res.status_code in [201,200]:
+            if not res.status_code in [201,200,400]:
                 logger.info("Issues with adding: %s" % data['domain'])
         else:
             logger.info("don't yet know what to do with: %s[%s]" % (indicator[1],indicator[0]))
