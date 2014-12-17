@@ -1,6 +1,9 @@
 #!/bin/bash
-echo "This product includes GeoLite data created by MaxMind, available from http://www.maxmind.com"
+# This product includes GeoLite data created by MaxMind, available from http://www.maxmind.com
 
-wget http://geolite.maxmind.com/download/geoip/database/GeoLiteCountry/GeoIP.dat.gz && gunzip -f GeoIP.dat.gz
+# you can set this up in the crontab to update it daily:
+# 0 0 * * * [combine_folder]/data/update_maxmind.sh
 
-wget http://geolite.maxmind.com/download/geoip/database/GeoLiteCity.dat.gz && gunzip -f GeoLiteCity.dat.gz
+wget -q http://geolite.maxmind.com/download/geoip/database/GeoLiteCountry/GeoIP.dat.gz && gunzip -f GeoIP.dat.gz
+
+wget -q http://geolite.maxmind.com/download/geoip/database/GeoLiteCity.dat.gz && gunzip -f GeoLiteCity.dat.gz
