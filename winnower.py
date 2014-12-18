@@ -126,7 +126,12 @@ def winnow(in_file, out_file, enr_file):
         logger.info('Enriching DNS indicators: FALSE')
 
     logger.info('Setting up DNSDB client')
-    dnsdb = dnsdb_query.DnsdbClient(server, api)
+
+    # handle the case where we aren't using DNSDB
+    if api != "YOUR_API_KEY_HERE":
+        dnsdb = dnsdb_query.DnsdbClient(server, api)
+    else:
+        dnsdb = None
 
     with open(in_file, 'rb') as f:
         crop = json.load(f)
@@ -148,7 +153,7 @@ def winnow(in_file, out_file, enr_file):
             ipaddr = IPAddress(addr)
             if not reserved(ipaddr):
                 wheat.append(each)
-                if enrich_ip:
+                if enrich_ip and dnsdb:
                     e_data = (addr, addr_type, direction, source, note, date) + enrich_IPv4(ipaddr, org_data, geo_data, dnsdb)
                     enriched.append(e_data)
                 else:
