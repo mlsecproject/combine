@@ -7,6 +7,8 @@ import re
 import sys
 from logger import get_logger
 import logging
+from csv import reader
+from itertools import ifilter
 
 logger = get_logger('thresher')
 
@@ -96,11 +98,14 @@ def process_rulez(response, source, direction):
 
 def process_packetmail(response, source, direction):
     data = []
-    for line in response.splitlines():
-        if not line.startswith('#') and len(line) > 0:
-            i = line.partition(';')[0].strip()
-            date = line.split('; ')[1].split(' ')[0]
+    filter_comments = lambda x: not x[0].startswith('#')
+    try:
+        for line in ifilter(filter_comments, reader(response, delimiter=';')):
+            i = line[0]
+            date = line[1].split(' ')[1]
             data.append((i, indicator_type(i), direction, source, '', date))
+    except (IndexError, AttributeError):
+        pass
     return data
 
 
