@@ -128,10 +128,10 @@ def winnow(in_file, out_file, enr_file):
     logger.info('Setting up DNSDB client')
 
     # handle the case where we aren't using DNSDB
-    if api != "YOUR_API_KEY_HERE":
-        dnsdb = dnsdb_query.DnsdbClient(server, api)
-    else:
+    dnsdb = dnsdb_query.DnsdbClient(server, api)
+    if len(dnsdb.query_rdata_name('google.com')) == 0:
         dnsdb = None
+        logger.info('Invalid DNSDB configuration found')
 
     with open(in_file, 'rb') as f:
         crop = json.load(f)
