@@ -153,7 +153,7 @@ def winnow(in_file, out_file, enr_file):
             ipaddr = IPAddress(addr)
             if not reserved(ipaddr):
                 wheat.append(each)
-                if enrich_ip and dnsdb:
+                if enrich_ip:
                     e_data = (addr, addr_type, direction, source, note, date) + enrich_IPv4(ipaddr, org_data, geo_data, dnsdb)
                     enriched.append(e_data)
                 else:
