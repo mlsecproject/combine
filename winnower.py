@@ -126,7 +126,12 @@ def winnow(in_file, out_file, enr_file):
         logger.info('Enriching DNS indicators: FALSE')
 
     logger.info('Setting up DNSDB client')
+
+    # handle the case where we aren't using DNSDB
     dnsdb = dnsdb_query.DnsdbClient(server, api)
+    if len(dnsdb.query_rdata_name('google.com')) == 0:
+        dnsdb = None
+        logger.info('Invalid DNSDB configuration found')
 
     with open(in_file, 'rb') as f:
         crop = json.load(f)
@@ -160,7 +165,7 @@ def winnow(in_file, out_file, enr_file):
             # TODO: validate these (cf. https://github.com/mlsecproject/combine/issues/15 )
             logger.info('Enriching %s' % addr)
             wheat.append(each)
-            if enrich_dns:
+            if enrich_dns and dnsdb:
                 e_data = (addr, addr_type, direction, source, note, date, enrich_FQDN(addr, date, dnsdb))
                 enriched.append(e_data)
         else:
