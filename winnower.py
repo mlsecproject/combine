@@ -15,6 +15,10 @@ import logging
 
 logger = get_logger('winnower')
 
+# from http://en.wikipedia.org/wiki/Reserved_IP_addresses:
+reserved_ranges = IPSet(['0.0.0.0/8', '100.64.0.0/10', '127.0.0.0/8', '192.88.99.0/24',
+                '198.18.0.0/15', '198.51.100.0/24', '203.0.113.0/24', '233.252.0.0/24'])
+
 
 def load_gi_org(filename):
     gi_org = {}
@@ -73,12 +77,9 @@ def filter_date(records, date):
 
 
 def reserved(address):
-    # from http://en.wikipedia.org/wiki/Reserved_IP_addresses:
-    ranges = IPSet(['0.0.0.0/8', '100.64.0.0/10', '127.0.0.0/8', '192.88.99.0/24',
-                    '198.18.0.0/15', '198.51.100.0/24', '203.0.113.0/24', '233.252.0.0/24'])
     a_reserved = address.is_reserved()
     a_private = address.is_private()
-    a_inr = address in ranges
+    a_inr = address in reserved_ranges
     if a_reserved or a_private or a_inr:
         return True
     else:
