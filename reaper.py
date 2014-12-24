@@ -36,13 +36,15 @@ def reap(file_name):
         logger.error('Reaper: Error while opening "%s" - %s' % (outbound_url_file, e.strerror))
         return
 
+    ## Setting the User-Agent to something spiffy
+    headers = {'User-Agent': 'Combine/0.1.1'}
+
     logger.info('Fetching inbound URLs')
     inbound_files=[]
     for url in inbound_urls:
         if url.startswith('file://'):
             inbound_files.append(url.partition('://')[2])
             inbound_urls.remove(url)
-    headers = {'User-Agent': 'harvest.py'}
     reqs = [grequests.get(url, headers=headers) for url in inbound_urls]
     inbound_responses = grequests.map(reqs, exception_handler=exception_handler)
     inbound_harvest = [(response.url, response.status_code, response.text) for response in inbound_responses if response]
