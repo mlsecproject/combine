@@ -29,6 +29,7 @@ def load_gi_org(filename):
     return gi_org
 
 
+# TODO: make this O(1) instead of O(n)
 def org_by_addr(address, org_data):
     as_num = None
     as_name = None
@@ -148,7 +149,6 @@ def winnow(in_file, out_file, enr_file):
     logger.info('Beginning winnowing process')
     for each in crop:
         (addr, addr_type, direction, source, note, date) = each
-        # TODO: enrich DNS indicators as well
         if addr_type == 'IPv4' and is_ipv4(addr):
             logger.info('Enriching %s' % addr)
             ipaddr = IPAddress(addr)
@@ -163,7 +163,6 @@ def winnow(in_file, out_file, enr_file):
             else:
                 logger.error('Found invalid address: %s from: %s' % (addr, source))
         elif addr_type == 'FQDN' and is_fqdn(addr):
-            # TODO: validate these (cf. https://github.com/mlsecproject/combine/issues/15 )
             logger.info('Enriching %s' % addr)
             wheat.append(each)
             if enrich_dns and dnsdb:
