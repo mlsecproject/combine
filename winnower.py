@@ -30,7 +30,7 @@ def load_gi_org(filename):
     return gi_org
 
 
-def org_by_addr(address, org_data):
+def org_by_addr(address):
     as_num = None
     as_name = None
     gi_index = gi_org.bisect(str(int(address)))
@@ -51,8 +51,8 @@ def maxhits(dns_records):
     return hostname
 
 
-def enrich_IPv4(address, org_data, geo_data, dnsdb=None):
-    as_num, as_name = org_by_addr(address, org_data)
+def enrich_IPv4(address, geo_data, dnsdb=None):
+    as_num, as_name = org_by_addr(address)
     country = geo_data.country_code_by_addr('%s' % address)
     if dnsdb:
         hostname = maxhits(dnsdb.query_rdata_ip('%s' % address))
@@ -140,7 +140,7 @@ def winnow(in_file, out_file, enr_file):
 
     # TODO: make these locations configurable?
     logger.info('Loading GeoIP data')
-    org_data = load_gi_org('data/GeoIPASNum2.csv')
+    gi_org = load_gi_org('data/GeoIPASNum2.csv')
     geo_data = pygeoip.GeoIP('data/GeoIP.dat')
 
     wheat = []
@@ -155,10 +155,10 @@ def winnow(in_file, out_file, enr_file):
             if not reserved(ipaddr):
                 wheat.append(each)
                 if enrich_ip:
-                    e_data = (addr, addr_type, direction, source, note, date) + enrich_IPv4(ipaddr, org_data, geo_data, dnsdb)
+                    e_data = (addr, addr_type, direction, source, note, date) + enrich_IPv4(ipaddr, geo_data, dnsdb)
                     enriched.append(e_data)
                 else:
-                    e_data = (addr, addr_type, direction, source, note, date) + enrich_IPv4(ipaddr, org_data, geo_data)
+                    e_data = (addr, addr_type, direction, source, note, date) + enrich_IPv4(ipaddr, geo_data)
                     enriched.append(e_data)
             else:
                 logger.error('Found invalid address: %s from: %s' % (addr, source))
@@ -173,10 +173,12 @@ def winnow(in_file, out_file, enr_file):
 
     logger.info('Dumping results')
     with open(out_file, 'wb') as f:
-        json.dump(wheat, f, indent=2)
+        w_data = json.dumps(wheat, indent=2, ensure_ascii=False).encode('utf8')
+        f.write(w_data)
 
     with open(enr_file, 'wb') as f:
-        json.dump(enriched, f, indent=2, ensure_ascii=False)
+        e_data = json.dumps(enriched, indent=2, ensure_ascii=False).encode('utf8')
+        f.write(e_data)
 
 
 if __name__ == "__main__":
