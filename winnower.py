@@ -163,7 +163,7 @@ def winnow(in_file, out_file, enr_file):
             else:
                 logger.error('Found invalid address: %s from: %s' % (addr, source))
         elif addr_type == 'FQDN' and is_fqdn(addr):
-            logger.info('Enriching %s' % addr)
+            #logger.info('Enriching %s' % addr)
             wheat.append(each)
             if enrich_dns and dnsdb:
                 e_data = (addr, addr_type, direction, source, note, date, enrich_FQDN(addr, date, dnsdb))
