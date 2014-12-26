@@ -30,7 +30,6 @@ def load_gi_org(filename):
     return gi_org
 
 
-# TODO: make this O(1) instead of O(n)
 def org_by_addr(address, org_data):
     as_num = None
     as_name = None
@@ -151,7 +150,7 @@ def winnow(in_file, out_file, enr_file):
     for each in crop:
         (addr, addr_type, direction, source, note, date) = each
         if addr_type == 'IPv4' and is_ipv4(addr):
-            logger.info('Enriching %s' % addr)
+            #logger.info('Enriching %s' % addr)
             ipaddr = IPAddress(addr)
             if not reserved(ipaddr):
                 wheat.append(each)
@@ -177,7 +176,7 @@ def winnow(in_file, out_file, enr_file):
         json.dump(wheat, f, indent=2)
 
     with open(enr_file, 'wb') as f:
-        json.dump(enriched, f, indent=2)
+        json.dump(enriched, f, indent=2, ensure_ascii=False)
 
 
 if __name__ == "__main__":
