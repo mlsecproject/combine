@@ -26,7 +26,7 @@ def load_gi_org(filename):
     with open(filename, 'rb') as f:
         org_reader = csv.DictReader(f, fieldnames=['start', 'end', 'org'])
         for row in org_reader:
-            gi_org[IPRange(row['start'], row['end'])] = row['org']
+            gi_org[row['start']] = (IPRange(row['start'], row['end']), row['org'])
     return gi_org
 
 
@@ -37,7 +37,7 @@ def org_by_addr(address, org_data):
     gi_index = gi_org.bisect(str(int(address)))
     gi_net = gi_org[gi_org.iloc[gi_index - 1]]
     if address in gi_net[0]:
-        as_num, sep, as_name = org_data[iprange].partition(' ')
+        as_num, sep, as_name = gi_net[1].partition(' ')
         as_num = as_num.replace("AS", "")  # Making sure the variable only has the number
     return as_num, as_name
 
