@@ -9,6 +9,7 @@ import re
 import sys
 
 from netaddr import IPAddress, IPRange, IPSet
+from sortedcontainers import SortedDict
 
 from logger import get_logger
 import logging
@@ -17,11 +18,11 @@ logger = get_logger('winnower')
 
 # from http://en.wikipedia.org/wiki/Reserved_IP_addresses:
 reserved_ranges = IPSet(['0.0.0.0/8', '100.64.0.0/10', '127.0.0.0/8', '192.88.99.0/24',
-                '198.18.0.0/15', '198.51.100.0/24', '203.0.113.0/24', '233.252.0.0/24'])
+                         '198.18.0.0/15', '198.51.100.0/24', '203.0.113.0/24', '233.252.0.0/24'])
+gi_org = SortedDict()
 
 
 def load_gi_org(filename):
-    gi_org = {}
     with open(filename, 'rb') as f:
         org_reader = csv.DictReader(f, fieldnames=['start', 'end', 'org'])
         for row in org_reader:
@@ -33,11 +34,11 @@ def load_gi_org(filename):
 def org_by_addr(address, org_data):
     as_num = None
     as_name = None
-    for iprange in org_data:
-        if address in iprange:
-            as_num, sep, as_name = org_data[iprange].partition(' ')
-            as_num = as_num.replace("AS", "")  # Making sure the variable only has the number
-            break
+    gi_index = gi_org.bisect(str(int(address)))
+    gi_net = gi_org[gi_org.iloc[gi_index - 1]]
+    if address in gi_net[0]:
+        as_num, sep, as_name = org_data[iprange].partition(' ')
+        as_num = as_num.replace("AS", "")  # Making sure the variable only has the number
     return as_num, as_name
 
 
