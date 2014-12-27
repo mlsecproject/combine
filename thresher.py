@@ -104,7 +104,8 @@ def process_packetmail(response, source, direction):
     data = []
     filter_comments = lambda x: not x[0].startswith('#')
     try:
-        for line in ifilter(filter_comments, reader(response, delimiter=';')):
+        for line in ifilter(filter_comments,
+                            reader(response.splitlines(), delimiter=';')):
             i = line[0]
             date = line[1].split(' ')[1]
             data.append((i, indicator_type(i), direction, source, '', date))
