@@ -27,10 +27,11 @@ def indicator_type(indicator):
 
 def process_simple_list(response, source, direction):
     data = []
+    current_date = str(datetime.date.today())
     for line in response.splitlines():
         if not line.startswith('#') and not line.startswith('/') and not line.startswith('Export date') and len(line) > 0:
             i = line.split()[0]
-            data.append((i, indicator_type(i), direction, source, '', '%s' % datetime.date.today()))
+            data.append((i, indicator_type(i), direction, source, '', current_date))
     return data
 
 
@@ -47,10 +48,11 @@ def process_sans(response, source, direction):
 
 def process_virbl(response, source, direction):
     data = []
+    current_date = str(datetime.date.today())
     for line in response.splitlines():
         if not line.startswith('E') and len(line) > 0:
             i = line.split()[0]
-            data.append((i, indicator_type(i), direction, source, '', '%s' % datetime.date.today()))
+            data.append((i, indicator_type(i), direction, source, '', current_date))
     return data
 
 
@@ -65,15 +67,17 @@ def process_project_honeypot(response, source, direction):
 
 def process_drg(response, source, direction):
     data = []
+    current_date = str(datetime.date.today())
     for line in response.splitlines():
         if not line.startswith('#') and len(line) > 0:
             i = line.split('|')[2].strip()
-            data.append((i, indicator_type(i), direction, source, '', '%s' % datetime.date.today()))
+            data.append((i, indicator_type(i), direction, source, '', current_date))
     return data
 
 
 def process_alienvault(response, source, direction):
     data = []
+    current_date = str(datetime.date.today())
     for line in response.splitlines():
         if not line.startswith('#') and len(line) > 0:
             i = line.partition('#')[0].strip()
@@ -82,7 +86,7 @@ def process_alienvault(response, source, direction):
                 direction = 'inbound'
             elif 'Malware' in note or 'C&C' in note or 'APT' in note:
                 direction = 'outbound'
-            data.append((i, indicator_type(i), direction, source, note, '%s' % datetime.date.today()))
+            data.append((i, indicator_type(i), direction, source, note, current_date))
     return data
 
 
@@ -124,10 +128,11 @@ def process_autoshun(response, source, direction):
 
 def process_haleys(response, source, direction):
     data = []
+    current_date = str(datetime.date.today())
     for line in response.splitlines():
         if not line.startswith('#') and len(line) > 0:
             i = line.partition(':')[2].strip()
-            data.append((i, indicator_type(i), direction, source, '', '%s' % datetime.date.today()))
+            data.append((i, indicator_type(i), direction, source, '', current_date))
     return data
 
 
