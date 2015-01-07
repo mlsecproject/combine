@@ -26,7 +26,8 @@ def load_gi_org(filename):
     with open(filename, 'rb') as f:
         org_reader = csv.DictReader(f, fieldnames=['start', 'end', 'org'])
         for row in org_reader:
-            gi_org[row['start']] = (IPRange(row['start'], row['end']), row['org'])
+            gi_org[row['start']] = (IPRange(row['start'], row['end']), unicode(row['org'], errors='replace'))
+
     return gi_org
 
 
