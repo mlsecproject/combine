@@ -64,7 +64,7 @@ def bale_reg_csvgz(harvest, output_file):
     """ bale the data as a gziped csv file"""
     logger.info('Output regular data as GZip CSV to %s' % output_file)
     with gzip.open(output_file, 'wb') as csv_file:
-        bale_writer = unicodecsv.writer(csv_file, quoting=csv.QUOTE_ALL)
+        bale_writer = unicodecsv.writer(csv_file, quoting=unicodecsv.QUOTE_ALL)
 
         # header row
         bale_writer.writerow(('entity', 'type', 'direction', 'source', 'notes', 'date'))
@@ -75,7 +75,7 @@ def bale_reg_csv(harvest, output_file):
     """ bale the data as a csv file"""
     logger.info('Output regular data as CSV to %s' % output_file)
     with open(output_file, 'wb') as csv_file:
-        bale_writer = unicodecsv.writer(csv_file, quoting=csv.QUOTE_ALL)
+        bale_writer = unicodecsv.writer(csv_file, quoting=unicodecsv.QUOTE_ALL)
 
         # header row
         bale_writer.writerow(('entity', 'type', 'direction', 'source', 'notes', 'date'))
@@ -86,7 +86,7 @@ def bale_enr_csv(harvest, output_file):
     """ output the data as an enriched csv file"""
     logger.info('Output enriched data as CSV to %s' % output_file)
     with open(output_file, 'wb') as csv_file:
-        bale_writer = unicodecsv.writer(csv_file, quoting=csv.QUOTE_ALL)
+        bale_writer = unicodecsv.writer(csv_file, quoting=unicodecsv.QUOTE_ALL)
 
         # header row
         bale_writer.writerow(('entity', 'type', 'direction', 'source', 'notes', 'date', 'asnumber', 'asname', 'country', 'host', 'rhost'))
@@ -97,7 +97,7 @@ def bale_enr_csvgz(harvest, output_file):
     """ output the data as an enriched gziped csv file"""
     logger.info('Output enriched data as GZip CSV to %s' % output_file)
     with gzip.open(output_file, 'wb') as csv_file:
-        bale_writer = unicodecsv.writer(csv_file, quoting=csv.QUOTE_ALL)
+        bale_writer = unicodecsv.writer(csv_file, quoting=unicodecsv.QUOTE_ALL)
 
         # header row
         bale_writer.writerow(('entity', 'type', 'direction', 'source', 'notes', 'date', 'asnumber', 'asname', 'country', 'host', 'rhost'))
