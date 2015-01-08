@@ -1,5 +1,6 @@
 import ConfigParser
 import csv
+import cybox
 import datetime as dt
 import gzip
 import json
@@ -200,6 +201,10 @@ def bale_CRITs(harvest, filename):
                 (total_iocs, maxThreads, time.time() - start_time))
 
 
+def bale_cybox(harvest, filename):
+    pass
+
+
 def bale(input_file, output_file, output_format, is_regular):
     config = ConfigParser.SafeConfigParser()
     cfg_success = config.read('combine.cfg')
@@ -214,9 +219,13 @@ def bale(input_file, output_file, output_format, is_regular):
 
     # TODO: also need plugins here (cf. #23)
     if is_regular:
-        format_funcs = {'csv': bale_reg_csv, 'crits': bale_CRITs}
+        format_funcs = {'csv': bale_reg_csv,
+                        'cybox': bale_cybox,
+                        'crits': bale_CRITs}
     else:
-        format_funcs = {'csv': bale_enr_csv, 'crits': bale_CRITs}
+        format_funcs = {'csv': bale_enr_csv,
+                        'cybox': bale_cybox,
+                        'crits': bale_CRITs}
     format_funcs[output_format](harvest, output_file)
 
 if __name__ == "__main__":
