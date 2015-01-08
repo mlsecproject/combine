@@ -46,11 +46,9 @@ venv
 *.swp
 
 # other data files
-crop.json
-harvest.csv
-enriched.csv
-harvest.json
-enriched.json
+crop.*
+harvest.*
+enriched.*
 enrich.json
 tiq_test/
 
@@ -60,7 +58,6 @@ combine.cfg
 
 # test local files
 test*.txt
-combine.cfg
 todo.txt
 extra_code.py
 crits_stats
