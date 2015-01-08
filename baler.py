@@ -14,6 +14,8 @@ import threading
 from logger import get_logger
 import logging
 
+from cybox.core import Observable
+from cybox.objects.address_object import Address
 
 logger = get_logger('baler')
 
@@ -202,7 +204,19 @@ def bale_CRITs(harvest, filename):
 
 
 def bale_cybox(harvest, filename):
-    pass
+    logger.info('Output regular data as CybOX to %s' % filename)
+    for indicator in harvest:
+        if indicator[1] == "IPv4":
+            addr = Address()
+            addr.address_value = indicator[0]
+            addr.category = 'ipv4-addr'
+            if indicator[2] == 'inbound':
+                addr.is_source = True
+            else:
+                addr.is_destination = True
+        obs = Observable(addr)
+        with open(filename, 'a') as f:
+            f.write(obs.to_xml(include_namespaces=False))
 
 
 def bale(input_file, output_file, output_format, is_regular):
