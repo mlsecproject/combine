@@ -37,7 +37,7 @@ def reap(file_name):
         return
 
     ## Setting the User-Agent to something spiffy
-    headers = {'User-Agent': 'Combine/0.1.1'}
+    headers = {'User-Agent': 'Combine/0.1.2'}
 
     logger.info('Fetching inbound URLs')
     inbound_files=[]
