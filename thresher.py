@@ -7,6 +7,8 @@ import re
 import sys
 from logger import get_logger
 import logging
+from csv import reader
+from itertools import ifilter
 
 logger = get_logger('thresher')
 
@@ -25,10 +27,11 @@ def indicator_type(indicator):
 
 def process_simple_list(response, source, direction):
     data = []
+    current_date = str(datetime.date.today())
     for line in response.splitlines():
         if not line.startswith('#') and not line.startswith('/') and not line.startswith('Export date') and len(line) > 0:
             i = line.split()[0]
-            data.append((i, indicator_type(i), direction, source, '', '%s' % datetime.date.today()))
+            data.append((i, indicator_type(i), direction, source, '', current_date))
     return data
 
 
@@ -45,10 +48,11 @@ def process_sans(response, source, direction):
 
 def process_virbl(response, source, direction):
     data = []
+    current_date = str(datetime.date.today())
     for line in response.splitlines():
         if not line.startswith('E') and len(line) > 0:
             i = line.split()[0]
-            data.append((i, indicator_type(i), direction, source, '', '%s' % datetime.date.today()))
+            data.append((i, indicator_type(i), direction, source, '', current_date))
     return data
 
 
@@ -63,15 +67,17 @@ def process_project_honeypot(response, source, direction):
 
 def process_drg(response, source, direction):
     data = []
+    current_date = str(datetime.date.today())
     for line in response.splitlines():
         if not line.startswith('#') and len(line) > 0:
             i = line.split('|')[2].strip()
-            data.append((i, indicator_type(i), direction, source, '', '%s' % datetime.date.today()))
+            data.append((i, indicator_type(i), direction, source, '', current_date))
     return data
 
 
 def process_alienvault(response, source, direction):
     data = []
+    current_date = str(datetime.date.today())
     for line in response.splitlines():
         if not line.startswith('#') and len(line) > 0:
             i = line.partition('#')[0].strip()
@@ -80,7 +86,7 @@ def process_alienvault(response, source, direction):
                 direction = 'inbound'
             elif 'Malware' in note or 'C&C' in note or 'APT' in note:
                 direction = 'outbound'
-            data.append((i, indicator_type(i), direction, source, note, '%s' % datetime.date.today()))
+            data.append((i, indicator_type(i), direction, source, note, current_date))
     return data
 
 
@@ -96,11 +102,15 @@ def process_rulez(response, source, direction):
 
 def process_packetmail(response, source, direction):
     data = []
-    for line in response.splitlines():
-        if not line.startswith('#') and len(line) > 0:
-            i = line.partition(';')[0].strip()
-            date = line.split('; ')[1].split(' ')[0]
+    filter_comments = lambda x: not x[0].startswith('#')
+    try:
+        for line in ifilter(filter_comments,
+                            reader(response.splitlines(), delimiter=';')):
+            i = line[0]
+            date = line[1].split(' ')[1]
             data.append((i, indicator_type(i), direction, source, '', date))
+    except (IndexError, AttributeError):
+        pass
     return data
 
 
@@ -119,10 +129,11 @@ def process_autoshun(response, source, direction):
 
 def process_haleys(response, source, direction):
     data = []
+    current_date = str(datetime.date.today())
     for line in response.splitlines():
         if not line.startswith('#') and len(line) > 0:
             i = line.partition(':')[2].strip()
-            data.append((i, indicator_type(i), direction, source, '', '%s' % datetime.date.today()))
+            data.append((i, indicator_type(i), direction, source, '', current_date))
     return data
 
 
