@@ -132,7 +132,7 @@ def winnow(in_file, out_file, enr_file):
 
     # handle the case where we aren't using DNSDB
     dnsdb = dnsdb_query.DnsdbClient(server, api)
-    if len(dnsdb.query_rdata_name('google.com')) == 0:
+    if api == 'YOUR_API_KEY_HERE' or len(dnsdb.query_rdata_name('google.com')) == 0:
         dnsdb = None
         logger.info('Invalid DNSDB configuration found')
 
