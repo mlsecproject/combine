@@ -1,21 +1,20 @@
 import ConfigParser
-import csv
-import cybox
 import datetime as dt
 import gzip
 import json
+import logging
 import os
-import sys
-import requests
-import time
 import re
-from Queue import Queue
+import requests
+import sys
+import time
+import unicodecsv
 import threading
 from logger import get_logger
-import logging
 
 from cybox.core import Observable
 from cybox.objects.address_object import Address
+from Queue import Queue
 
 logger = get_logger('baler')
 
@@ -68,7 +67,7 @@ def bale_reg_csvgz(harvest, output_file):
     """ bale the data as a gziped csv file"""
     logger.info('Output regular data as GZip CSV to %s' % output_file)
     with gzip.open(output_file, 'wb') as csv_file:
-        bale_writer = csv.writer(csv_file, quoting=csv.QUOTE_ALL)
+        bale_writer = unicodecsv.writer(csv_file, quoting=unicodecsv.QUOTE_ALL)
 
         # header row
         bale_writer.writerow(('entity', 'type', 'direction', 'source', 'notes', 'date'))
@@ -79,7 +78,7 @@ def bale_reg_csv(harvest, output_file):
     """ bale the data as a csv file"""
     logger.info('Output regular data as CSV to %s' % output_file)
     with open(output_file, 'wb') as csv_file:
-        bale_writer = csv.writer(csv_file, quoting=csv.QUOTE_ALL)
+        bale_writer = unicodecsv.writer(csv_file, quoting=unicodecsv.QUOTE_ALL)
 
         # header row
         bale_writer.writerow(('entity', 'type', 'direction', 'source', 'notes', 'date'))
@@ -90,7 +89,7 @@ def bale_enr_csv(harvest, output_file):
     """ output the data as an enriched csv file"""
     logger.info('Output enriched data as CSV to %s' % output_file)
     with open(output_file, 'wb') as csv_file:
-        bale_writer = csv.writer(csv_file, quoting=csv.QUOTE_ALL)
+        bale_writer = unicodecsv.writer(csv_file, quoting=unicodecsv.QUOTE_ALL)
 
         # header row
         bale_writer.writerow(('entity', 'type', 'direction', 'source', 'notes', 'date', 'asnumber', 'asname', 'country', 'host', 'rhost'))
@@ -101,7 +100,7 @@ def bale_enr_csvgz(harvest, output_file):
     """ output the data as an enriched gziped csv file"""
     logger.info('Output enriched data as GZip CSV to %s' % output_file)
     with gzip.open(output_file, 'wb') as csv_file:
-        bale_writer = csv.writer(csv_file, quoting=csv.QUOTE_ALL)
+        bale_writer = unicodecsv.writer(csv_file, quoting=unicodecsv.QUOTE_ALL)
 
         # header row
         bale_writer.writerow(('entity', 'type', 'direction', 'source', 'notes', 'date', 'asnumber', 'asname', 'country', 'host', 'rhost'))
@@ -229,7 +228,7 @@ def bale(input_file, output_file, output_format, is_regular):
 
     logger.info('Reading processed data from %s' % input_file)
     with open(input_file, 'rb') as f:
-        harvest = json.load(f)
+        harvest = json.load(f, encoding='utf8')
 
     # TODO: also need plugins here (cf. #23)
     if is_regular:

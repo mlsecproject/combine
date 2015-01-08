@@ -9,30 +9,36 @@ import re
 import sys
 
 from netaddr import IPAddress, IPRange, IPSet
+from sortedcontainers import SortedDict
 
 from logger import get_logger
 import logging
 
 logger = get_logger('winnower')
 
+# from http://en.wikipedia.org/wiki/Reserved_IP_addresses:
+reserved_ranges = IPSet(['0.0.0.0/8', '100.64.0.0/10', '127.0.0.0/8', '192.88.99.0/24',
+                         '198.18.0.0/15', '198.51.100.0/24', '203.0.113.0/24', '233.252.0.0/24'])
+gi_org = SortedDict()
+
 
 def load_gi_org(filename):
-    gi_org = {}
     with open(filename, 'rb') as f:
         org_reader = csv.DictReader(f, fieldnames=['start', 'end', 'org'])
         for row in org_reader:
-            gi_org[IPRange(row['start'], row['end'])] = row['org']
+            gi_org[row['start']] = (IPRange(row['start'], row['end']), unicode(row['org'], errors='replace'))
+
     return gi_org
 
 
-def org_by_addr(address, org_data):
+def org_by_addr(address):
     as_num = None
     as_name = None
-    for iprange in org_data:
-        if address in iprange:
-            as_num, sep, as_name = org_data[iprange].partition(' ')
-            as_num = as_num.replace("AS", "")  # Making sure the variable only has the number
-            break
+    gi_index = gi_org.bisect(str(int(address)))
+    gi_net = gi_org[gi_org.iloc[gi_index - 1]]
+    if address in gi_net[0]:
+        as_num, sep, as_name = gi_net[1].partition(' ')
+        as_num = as_num.replace("AS", "")  # Making sure the variable only has the number
     return as_num, as_name
 
 
@@ -46,8 +52,8 @@ def maxhits(dns_records):
     return hostname
 
 
-def enrich_IPv4(address, org_data, geo_data, dnsdb=None):
-    as_num, as_name = org_by_addr(address, org_data)
+def enrich_IPv4(address, geo_data, dnsdb=None):
+    as_num, as_name = org_by_addr(address)
     country = geo_data.country_code_by_addr('%s' % address)
     if dnsdb:
         hostname = maxhits(dnsdb.query_rdata_ip('%s' % address))
@@ -73,12 +79,9 @@ def filter_date(records, date):
 
 
 def reserved(address):
-    # from http://en.wikipedia.org/wiki/Reserved_IP_addresses:
-    ranges = IPSet(['0.0.0.0/8', '100.64.0.0/10', '127.0.0.0/8', '192.88.99.0/24',
-                    '198.18.0.0/15', '198.51.100.0/24', '203.0.113.0/24', '233.252.0.0/24'])
     a_reserved = address.is_reserved()
     a_private = address.is_private()
-    a_inr = address in ranges
+    a_inr = address in reserved_ranges
     if a_reserved or a_private or a_inr:
         return True
     else:
@@ -138,8 +141,8 @@ def winnow(in_file, out_file, enr_file):
 
     # TODO: make these locations configurable?
     logger.info('Loading GeoIP data')
-    org_data = load_gi_org('data/GeoIPASNum2.csv')
-    geo_data = pygeoip.GeoIP('data/GeoIP.dat')
+    gi_org = load_gi_org('data/GeoIPASNum2.csv')
+    geo_data = pygeoip.GeoIP('data/GeoIP.dat', pygeoip.MEMORY_CACHE)
 
     wheat = []
     enriched = []
@@ -147,23 +150,21 @@ def winnow(in_file, out_file, enr_file):
     logger.info('Beginning winnowing process')
     for each in crop:
         (addr, addr_type, direction, source, note, date) = each
-        # TODO: enrich DNS indicators as well
         if addr_type == 'IPv4' and is_ipv4(addr):
-            logger.info('Enriching %s' % addr)
+            #logger.info('Enriching %s' % addr)
             ipaddr = IPAddress(addr)
             if not reserved(ipaddr):
                 wheat.append(each)
                 if enrich_ip:
-                    e_data = (addr, addr_type, direction, source, note, date) + enrich_IPv4(ipaddr, org_data, geo_data, dnsdb)
+                    e_data = (addr, addr_type, direction, source, note, date) + enrich_IPv4(ipaddr, geo_data, dnsdb)
                     enriched.append(e_data)
                 else:
-                    e_data = (addr, addr_type, direction, source, note, date) + enrich_IPv4(ipaddr, org_data, geo_data)
+                    e_data = (addr, addr_type, direction, source, note, date) + enrich_IPv4(ipaddr, geo_data)
                     enriched.append(e_data)
             else:
                 logger.error('Found invalid address: %s from: %s' % (addr, source))
         elif addr_type == 'FQDN' and is_fqdn(addr):
-            # TODO: validate these (cf. https://github.com/mlsecproject/combine/issues/15 )
-            logger.info('Enriching %s' % addr)
+            #logger.info('Enriching %s' % addr)
             wheat.append(each)
             if enrich_dns and dnsdb:
                 e_data = (addr, addr_type, direction, source, note, date, enrich_FQDN(addr, date, dnsdb))
@@ -173,10 +174,12 @@ def winnow(in_file, out_file, enr_file):
 
     logger.info('Dumping results')
     with open(out_file, 'wb') as f:
-        json.dump(wheat, f, indent=2)
+        w_data = json.dumps(wheat, indent=2, ensure_ascii=False).encode('utf8')
+        f.write(w_data)
 
     with open(enr_file, 'wb') as f:
-        json.dump(enriched, f, indent=2)
+        e_data = json.dumps(enriched, indent=2, ensure_ascii=False).encode('utf8')
+        f.write(e_data)
 
 
 if __name__ == "__main__":

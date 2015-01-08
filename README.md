@@ -1,5 +1,6 @@
 [![Stories in Ready](https://badge.waffle.io/mlsecproject/combine.png?label=ready&title=Ready)](https://waffle.io/mlsecproject/combine)
-combine
+[![Stories in In Progress](https://badge.waffle.io/mlsecproject/combine.png?label=in%20progress&title=In%20Progress)](https://waffle.io/mlsecproject/combine)
+Combine
 =======
 
 Combine gathers Threat Intelligence Feeds from publicly available sources
@@ -106,7 +107,7 @@ furnished to do so, subject to the following conditions:
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
 
-Copyright (c) 2014 MLSec Project
+Copyright (c) 2014-2015 MLSec Project
 
 Licensed under GPLv3 - https://github.com/mlsecproject/combine/blob/master/LICENSE
 
