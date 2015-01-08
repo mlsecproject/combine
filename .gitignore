@@ -46,11 +46,10 @@ venv
 *.swp
 
 # other data files
-crop.json
-harvest.csv
-enriched.csv
+crop.*
+harvest.*
 harvest.json
-enriched.json
+enriched.*
 enrich.json
 tiq_test/
 
