@@ -48,7 +48,6 @@ venv
 # other data files
 crop.*
 harvest.*
-harvest.json
 enriched.*
 enrich.json
 tiq_test/
@@ -59,7 +58,6 @@ combine.cfg
 
 # test local files
 test*.txt
-combine.cfg
 todo.txt
 extra_code.py
 crits_stats
