@@ -37,7 +37,7 @@ def reap(file_name):
         return
 
     ## Setting the User-Agent to something spiffy
-    headers = {'User-Agent': 'Combine/0.1.2'}
+    headers = {'User-Agent': 'MLSecProject-Combine/0.1.2 (+https://github.com/mlsecproject/combine)'}
 
     logger.info('Fetching inbound URLs')
     inbound_files=[]
