@@ -20,7 +20,7 @@ logger = get_logger('winnower')
 reserved_ranges = IPSet(['0.0.0.0/8', '100.64.0.0/10', '127.0.0.0/8', '192.88.99.0/24',
                          '198.18.0.0/15', '198.51.100.0/24', '203.0.113.0/24', '233.252.0.0/24'])
 gi_org = SortedDict()
-geo_data = None
+geo_data = pygeoip.GeoIP('data/GeoIP.dat', pygeoip.MEMORY_CACHE)
 
 
 def load_gi_org(filename):
@@ -144,7 +144,6 @@ def winnow(in_file, out_file, enr_file):
     # TODO: make these locations configurable?
     logger.info('Loading GeoIP data')
     gi_org = load_gi_org('data/GeoIPASNum2.csv')
-    geo_data = pygeoip.GeoIP('data/GeoIP.dat', pygeoip.MEMORY_CACHE)
 
     wheat = []
     enriched = []
@@ -152,12 +151,14 @@ def winnow(in_file, out_file, enr_file):
     logger.info('Beginning winnowing process')
     for each in crop:
         (addr, addr_type, direction, source, note, date) = each
+        # this should be refactored into appropriate functions
         if addr_type == 'IPv4' and is_ipv4(addr):
             #logger.info('Enriching %s' % addr)
             ipaddr = IPAddress(addr)
             if not reserved(ipaddr):
                 wheat.append(each)
                 if enrich_ip:
+                    print "Enriching %s" % addr
                     e_data = (addr, addr_type, direction, source, note, date) + enrich_IPv4(ipaddr, dnsdb)
                     enriched.append(e_data)
                 else:
@@ -169,6 +170,7 @@ def winnow(in_file, out_file, enr_file):
             #logger.info('Enriching %s' % addr)
             wheat.append(each)
             if enrich_dns and dnsdb:
+                print "Enriching %s" % addr
                 e_data = (addr, addr_type, direction, source, note, date, enrich_FQDN(addr, date, dnsdb))
                 enriched.append(e_data)
         else:
