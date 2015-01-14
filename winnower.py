@@ -20,6 +20,7 @@ logger = get_logger('winnower')
 reserved_ranges = IPSet(['0.0.0.0/8', '100.64.0.0/10', '127.0.0.0/8', '192.88.99.0/24',
                          '198.18.0.0/15', '198.51.100.0/24', '203.0.113.0/24', '233.252.0.0/24'])
 gi_org = SortedDict()
+geo_data = None
 
 
 def load_gi_org(filename):
@@ -52,14 +53,14 @@ def maxhits(dns_records):
     return hostname
 
 
-def enrich_IPv4(address, geo_data, dnsdb=None):
+def enrich_IPv4(address, dnsdb=None, rhost=None):
     as_num, as_name = org_by_addr(address)
     country = geo_data.country_code_by_addr('%s' % address)
     if dnsdb:
         hostname = maxhits(dnsdb.query_rdata_ip('%s' % address))
     else:
         hostname = None
-    return (as_num, as_name, country, None, hostname)
+    return (as_num, as_name, country, rhost, hostname)
 
 
 def enrich_FQDN(address, date, dnsdb):
@@ -68,6 +69,7 @@ def enrich_FQDN(address, date, dnsdb):
     ip_addr = maxhits(records)
     if ip_addr:
         logger.info('Mapped %s to %s' % (address, ip_addr))
+        ip_addr = enrich_IPv4(ip_addr, dnsdb, address)
     return ip_addr
 
 
@@ -156,10 +158,10 @@ def winnow(in_file, out_file, enr_file):
             if not reserved(ipaddr):
                 wheat.append(each)
                 if enrich_ip:
-                    e_data = (addr, addr_type, direction, source, note, date) + enrich_IPv4(ipaddr, geo_data, dnsdb)
+                    e_data = (addr, addr_type, direction, source, note, date) + enrich_IPv4(ipaddr, dnsdb)
                     enriched.append(e_data)
                 else:
-                    e_data = (addr, addr_type, direction, source, note, date) + enrich_IPv4(ipaddr, geo_data)
+                    e_data = (addr, addr_type, direction, source, note, date) + enrich_IPv4(ipaddr)
                     enriched.append(e_data)
             else:
                 logger.error('Found invalid address: %s from: %s' % (addr, source))
