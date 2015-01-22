@@ -26,7 +26,7 @@ python reaper.py
 python thresher.py
 python winnower.py
 python baler.py
-`````
+````
 
 The output will actually be a CSV with the following schema:
 ```
