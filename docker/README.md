@@ -8,5 +8,5 @@ sudo docker build .
 ```
 Then note the ID at the end and run:
 ```
-sudo docker run --rm -v \`pwd\`/harvest.csv:/combine/harvest.csv IDHERE`
+sudo docker run --rm -v \`pwd\`/harvest.csv:/combine/harvest.csv IDHERE
 ```
