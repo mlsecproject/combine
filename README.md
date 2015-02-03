@@ -93,6 +93,8 @@ pip install -r requirements.txt
 
 At this point you should be ready to run Combine.
 
+We also have a [dockerfile](https://github.com/mlsecproject/combine/tree/master/docker) available.
+
 
 ### Exporting to CRITs
 
@@ -107,7 +109,7 @@ crits_campaign = combine
 crits_maxThreads = 10
 ```
 Make sure you have the campaign created on CRITs before exporting the data. The `confidence` field is being
-set as `medium` throughout the export by default. 
+set as `medium` throughout the export by default.
 
 Thanks to [@paulpc](https://github.com/paulpc) for implementing this feature and [@mgoffin](https://github.com/mgoffin) for moral support ;).
 
