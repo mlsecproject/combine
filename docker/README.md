@@ -6,7 +6,7 @@ The easiest way to run is simply
 
 ```
 sudo docker pull technoskald/combine
-sudo docker run --rm -v `pwd/harvest.csv:/combine/harvest.csv technoskald/combine 
+sudo docker run --rm -v `pwd`/harvest.csv:/combine/harvest.csv technoskald/combine 
 ```
 
 If you prefer to use the Docker file rather than pull from the Docker Hub, then run with something like:
