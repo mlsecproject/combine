@@ -36,24 +36,30 @@ def tiq_output(reg_file, enr_file):
     if not os.path.isdir(tiq_dir):
         os.makedirs(os.path.join(tiq_dir, 'raw', 'public_inbound'))
         os.makedirs(os.path.join(tiq_dir, 'raw', 'public_outbound'))
+        os.makedirs(os.path.join(tiq_dir, 'raw', 'public_hash'))
         os.makedirs(os.path.join(tiq_dir, 'enriched', 'public_inbound'))
         os.makedirs(os.path.join(tiq_dir, 'enriched', 'public_outbound'))
+        os.makedirs(os.path.join(tiq_dir, 'enriched', 'public_hash'))
 
     inbound_data = [row for row in reg_data if row[2] == 'inbound']
     outbound_data = [row for row in reg_data if row[2] == 'outbound']
+    hash_data = [row for row in reg_data if row[2] == 'hash']
 
     try:
         bale_reg_csvgz(inbound_data, os.path.join(tiq_dir, 'raw', 'public_inbound', today + '.csv.gz'))
         bale_reg_csvgz(outbound_data, os.path.join(tiq_dir, 'raw', 'public_outbound', today + '.csv.gz'))
+        bale_reg_csvgz(hash_data, os.path.join(tiq_dir, 'raw', 'hash_outbound', today + '.csv.gz'))
     except:
         pass
 
     inbound_data = [row for row in enr_data if row[2] == 'inbound']
     outbound_data = [row for row in enr_data if row[2] == 'outbound']
+    hash_data = [row for row in enr_data if row[2] == 'hash']
 
     try:
         bale_enr_csvgz(inbound_data, os.path.join(tiq_dir, 'enriched', 'public_inbound', today + '.csv.gz'))
         bale_enr_csvgz(outbound_data, os.path.join(tiq_dir, 'enriched', 'public_outbound', today + '.csv.gz'))
+        bale_enr_csvgz(hash_data, os.path.join(tiq_dir, 'enriched', 'public_hash', today + '.csv.gz'))
     except:
         pass
 
