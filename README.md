@@ -91,6 +91,8 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
+To use some of the plugins you should also grab [uniaccept-python](https://github.com/icann/uniaccept-python), and install it.
+
 At this point you should be ready to run Combine.
 
 We also have a [dockerfile](https://github.com/mlsecproject/combine/tree/master/docker) available.
