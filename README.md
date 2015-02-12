@@ -97,6 +97,7 @@ At this point you should be ready to run Combine.
 
 We also have a [dockerfile](https://github.com/mlsecproject/combine/tree/master/docker) available.
 
+*Note, there is an issue running this under Python 2.7.9 that will cause all HTTPS URLs to fail*
 
 ### Exporting to CRITs
 
