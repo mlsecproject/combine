@@ -23,7 +23,9 @@ class PluginOne(IPlugin):
                 i = line.partition('#')[0].strip()
                 note = line.split('#')[3].strip()
                 if 'Scanning Host' in note or 'Spamming' in note:
-                    data.append((i, "IPv4", 'inbound', self.NAME, note, current_date))
+                    data.append({'indicator':i, 'indicator_type':"IPv4", 'indicator_direction':'inbound', 
+                                 'source_name':self.NAME, 'source':source, 'note':note, 'date':current_date})
                 elif 'Malware' in note or 'C&C' in note or 'APT' in note:
-                    data.append((i, "IPv4", 'outbound', self.NAME, note, current_date))
+                    data.append({'indicator':i, 'indicator_type':"IPv4", 'indicator_direction':'outbound', 
+                                 'source_name':self.NAME, 'source':source, 'note':note, 'date':current_date})
         return data

@@ -37,5 +37,6 @@ class PluginOne(IPlugin):
                     ip = cell.string
                 count += 1
             if re.match(ip_regex, ip):
-                data.append((ip, "IPv4", self.DIRECTION, self.NAME, note, current_date))
+                data.append({'indicator':ip, 'indicator_type':"IPv4", 'indicator_direction':self.DIRECTION,
+                             'source_name':self.NAME, 'source':source, 'note':note, 'date':current_date})
         return data

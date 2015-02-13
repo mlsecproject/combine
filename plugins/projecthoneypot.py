@@ -21,5 +21,6 @@ class PluginOne(IPlugin):
         for entry in feedparser.parse(response).entries:
             i = entry.title.partition(' ')[0]
             i_date = entry.description.split(' ')[-1]
-            data.append((i, "IPv4", self.DIRECTION, self.NAME, '', i_date))
+            data.append({'indicator':i, 'indicator_type':"IPv4", 'indicator_direction':self.DIRECTION,
+                             'source_name':self.NAME, 'source':source, 'date':i_date})
         return data

@@ -23,7 +23,9 @@ class PluginOne(IPlugin):
             if not line.startswith('#') and len(line) > 0:
                 i = line.split('|')[2].strip()
                 if 'sshpwauth' in source:
-                    data.append((i, "IPv4", self.DIRECTION, self.NAME, 'sshpwauth', current_date))
+                    data.append({'indicator':i, 'indicator_type':"IPv4", 'indicator_direction':self.DIRECTION,
+                             'source_name':self.NAME, 'source':source, 'note':'sshpwauth', 'date':current_date})
                 if 'vncprobe' in source:
-                    data.append((i, "IPv4", self.DIRECTION, self.NAME, 'vncprobe', current_date))
+                    data.append({'indicator':i, 'indicator_type':"IPv4", 'indicator_direction':self.DIRECTION,
+                             'source_name':self.NAME, 'source':source, 'note':'vncprobe', 'date':current_date})
         return data

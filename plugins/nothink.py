@@ -1,6 +1,7 @@
 from yapsy.IPlugin import IPlugin
 import datetime
 import uniaccept
+import os
 import re
 
 class PluginOne(IPlugin):
@@ -24,23 +25,23 @@ class PluginOne(IPlugin):
         ip_regex = '^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$' 
         if re.match(ip_regex, indicator):
             return "IPv4"
-        result = uniaccept.verifytldoffline(indicator, "./tld-list.txt")
-        if result == True:
+        if uniaccept.verifytldoffline(indicator, "./tld-list.txt"):
             return "FQDN"
         else:
-            # TODO add hash support
             return None
 
     def process_data(self, source, response):
-        # Update TLD db
-        uniaccept.refreshtlddb("./tld-list.txt")
+        if not os.path.isfile('./tld-list.txt'):
+            uniaccept.refreshtlddb("./tld-list.txt")
         data = []
         current_date = str(datetime.date.today())
         for line in response.splitlines():
             if not line.startswith('#') and not line.startswith('/') and not line.startswith('Export date') and len(line) > 0:
                 i = line.split()[0]
                 if 'ssh_day' in source:
-                    data.append((i, self.indicator_type(i), 'inbound', self.NAME, '', current_date))
+                    data.append({'indicator':i, 'indicator_type':self.indicator_type(i), 'indicator_direction':'inbound',
+                             'source_name':self.NAME, 'source':source, 'date':current_date})
                 else:
-                    data.append((i, self.indicator_type(i), self.DIRECTION, self.NAME, '', current_date))
+                    data.append({'indicator':i, 'indicator_type':self.indicator_type(i), 'indicator_direction':self.DIRECTION,
+                             'source_name':self.NAME, 'source':source, 'date':current_date})
         return data

@@ -21,5 +21,6 @@ class PluginOne(IPlugin):
                 # Because SANS zero-pads their addresses
                 i = re.sub('\.0{1,2}', '.', line.split()[0].lstrip('0'))
                 date = line.split()[-1]
-                data.append((i, "IPv4", self.DIRECTION, self.NAME, '', date))
+                data.append({'indicator':i, 'indicator_type':"IPv4", 'indicator_direction':self.DIRECTION,
+                             'source_name':self.NAME, 'source':source, 'date':date})
         return data

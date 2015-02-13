@@ -20,5 +20,6 @@ class PluginOne(IPlugin):
             if not line.startswith('#') and len(line) > 0:
                 i = line.partition('#')[0].strip()
                 date = line.partition('#')[2].split(' ')[1]
-                data.append((i, "IPv4", self.DIRECTION, self.NAME, '', date))
+                data.append({'indicator':i, 'indicator_type':"IPv4", 'indicator_direction':self.DIRECTION,
+                             'source_name':self.NAME, 'source':source, 'date':date})
         return data

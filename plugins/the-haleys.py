@@ -21,5 +21,6 @@ class PluginOne(IPlugin):
         for line in response.splitlines():
             if not line.startswith('#') and len(line) > 0:
                 i = line.partition(':')[2].strip()
-                data.append((i, "IPv4", self.DIRECTION, self.NAME, '', current_date))
+                data.append({'indicator':i, 'indicator_type':"IPv4", 'indicator_direction':self.DIRECTION,
+                             'source_name':self.NAME, 'source':source, 'date':current_date})
         return data

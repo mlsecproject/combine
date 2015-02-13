@@ -23,7 +23,8 @@ class PluginOne(IPlugin):
                                 reader(response.splitlines(), delimiter=';')):
                 i = line[0]
                 date = line[1].split(' ')[1]
-                data.append((i, "IPv4", self.DIRECTION, self.NAME, '', date))
+                data.append({'indicator':i, 'indicator_type':"IPv4", 'indicator_direction':self.DIRECTION,
+                             'source_name':self.NAME, 'source':source, 'date':date})
         except (IndexError, AttributeError):
             pass
         return data
