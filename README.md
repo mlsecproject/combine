@@ -116,6 +116,46 @@ set as `medium` throughout the export by default.
 
 Thanks to [@paulpc](https://github.com/paulpc) for implementing this feature and [@mgoffin](https://github.com/mgoffin) for moral support ;).
 
+### Creating a plugin
+
+The plugin system uses yapsy, you will need a .py and a .yapsy-plugin file in the plugins directory in order for your plugin to be recognized.
+To create a .yapsy-plugin file you need the following:
+<code>
+[Core]
+Name = <plugin name>
+Module = <name of the .py file without the .py extension>
+
+[Documentation]   
+Author = <plugin author>
+Version = <plugin version>
+Website = <website for reference, yours or another one>
+Description = <what the plugin does>
+</code>
+
+Then create a .py file you can use this as a skeleton.
+<code>
+from yapsy.IPlugin import IPlugin
+
+class PluginOne(IPlugin):
+    NAME = <name of the plugin from above>
+    DIRECTION = <can be 'inbound', 'outbound', or 'file'>
+    URLS = ['a', 'list', 'of', 'urls']
+
+    def get_URLs(self):
+        return self.URLS
+
+    def get_direction(self):
+        return self.DIRECTION
+
+    def get_name(self):
+        return self.NAME
+
+    def process_data(self, source, response)
+        <code you need to process the response (eg website text)
+         this should return a list of dicts, look at some of the
+         other plugins for examples>
+</code>
+
 ### Copyright Info
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
