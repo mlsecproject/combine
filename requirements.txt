@@ -13,3 +13,4 @@ wsgiref==0.1.2
 unicodecsv==0.9.4
 yapsy==1.10.423
 logbook==0.8.1
+dnspython==1.12.0
