@@ -6,7 +6,11 @@ import dnsdb_query
 import json
 import pygeoip
 import re
+import os
 import sys
+import uniaccept
+import dns.resolver
+import dns.reversename
 
 from netaddr import IPAddress, IPRange, IPSet
 from sortedcontainers import SortedDict
@@ -53,22 +57,53 @@ def maxhits(dns_records):
 
 
 def enrich_IPv4(address, geo_data, dnsdb=None):
-    as_num, as_name = org_by_addr(address)
-    country = geo_data.country_code_by_addr('%s' % address)
+    result = {}
+    result['as_num'], result['as_name'] = org_by_addr(address)
+    result['country'] = geo_data.country_code_by_addr('%s' % address)
+    hostname = None
     if dnsdb:
-        hostname = maxhits(dnsdb.query_rdata_ip('%s' % address))
-    else:
-        hostname = None
-    return (as_num, as_name, country, None, hostname)
+        result['dnsdb'] = maxhits(dnsdb.query_rdata_ip('%s' % address))
+    try:
+        a = reversename.from_address(address)
+        hostname = dns.resolver.query(a, "PTR")[0].to_text()
+    except Exception as e:
+        pass
+    if hostname:
+        result['hostname'] = hostname
+    return {'enriched':result}
 
 
-def enrich_FQDN(address, date, dnsdb):
-    records = dnsdb.query_rrset(address, rrtype='A')
-    records = filter_date(records, date)
-    ip_addr = maxhits(records)
-    if ip_addr:
-        logger.info('Mapped %s to %s' % (address, ip_addr))
-    return ip_addr
+def enrich_FQDN(address, date, dnsdb=None):
+    result = {}
+    ip_addr = ''
+    if dnsdb:
+        records = dnsdb.query_rrset(address, rrtype='A')
+        records = filter_date(records, date)
+        ip_addr = maxhits(records)
+        result['dnsdb'] = ip_addr
+    mx = []
+    try:
+        answers = dns.resolver.query(address, 'MX')
+        for rdata in answers:
+            mx.append(str(rdata.exchange))
+    except Exception as e:
+        pass
+    if len(mx) > 0:
+        result['MX'] = mx
+    a = []
+    try:
+        answers = dns.resolver.query(address, 'A')
+        for rdata in answers:
+            a.append(str(rdata.address))
+    except Exception as e:
+        pass
+    if len(a) > 0:
+        result['A'] = a
+    return {'enriched':result}
+
+def enrich_hash(hash):
+    # TODO something useful here
+    return {'enriched':{}}
 
 
 def filter_date(records, date):
@@ -95,13 +130,6 @@ def is_ipv4(address):
         return False
 
 
-def is_fqdn(address):
-    if re.match('(?=^.{4,255}$)(^((?!-)[a-zA-Z0-9-]{1,63}(?<!-)\.)+[a-zA-Z]{2,63}$)', address):
-        return True
-    else:
-        return False
-
-
 def winnow(in_file, out_file, enr_file):
     config = ConfigParser.SafeConfigParser(allow_no_value=True)
     cfg_success = config.read('combine.cfg')
@@ -110,23 +138,28 @@ def winnow(in_file, out_file, enr_file):
         logger.error('HINT: edit combine-example.cfg and save as combine.cfg.')
         return
 
+    if not os.path.isfile('./tld-list.txt'):
+        uniaccept.refreshtlddb("./tld-list.txt")
+
     server = config.get('Winnower', 'dnsdb_server')
     api = config.get('Winnower', 'dnsdb_api')
-    enrich_ip = config.get('Winnower', 'enrich_ip')
-    if enrich_ip == '1':
-        enrich_ip = True
+    enrich_ip = config.getboolean('Winnower', 'enrich_ip')
+    if enrich_ip:
         logger.info('Enriching IPv4 indicators: TRUE')
     else:
-        enrich_ip = False
         logger.info('Enriching IPv4 indicators: FALSE')
 
-    enrich_dns = config.get('Winnower', 'enrich_dns')
-    if enrich_dns == '1':
-        enrich_dns = True
+    enrich_dns = config.getboolean('Winnower', 'enrich_dns')
+    if enrich_dns:
         logger.info('Enriching DNS indicators: TRUE')
     else:
-        enrich_dns = False
         logger.info('Enriching DNS indicators: FALSE')
+
+    enrich_hash = config.getboolean('Winnower', 'enrich_hash')
+    if enrich_hash:
+        logger.info('Enriching Hash indicators: TRUE')
+    else:
+        logger.info('Enriching Hash indicators: FALSE')
 
     logger.info('Setting up DNSDB client')
 
@@ -139,9 +172,20 @@ def winnow(in_file, out_file, enr_file):
     with open(in_file, 'rb') as f:
         crop = json.load(f)
 
-    # TODO: make these locations configurable?
+    plugin_dir = config.get('Thresher', 'plugin_directory')
+    if plugin_dir == None or plugin_dir == '':
+        logger.error("Thresher: Couldn't find plugins for processing")
+        return
+
+    gi_org_loc = config.get('Winnower', 'gi_org_loc')
+    if gi_org_loc == None or gi_org_loc == '':
+        gi_org_loc = 'data/GeoIPASNum2.csv'
+    gi_data_loc = config.get('Winnower', 'gi_data_loc')
+    if gi_data_loc == None or gi_data_loc == '':
+        gi_data_loc = 'data/GeoIP.dat'
+
     logger.info('Loading GeoIP data')
-    gi_org = load_gi_org('data/GeoIPASNum2.csv')
+    gi_org = load_gi_org(gi_org_loc)
     geo_data = pygeoip.GeoIP('data/GeoIP.dat', pygeoip.MEMORY_CACHE)
 
     wheat = []
@@ -149,28 +193,32 @@ def winnow(in_file, out_file, enr_file):
 
     logger.info('Beginning winnowing process')
     for each in crop:
-        (addr, addr_type, direction, source, note, date) = each
-        if addr_type == 'IPv4' and is_ipv4(addr):
-            #logger.info('Enriching %s' % addr)
-            ipaddr = IPAddress(addr)
+        indicator = each['indicator']
+        indicator_type = each['indicator_type']
+        if indicator_type == 'IPv4' and is_ipv4(indicator):
+            #logger.info('Enriching %s' % indicator)
+            ipaddr = IPAddress(indicator)
             if not reserved(ipaddr):
                 wheat.append(each)
                 if enrich_ip:
-                    e_data = (addr, addr_type, direction, source, note, date) + enrich_IPv4(ipaddr, geo_data, dnsdb)
-                    enriched.append(e_data)
+                    enriched.append(dict(each.items() + enrich_IPv4(ipaddr, geo_data, dnsdb).items()))
                 else:
-                    e_data = (addr, addr_type, direction, source, note, date) + enrich_IPv4(ipaddr, geo_data)
-                    enriched.append(e_data)
+                    enriched.append(dict(each.items() + enrich_IPv4(ipaddr, geo_data).items()))
             else:
                 logger.error('Found invalid address: %s from: %s' % (addr, source))
-        elif addr_type == 'FQDN' and is_fqdn(addr):
-            #logger.info('Enriching %s' % addr)
+        elif indicator_type == 'FQDN' and uniaccept.verifytldoffline(indicator, "./tld-list.txt"):
+            #logger.info('Enriching %s' % indicator)
             wheat.append(each)
-            if enrich_dns and dnsdb:
-                e_data = (addr, addr_type, direction, source, note, date, enrich_FQDN(addr, date, dnsdb))
-                enriched.append(e_data)
+            if enrich_dns:
+                enriched.append(dict(each.items() + enrich_FQDN(indicator, each['date'], dnsdb).items()))
+        elif indicator_type == 'HASH':
+            wheat.append(each)
+            if enrich_hash:
+                enriched.append(dict(each.items() + enrich_hash(indicator)))
+        elif indicator_type == 'URL':
+            wheat.append(each)
         else:
-            logger.error('Could not determine address type for %s listed as %s' % (addr, addr_type))
+            logger.error('Could not determine address type for %s listed as %s' % (indicator, indicator_type))
 
     logger.info('Dumping results')
     with open(out_file, 'wb') as f:

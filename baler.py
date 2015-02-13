@@ -15,7 +15,6 @@ from Queue import Queue
 
 logger = get_logger('baler')
 
-
 def tiq_output(reg_file, enr_file):
     config = ConfigParser.SafeConfigParser()
     cfg_success = config.read('combine.cfg')
@@ -43,7 +42,7 @@ def tiq_output(reg_file, enr_file):
 
     inbound_data = [row for row in reg_data if row[2] == 'inbound']
     outbound_data = [row for row in reg_data if row[2] == 'outbound']
-    hash_data = [row for row in reg_data if row[2] == 'hash']
+    hash_data = [row for row in reg_data if row[2] == 'HASH']
 
     try:
         bale_reg_csvgz(inbound_data, os.path.join(tiq_dir, 'raw', 'public_inbound', today + '.csv.gz'))
@@ -54,7 +53,7 @@ def tiq_output(reg_file, enr_file):
 
     inbound_data = [row for row in enr_data if row[2] == 'inbound']
     outbound_data = [row for row in enr_data if row[2] == 'outbound']
-    hash_data = [row for row in enr_data if row[2] == 'hash']
+    hash_data = [row for row in enr_data if row[2] == 'HASH']
 
     try:
         bale_enr_csvgz(inbound_data, os.path.join(tiq_dir, 'enriched', 'public_inbound', today + '.csv.gz'))
@@ -74,7 +73,14 @@ def bale_reg_csvgz(harvest, output_file):
 
         # header row
         bale_writer.writerow(('entity', 'type', 'direction', 'source', 'notes', 'date'))
-        bale_writer.writerows(harvest)
+        for row in harvest:
+            r = []
+            for key in ['indicator', 'indicator_type', 'indicator_direction', 'source_name', 'note', 'date']:
+                if key in row:
+                    r.append(row[key])
+                else:
+                    r.append('')
+            bale_writer.writerow(r)
 
 
 def bale_reg_csv(harvest, output_file):
@@ -85,7 +91,14 @@ def bale_reg_csv(harvest, output_file):
 
         # header row
         bale_writer.writerow(('entity', 'type', 'direction', 'source', 'notes', 'date'))
-        bale_writer.writerows(harvest)
+        for row in harvest:
+            r = []
+            for key in ['indicator', 'indicator_type', 'indicator_direction', 'source_name', 'note', 'date']:
+                if key in row:
+                    r.append(row[key])
+                else:
+                    r.append('')
+            bale_writer.writerow(r)
 
 
 def bale_enr_csv(harvest, output_file):
@@ -95,8 +108,26 @@ def bale_enr_csv(harvest, output_file):
         bale_writer = unicodecsv.writer(csv_file, quoting=unicodecsv.QUOTE_ALL)
 
         # header row
-        bale_writer.writerow(('entity', 'type', 'direction', 'source', 'notes', 'date', 'asnumber', 'asname', 'country', 'host', 'rhost'))
-        bale_writer.writerows(harvest)
+        bale_writer.writerow(('entity', 'type', 'direction', 'source', 'notes', 'date', 'url', 'domain', 'ip', 'asnumber', 'asname', 'country', 'hostname', 'ips', 'mx'))
+        for row in harvest:
+            r = []
+            for key in ['indicator', 'indicator_type', 'indicator_direction', 'source_name', 'note', 'date', 'domain', 'ip', 'url']:
+                if key in row:
+                    r.append(row[key])
+                else:
+                    r.append('')
+            if not row['enriched']:
+                r += ['', '', '', '', '', '']
+            else:
+                for key in ['as_num', 'as_name', 'country', 'hostname', 'A', 'MX']:
+                    if key in row['enriched']:
+                        if key == 'A' or key == 'MX':
+                            r.append("|".join(row['enriched'][key]))
+                        else:
+                            r.append(row['enriched'][key])
+                    else:
+                        r.append('')
+            bale_writer.writerow(r)
 
 
 def bale_enr_csvgz(harvest, output_file):
@@ -107,7 +138,25 @@ def bale_enr_csvgz(harvest, output_file):
 
         # header row
         bale_writer.writerow(('entity', 'type', 'direction', 'source', 'notes', 'date', 'asnumber', 'asname', 'country', 'host', 'rhost'))
-        bale_writer.writerows(harvest)
+        for row in harvest:
+            r = []
+            for key in ['indicator', 'indicator_type', 'indicator_direction', 'source_name', 'note', 'date', 'domain', 'ip', 'url']:
+                if key in row:
+                    r.append(row[key])
+                else:
+                    r.append('')
+            if not row['enriched']:
+                r += ['', '', '', '', '', '']
+            else:
+                for key in ['as_num', 'as_name', 'country', 'hostname', 'A', 'MX']:
+                    if key in row['enriched']:
+                        if key == 'A' or key == 'MX':
+                            r.append("|".join(row['enriched'][key]))
+                        else:
+                            r.append(row['enriched'][key])
+                    else:
+                        r.append('')
+            bale_writer.writerow(r)
 
 
 def bale_CRITs_indicator(base_url, data, indicator_que):
@@ -224,4 +273,5 @@ def bale(input_file, output_file, output_format, is_regular):
     format_funcs[output_format](harvest, output_file)
 
 if __name__ == "__main__":
-    bale('crop.json', 'harvest.csv', 'csv', True)
+    #bale('crop.json', 'harvest.csv', 'csv', True)
+    bale('enriched.json', 'harvest.csv', 'csv', False)

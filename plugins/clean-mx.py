@@ -1,12 +1,13 @@
 from yapsy.IPlugin import IPlugin
 import uniaccept
+import os
 import re
 import bs4
 import datetime
 
 class PluginOne(IPlugin):
     NAME = "clean-mx"
-    DIRECTION = "hash"
+    DIRECTION = "HASH"
     URLS = ['http://support.clean-mx.de/clean-mx/xmlviruses.php?']
 
     def get_URLs(self):
@@ -19,7 +20,8 @@ class PluginOne(IPlugin):
         return self.NAME
 
     def process_data(self, source, response):
-        uniaccept.refreshtlddb("./tld-list.txt")
+        if not os.path.isfile('./tld-list.txt'):
+            uniaccept.refreshtlddb("./tld-list.txt")
         current_date = str(datetime.date.today())
         data = []
         ip_regex = '^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$'
@@ -35,9 +37,19 @@ class PluginOne(IPlugin):
             note = "%s|||%s|||%s|||%s|||%s" %(virusname, url, ip, asn, domain)
             note = ''.join([x.replace('\x00','').encode("utf8") for x in note.split()])
             if md5 != None and md5 != '':
-                data.append((md5, "md5", self.DIRECTION, self.NAME, note, current_date))
+                data.append({'indicator':md5, 'indicator_type':"HASH", 'hash_type':'md5', 'indicator_direction':'file',
+                             'source_name':self.NAME, 'source':source, 'virusname':virusname, 'url':url,
+                             'date':current_date})
             if re.match(ip_regex, ip):
-                data.append((ip, "IPv4", 'outbound', self.NAME, asn, current_date))
-            if uniaccept.verifytldoffline(domain, "./tld-list.txt") == True:
-                data.append((domain, "FQDN", 'outbound', self.NAME, url, current_date))
+                data.append({'indicator':ip, 'indicator_type':"IPv4", 'indicator_direction':'outbound', 
+                             'source_name':self.NAME, 'source':source, 'domain':domain, 'note':asn,
+                             'date':current_date})
+            if uniaccept.verifytldoffline(domain, "./tld-list.txt"):
+                data.append({'indicator':domain, 'indicator_type':"FQDN", 'indicator_direction':'outbound', 
+                             'source_name':self.NAME, 'source':source, 'url':url, 'ip':ip, 
+                             'date':current_date})
+            if url.startswith('http'):
+                data.append({'indicator':url, 'indicator_type':"URL", 'indicator_direction':'outbound',
+                             'source_name':self.NAME, 'source':source, 'domain':domain, 'ip':ip,
+                             'date':current_date}) 
         return data

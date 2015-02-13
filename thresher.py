@@ -11,7 +11,6 @@ from itertools import ifilter
 from yapsy.PluginManager import PluginManager
 from logbook.compat import redirect_logging
 from logging import getLogger
-import uniaccept
 
 redirect_logging()
 

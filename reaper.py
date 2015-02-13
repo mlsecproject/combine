@@ -27,8 +27,6 @@ def reap(file_name):
         logger.error('HINT: edit combine-example.cfg and save as combine.cfg.')
         return
 
-    inbound_url_file = config.get('Reaper', 'inbound_urls')
-    outbound_url_file = config.get('Reaper', 'outbound_urls')
     plugin_dir = config.get('Reaper', 'plugin_directory')
     if plugin_dir == None or plugin_dir == '':
         logger.error("Thresher: Couldn't find plugins for processing")
@@ -73,8 +71,6 @@ def reap(file_name):
             logger.error('Reaper: Error while opening "%s" - %s' % (each, e.strerror))
             
     logger.info('Storing raw feeds in %s' % file_name)
-    #harvest = {'inbound': inbound_harvest, 'outbound': outbound_harvest, 'hash': hash_harvest}
-
     with open(file_name, 'wb') as f:
         json.dump(harvest, f, indent=2)
 
