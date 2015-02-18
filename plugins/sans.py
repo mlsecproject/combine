@@ -1,4 +1,5 @@
 from yapsy.IPlugin import IPlugin
+import re
 
 class PluginOne(IPlugin):
     NAME = "sans"
