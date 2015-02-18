@@ -1,8 +1,9 @@
 import ConfigParser
-import grequests
 import json
 import sys
 import logging
+import requests
+import multiprocessing as mp
 from yapsy.PluginManager import PluginManager
 from logbook.compat import redirect_logging
 from logging import getLogger
@@ -15,9 +16,13 @@ logging.getLogger('yapsy').setLevel(logging.INFO)
 logging.getLogger('requests').setLevel(logging.CRITICAL)
 logger = getLogger('reaper')
 
-# This only works with versions in github, not available via released versions in pip
-def exception_handler(request, exception):
-    logger.error("Request %r failed: %r" % (request, exception))
+## Setting the User-Agent to something spiffy
+headers = {'User-Agent': 'MLSecProject-Combine/0.1.2 (+https://github.com/mlsecproject/combine)'}
+
+def get_file(url, q):
+    global headers
+    r = requests.get(url)
+    q.put(r)
 
 def reap(file_name):
     config = ConfigParser.SafeConfigParser(allow_no_value=False)
@@ -32,8 +37,6 @@ def reap(file_name):
         logger.error("Thresher: Couldn't find plugins for processing")
         return
 
-    ## Setting the User-Agent to something spiffy
-    headers = {'User-Agent': 'MLSecProject-Combine/0.1.2 (+https://github.com/mlsecproject/combine)'}
 
     logger.info('Loading Plugins')
     # Load the plugins from the plugin directory.
@@ -43,7 +46,7 @@ def reap(file_name):
 
     reqs = []
     files = []
-    
+    queues = [] 
     # Loop through all the plugins and gather the URLs
     for plugin in manager.getAllPlugins():
         logger.info('Processing: ' + plugin.plugin_object.get_name())
@@ -52,16 +55,17 @@ def reap(file_name):
                 files.append(url.partition('://')[2])
             else:
                 try:
-                    reqs.append(grequests.get(url, headers=headers))
+                    q = mp.Queue()
+                    p = mp.Process(target=get_file, args=(url, q))
+                    p.start()
+                    reqs.append(p)
+                    queues.append(q)
                 except Exception as e:
                     pass
 
-    responses = grequests.map(reqs)
-    # Exception handler requires a version > 0.2.0
-    #responses = grequests.map(reqs, exception_handler=exception_handler)
-
+    responses = [q.get() for q in queues]
+    [p.join() for r in reqs]
     harvest = [(response.url, response.status_code, response.text) for response in responses if response]
-
     for each in files:
         try:
             with open(each,'rb') as f:
