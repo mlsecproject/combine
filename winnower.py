@@ -213,7 +213,7 @@ def winnow(in_file, out_file, enr_file):
                     enriched.append(dict(each.items() + enrich_IPv4(ipaddr, geo_data).items()))
             else:
                 logger.error('Found invalid address: %s from: %s' % (indicator, each['source']))
-        elif (indicator_type == 'IPv4' or indicator_type == 'IPv6) and is_ipv6(indicator): # generic cleanup
+        elif (indicator_type == 'IPv4' or indicator_type == 'IPv6') and is_ipv6(indicator): # generic cleanup
                 each['indicator_type'] = 'IPv6'
                 wheat.append(each)
         elif indicator_type == 'FQDN' and uniaccept.verifytldoffline(indicator, "./tld-list.txt"):
