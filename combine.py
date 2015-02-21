@@ -15,14 +15,14 @@ from winnower import winnow
 logger = get_logger()
 
 parser = argparse.ArgumentParser()
-parser.add_argument('-t', '--type', help="Specify output type. Currently supported: CSV and exporting to CRITs")
+parser.add_argument('-t', '--type', help="Specify output type. Currently supported: CSV, SiLK IPSets and exporting to CRITs")
 parser.add_argument('-f', '--file', help="Specify output file. Defaults to harvest.FILETYPE")
 parser.add_argument('-d', '--delete', help="Delete intermediate files", action="store_true")
 parser.add_argument('-e', '--enrich', help="Enrich data", action="store_true")
 parser.add_argument('--tiq-test', help="Output in tiq-test format", action="store_true")
 args = parser.parse_args()
 
-possible_types = ['csv', 'json','crits']
+possible_types = ['csv', 'json','crits', 'silk']
 
 if not args.type:
     out_type = 'csv'
