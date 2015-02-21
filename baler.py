@@ -15,6 +15,7 @@ from Queue import Queue
 
 logger = get_logger('baler')
 
+
 def tiq_output(reg_file, enr_file):
     config = ConfigParser.SafeConfigParser()
     cfg_success = config.read('combine.cfg')
@@ -273,5 +274,5 @@ def bale(input_file, output_file, output_format, is_regular):
     format_funcs[output_format](harvest, output_file)
 
 if __name__ == "__main__":
-    #bale('crop.json', 'harvest.csv', 'csv', True)
-    bale('enriched.json', 'harvest.csv', 'csv', False)
+    #bale('crop.json', 'combine-output.csv', 'csv', True)
+    bale('enriched.json', 'enriched.csv', 'csv', False)

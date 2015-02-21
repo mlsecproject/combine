@@ -22,7 +22,7 @@ parser.add_argument('-e', '--enrich', help="Enrich data", action="store_true")
 parser.add_argument('--tiq-test', help="Output in tiq-test format", action="store_true")
 args = parser.parse_args()
 
-possible_types = ['csv', 'json','crits']
+possible_types = ['csv', 'json', 'crits']
 
 if not args.type:
     out_type = 'csv'
@@ -34,7 +34,7 @@ else:
 if args.file:
     out_file = args.file
 else:
-    out_file = 'harvest.'+out_type
+    out_file = 'harvest.' + out_type
 
 reap('harvest.json')
 thresh('harvest.json', 'crop.json')
@@ -42,7 +42,7 @@ bale('crop.json', out_file, out_type, True)
 
 if args.enrich or args.tiq_test:
     winnow('crop.json', 'crop.json', 'enrich.json')
-    bale('enrich.json', 'enriched.'+out_type, out_type, False)
+    bale('enrich.json', 'enriched.' + out_type, out_type, False)
 
 if args.tiq_test:
     tiq_output('crop.json', 'enrich.json')

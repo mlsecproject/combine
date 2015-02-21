@@ -17,6 +17,7 @@ redirect_logging()
 logging.getLogger('yapsy').setLevel(logging.INFO)
 logger = getLogger('thresher')
 
+
 def thresh(input_file, output_file):
     config = ConfigParser.SafeConfigParser(allow_no_value=False)
     cfg_success = config.read('combine.cfg')
@@ -26,7 +27,7 @@ def thresh(input_file, output_file):
         return
 
     plugin_dir = config.get('Thresher', 'plugin_directory')
-    if plugin_dir == None or plugin_dir == '':
+    if plugin_dir is None or plugin_dir == '':
         logger.error("Thresher: Couldn't find plugins for processing")
         return
 
@@ -43,7 +44,6 @@ def thresh(input_file, output_file):
     manager.collectPlugins()
 
     # When we have plugins, this hack won't be necessary
-    #for type in crop:
     for response in crop:
         # Loop through all the plugins and see which ones have matching names
         for plugin in manager.getAllPlugins():

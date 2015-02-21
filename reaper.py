@@ -19,10 +19,12 @@ logger = getLogger('reaper')
 ## Setting the User-Agent to something spiffy
 headers = {'User-Agent': 'MLSecProject-Combine/0.1.2 (+https://github.com/mlsecproject/combine)'}
 
+
 def get_file(url, q):
     global headers
     r = requests.get(url)
     q.put(r)
+
 
 def reap(file_name):
     config = ConfigParser.SafeConfigParser(allow_no_value=False)
@@ -33,10 +35,9 @@ def reap(file_name):
         return
 
     plugin_dir = config.get('Reaper', 'plugin_directory')
-    if plugin_dir == None or plugin_dir == '':
+    if plugin_dir is None or plugin_dir == '':
         logger.error("Thresher: Couldn't find plugins for processing")
         return
-
 
     logger.info('Loading Plugins')
     # Load the plugins from the plugin directory.
@@ -46,7 +47,7 @@ def reap(file_name):
 
     reqs = []
     files = []
-    queues = [] 
+    queues = []
     # Loop through all the plugins and gather the URLs
     for plugin in manager.getAllPlugins():
         logger.info('Processing: ' + plugin.plugin_object.get_name())
@@ -68,12 +69,12 @@ def reap(file_name):
     harvest = [(response.url, response.status_code, response.text) for response in responses if response]
     for each in files:
         try:
-            with open(each,'rb') as f:
-                hash_harvest.append(('file://'+each, 200, f.read()))
+            with open(each, 'rb') as f:
+                hash_harvest.append(('file://' + each, 200, f.read()))
         except IOError as e:
             assert isinstance(logger, logging.Logger)
             logger.error('Reaper: Error while opening "%s" - %s' % (each, e.strerror))
-            
+
     logger.info('Storing raw feeds in %s' % file_name)
     with open(file_name, 'wb') as f:
         json.dump(harvest, f, indent=2)
