@@ -91,6 +91,12 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
+In RHEL/Centos, use the following line instead of apt-get:
+
+```
+sudo yum install python-dev python-pip python-virtualenv git gcc
+```
+
 At this point you should be ready to run Combine.
 
 We also have a [dockerfile](https://github.com/mlsecproject/combine/tree/master/docker) available.
