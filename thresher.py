@@ -43,7 +43,6 @@ def thresh(input_file, output_file):
     manager.collectPlugins()
 
     # When we have plugins, this hack won't be necessary
-    #for type in crop:
     for response in crop:
         # Loop through all the plugins and see which ones have matching names
         for plugin in manager.getAllPlugins():
