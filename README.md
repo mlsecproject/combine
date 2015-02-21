@@ -86,7 +86,7 @@ Installation on Unix and Unix-like systems is straightforward. Either clone the 
 sudo apt-get install python-dev python-pip python-virtualenv git
 git clone https://github.com/mlsecproject/combine.git
 cd combine
-virtualenv venv
+virtualenv --system-site-packages venv
 source venv/bin/activate
 pip install -r requirements.txt
 ```
