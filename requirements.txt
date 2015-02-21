@@ -12,3 +12,4 @@ unicodecsv==0.9.4
 yapsy==1.10.423
 logbook==0.8.1
 dnspython==1.12.0
+-e git+https://github.com/icann/uniaccept-python.git@2fd43061c729fdd834b93ee64ea33695266ddae0#egg=uniaccept-master
