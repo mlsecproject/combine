@@ -10,10 +10,11 @@ import sys
 import time
 import unicodecsv
 import threading
-from logger import get_logger
+from logging import getLogger
+import logging
 from Queue import Queue
 
-logger = get_logger('baler')
+logger = getLogger('baler')
 
 def tiq_output(reg_file, enr_file):
     config = ConfigParser.SafeConfigParser()
