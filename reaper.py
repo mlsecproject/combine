@@ -22,7 +22,7 @@ headers = {'User-Agent': 'MLSecProject-Combine/0.1.2 (+https://github.com/mlsecp
 
 def get_file(url, q):
     global headers
-    r = requests.get(url)
+    r = requests.get(url, headers=headers)
     q.put(r)
 
 
