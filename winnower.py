@@ -15,10 +15,10 @@ import dns.reversename
 from netaddr import IPAddress, IPRange, IPSet
 from sortedcontainers import SortedDict
 
-from logger import get_logger
+from logging import getLogger
 import logging
 
-logger = get_logger('winnower')
+logger = getLogger('winnower')
 
 # from http://en.wikipedia.org/wiki/Reserved_IP_addresses:
 reserved_ranges = IPSet(['0.0.0.0/8', '100.64.0.0/10', '127.0.0.0/8', '192.88.99.0/24',

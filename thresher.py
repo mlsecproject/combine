@@ -47,7 +47,8 @@ def thresh(input_file, output_file):
     for response in crop:
         # Loop through all the plugins and see which ones have matching names
         for plugin in manager.getAllPlugins():
-            if plugin.plugin_object.get_name() in response[0]:
+            if response[0] in set(plugin.plugin_object.URLS):
+            #if plugin.plugin_object.get_name() in response[2]:
                 if response[1] == 200:
                     logger.info('Parsing feed from %s' % response[0])
                     harvest += plugin.plugin_object.process_data(response[0], response[2])
