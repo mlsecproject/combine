@@ -4,15 +4,16 @@ import argparse
 import os
 import sys
 import logging
+from logging import getLogger
 
 # Combine components
-from logger import get_logger
+#from logger import get_logger
 from reaper import reap
 from thresher import thresh
 from baler import bale, tiq_output
 from winnower import winnow
 
-logger = get_logger()
+logger = getLogger()
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-t', '--type', help="Specify output type. Currently supported: CSV and exporting to CRITs")
