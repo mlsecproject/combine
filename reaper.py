@@ -21,7 +21,11 @@ headers = {'User-Agent': 'MLSecProject-Combine/0.1.2 (+https://github.com/mlsecp
 
 def get_file(url, q):
     global headers
-    r = requests.get(url)
+    try:
+        r = requests.get(url, headers=headers, timeout=7.0)
+    except Exception as e:
+        logger.error("Requests Error: %s" % str(e))
+        return
     q.put(r)
 
 def reap(file_name):
@@ -34,7 +38,7 @@ def reap(file_name):
 
     plugin_dir = config.get('Reaper', 'plugin_directory')
     if plugin_dir == None or plugin_dir == '':
-        logger.error("Thresher: Couldn't find plugins for processing")
+        logger.error("Reaper: Couldn't find plugins for processing")
         return
 
 
