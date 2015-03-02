@@ -64,6 +64,7 @@ def reap(file_name):
                     p.start()
                     reqs.append(p)
                     queues.append(q)
+                    logger.debug('Added: ' + url)
                 except Exception as e:
                     pass
 
