@@ -19,10 +19,13 @@ logger = getLogger('reaper')
 ## Setting the User-Agent to something spiffy
 headers = {'User-Agent': 'MLSecProject-Combine/0.1.2 (+https://github.com/mlsecproject/combine)'}
 
-def get_file(url, q):
+def get_file(url, q, optional_headers=None):
     global headers
+    h = headers
+    if optional_headers:
+        h.update(optional_headers)
     try:
-        r = requests.get(url, headers=headers, timeout=7.0)
+        r = requests.get(url, headers=h, timeout=7.0)
     except Exception as e:
         logger.error("Requests Error: %s" % str(e))
         return
@@ -54,13 +57,18 @@ def reap(file_name):
     # Loop through all the plugins and gather the URLs
     for plugin in manager.getAllPlugins():
         logger.info('Processing: ' + plugin.plugin_object.get_name())
+        o_headers = None
+        try:
+            o_headers = plugin.plugin_object.get_headers()
+        except Exception as e:
+            logger.error(str(e))
         for url in plugin.plugin_object.get_URLs():
             if url.startswith('file://'):
                 files.append(url.partition('://')[2])
             else:
                 try:
                     q = mp.Queue()
-                    p = mp.Process(target=get_file, args=(url, q))
+                    p = mp.Process(target=get_file, args=(url, q, o_headers))
                     p.start()
                     reqs.append(p)
                     queues.append(q)

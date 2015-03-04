@@ -1,12 +1,8 @@
 import ConfigParser
-import bs4
-import datetime
-import feedparser
 import json
-import re
 import sys
 import logging
-from csv import reader
+from urlparse import urlparse, urlunparse
 from itertools import ifilter
 from yapsy.PluginManager import PluginManager
 from logbook.compat import redirect_logging
@@ -42,12 +38,13 @@ def thresh(input_file, output_file):
     manager.setPluginPlaces([plugin_dir])
     manager.collectPlugins()
 
-    # When we have plugins, this hack won't be necessary
-    #for type in crop:
     for response in crop:
         # Loop through all the plugins and see which ones have matching names
         for plugin in manager.getAllPlugins():
-            if response[0] in set(plugin.plugin_object.URLS):
+            scheme, netloc, path, params, query, fragment = urlparse(response[0])
+            suburl = urlunparse((scheme, netloc, path, '', '', ''))
+            if suburl in set(plugin.plugin_object.URLS):
+            #if response[0] in set(plugin.plugin_object.URLS):
             #if plugin.plugin_object.get_name() in response[2]:
                 if response[1] == 200:
                     logger.info('Parsing feed from %s' % response[0])
