@@ -61,7 +61,7 @@ def reap(file_name):
         try:
             o_headers = plugin.plugin_object.get_headers()
         except Exception as e:
-            logger.error(str(e))
+            pass #because we don't care if this isn't implemented in plugins
         for url in plugin.plugin_object.get_URLs():
             if url.startswith('file://'):
                 files.append(url.partition('://')[2])
