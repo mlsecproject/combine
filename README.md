@@ -92,6 +92,8 @@ cd combine
 virtualenv venv
 source venv/bin/activate
 pip install -r requirements.txt
+cd uniaccept
+python setup.py install
 ```
 
 To use some of the plugins you should also grab [uniaccept-python](https://github.com/icann/uniaccept-python), and install it.
@@ -129,7 +131,7 @@ To create a .yapsy-plugin file you need the following:
 Name = plugin name
 Module = name of the .py file without the .py extension
 
-[Documentation]   
+[Documentation]
 Author = plugin author
 Version = plugin version
 Website = website for reference, yours or another one
