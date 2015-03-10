@@ -164,35 +164,32 @@ def bale_CRITs_indicator(base_url, data, indicator_que):
     """ One thread of adding indicators to CRITs"""
     while not indicator_que.empty():
         indicator = indicator_que.get()
-        if indicator[1] == 'IPv4':
+        if indicator['indicator_type'] == 'IPv4':
             # using the IP API
             url = base_url + 'ips/'
             data['add_indicator'] = "true"
-            data['ip'] = indicator[0]
+            data['ip'] = indicator['indicator']
             data['ip_type'] = 'Address - ipv4-addr'
-            data['reference'] = indicator[3]
-            # getting the source automatically:
-            source = re.findall(r'\/\/(.*?)\/', data['reference'])
-            if source:
-                data['source'] = source[0]
+            # source = the actual URL and source_name = name in the plugin
+            data['reference'] = indicator['source']
+            if 'source_name' in indicator:
+                data['source'] = indicator['source_name']
             res = requests.post(url, data=data, verify=False)
             if not res.status_code in [201, 200, 400]:
                 logger.info("Issues with adding: %s" % data['ip'])
-        elif indicator[1] == "FQDN":
+        elif indicator['indicator_type'] == "FQDN":
             # using the Domain API
             url = base_url + 'domains/'
             data['add_indicator'] = "true"
-            data['domain'] = indicator[0]
-            data['reference'] = indicator[3]
-            # getting the source automatically:
-            source = re.findall(r'\/\/(.*?)\/', data['reference'])
-            if source:
-                data['source'] = source[0]
+            data['domain'] = indicator['indicator']
+            data['reference'] = indicator['source']
+            if 'source_name' in indicator:
+                data['source'] = indicator['source_name']
             res = requests.post(url, data=data, verify=False)
             if not res.status_code in [201, 200, 400]:
                 logger.info("Issues with adding: %s" % data['domain'])
         else:
-            logger.info("don't yet know what to do with: %s[%s]" % (indicator[1], indicator[0]))
+            logger.info("don't yet know what to do with: %s[%s]" % (indicator['indicator_type'], indicator['indicator']))
 
 
 def bale_CRITs(harvest, filename):
