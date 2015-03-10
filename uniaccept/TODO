@@ -1,0 +1,9 @@
+FUTURE WORK:
+
+* A more automated update mechanism that does not rely on the system
+administrator calling refreshtlddb() on a schedule. (i.e. at every
+execution, check last modified date, and only schedule update if older
+than 'x')
+
+* Use proper packaging for the various modules (e.g. a proper Perl
+bundle)
