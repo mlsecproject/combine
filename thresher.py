@@ -41,11 +41,13 @@ def thresh(input_file, output_file):
     for response in crop:
         # Loop through all the plugins and see which ones have matching names
         for plugin in manager.getAllPlugins():
-            scheme, netloc, path, params, query, fragment = urlparse(response[0])
-            suburl = urlunparse((scheme, netloc, path, '', '', ''))
-            if suburl in set(plugin.plugin_object.URLS):
-            #if response[0] in set(plugin.plugin_object.URLS):
-            #if plugin.plugin_object.get_name() in response[2]:
+            urls = set(plugin.plugin_object.URLS)
+            try:
+                # For those plugins that build dynamic URLs, we should get those for the comparison for parsing
+                urls = set(plugin.plugin_object.get_URLs())
+            except Exception as e:
+                pass   
+            if response[0] in urls:
                 if response[1] == 200:
                     logger.info('Parsing feed from %s' % response[0])
                     harvest += plugin.plugin_object.process_data(response[0], response[2])
