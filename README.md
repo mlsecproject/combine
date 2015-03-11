@@ -157,11 +157,13 @@ class PluginOne(IPlugin):
 
     def process_data(self, source, response)
         code you need to process the response (eg website text)
-         this should return a list of dicts, look at some of the
-         other plugins for examples
+        this should return a list of dicts, look at some of the
+        other plugins for examples
 ```
 
 Plugins MUST implement process_data(), get_name() and get_direction(), in addition to the variables: NAME and URLS. The function get_URLs() is optional, and will ALWAYS override the values in URLS if present.
+
+process_data() MUST return a list of dicts. Each dict MUST possess the following keys: indicator (the IP address, hostname, etc...), indicator_type (IPv4, IPv6, HASH, URL, FQDN), indicator_direction (inbound or outbound), source_name (the name of the plugin/source), source (the URL that the data was retrieved from), date (Year-2digitMonth-2digitDay). Other keys will be passed through, but the listed ones are required for most of the various output formats.
 
 ### Copyright Info
 
