@@ -86,7 +86,7 @@ def reap(file_name):
         urlcount -= 1
         try:
             r = q.get(True, 10)
-            if r != None:
+            if r is not None:
                 responses.append(r)
         except Exception as e:
             logger.error('Reaper: Queue Error "%s"' % str(e))

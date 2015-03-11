@@ -180,15 +180,15 @@ def winnow(in_file, out_file, enr_file):
         crop = json.load(f)
 
     plugin_dir = config.get('Thresher', 'plugin_directory')
-    if plugin_dir == None or plugin_dir == '':
+    if plugin_dir is None or plugin_dir == '':
         logger.error("Thresher: Couldn't find plugins for processing")
         return
 
     gi_org_loc = config.get('Winnower', 'gi_org_loc')
-    if gi_org_loc == None or gi_org_loc == '':
+    if gi_org_loc is None or gi_org_loc == '':
         gi_org_loc = 'data/GeoIPASNum2.csv'
     gi_data_loc = config.get('Winnower', 'gi_data_loc')
-    if gi_data_loc == None or gi_data_loc == '':
+    if gi_data_loc is None or gi_data_loc == '':
         gi_data_loc = 'data/GeoIP.dat'
 
     logger.info('Loading GeoIP data')
