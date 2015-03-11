@@ -22,16 +22,17 @@ headers = {'User-Agent': 'MLSecProject-Combine/0.1.2 (+https://github.com/mlsecp
 def get_file(url, q, optional_headers=None):
     global headers
     h = headers
+    r = None
     if optional_headers:
         h.update(optional_headers)
     try:
         r = requests.get(url, headers=h, timeout=7.0)
     except Exception as e:
         logger.error("Requests Error: %s" % str(e))
-        q.task_done()
-        return
+#        q.task_done()
+#        return
     q.put(r)
-    q.task_done()
+#    q.task_done()
 
 def reap(file_name):
     config = ConfigParser.SafeConfigParser(allow_no_value=False)
@@ -55,7 +56,8 @@ def reap(file_name):
 
     reqs = []
     files = []
-    queues = [] 
+    q = mp.Queue()
+    urlcount = 0
     # Loop through all the plugins and gather the URLs
     for plugin in manager.getAllPlugins():
         logger.info('Processing: ' + plugin.plugin_object.get_name())
@@ -69,17 +71,24 @@ def reap(file_name):
                 files.append(url.partition('://')[2])
             else:
                 try:
-                    q = mp.JoinableQueue()
+                    urlcount += 1
                     p = mp.Process(target=get_file, args=(url, q, o_headers))
                     p.start()
                     reqs.append(p)
-                    queues.append(q)
                     logger.debug('Added: ' + url)
                 except Exception as e:
                     pass
 
-    responses = [q.get() for q in queues]
+    responses = []
+    while urlcount > 0:
+        urlcount -= 1
+        try:
+            responses.append(q.get(True, 10))
+        except Exception as e:
+            logger.error('Reaper: Queue Error "%s"' % str(e))
+
     [p.join() for r in reqs]
+
     harvest = [(response.url, response.status_code, response.text) for response in responses if response]
     for each in files:
         try:
