@@ -55,6 +55,7 @@ def reap(file_name):
     files = []
     q = mp.Queue()
     urlcount = 0
+    QUEUELIMIT = 32767
     # Loop through all the plugins and gather the URLs
     for plugin in manager.getAllPlugins():
         logger.info('Processing: ' + plugin.plugin_object.get_name())
@@ -68,11 +69,13 @@ def reap(file_name):
                 files.append(url.partition('://')[2])
             else:
                 try:
-                    urlcount += 1
-                    p = mp.Process(target=get_file, args=(url, q, o_headers))
-                    p.start()
-                    reqs.append(p)
-                    logger.debug('Added: ' + url)
+                    # There is a limit to how many things you can cram in a queue
+                    if urlcount <= QUEUELIMIT:
+                        urlcount += 1
+                        p = mp.Process(target=get_file, args=(url, q, o_headers))
+                        p.start()
+                        reqs.append(p)
+                        logger.debug('Added: ' + url)
                 except Exception as e:
                     pass
 
@@ -86,7 +89,11 @@ def reap(file_name):
         except Exception as e:
             logger.error('Reaper: Queue Error "%s"' % str(e))
 
-    [p.join() for r in reqs]
+    for p in reqs:
+        try:
+            p.join(1)
+        except Exception as e:
+            logger.error('Reaper: Thread Join Error "%s"' %str(e))
 
     harvest = [(response.url, response.status_code, response.text) for response in responses if response]
     for each in files:
