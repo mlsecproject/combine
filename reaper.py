@@ -23,16 +23,14 @@ headers = {'User-Agent': 'MLSecProject-Combine/0.1.2 (+https://github.com/mlsecp
 def get_file(url, q, optional_headers=None):
     global headers
     h = headers
+    r = None
     if optional_headers:
         h.update(optional_headers)
     try:
         r = requests.get(url, headers=h, timeout=7.0)
     except Exception as e:
         logger.error("Requests Error: %s" % str(e))
-        q.task_done()
-        return
     q.put(r)
-    q.task_done()
 
 
 def reap(file_name):
@@ -56,7 +54,10 @@ def reap(file_name):
 
     reqs = []
     files = []
-    queues = []
+
+    q = mp.Queue()
+    urlcount = 0
+    QUEUELIMIT = 32767
     # Loop through all the plugins and gather the URLs
     for plugin in manager.getAllPlugins():
         logger.info('Processing: ' + plugin.plugin_object.get_name())
@@ -70,17 +71,32 @@ def reap(file_name):
                 files.append(url.partition('://')[2])
             else:
                 try:
-                    q = mp.JoinableQueue()
-                    p = mp.Process(target=get_file, args=(url, q, o_headers))
-                    p.start()
-                    reqs.append(p)
-                    queues.append(q)
-                    logger.debug('Added: ' + url)
+                    # There is a limit to how many things you can cram in a queue
+                    if urlcount <= QUEUELIMIT:
+                        urlcount += 1
+                        p = mp.Process(target=get_file, args=(url, q, o_headers))
+                        p.start()
+                        reqs.append(p)
+                        logger.debug('Added: ' + url)
                 except Exception as e:
                     pass
 
-    responses = [q.get() for q in queues]
-    [p.join() for r in reqs]
+    responses = []
+    while urlcount > 0:
+        urlcount -= 1
+        try:
+            r = q.get(True, 10)
+            if r != None:
+                responses.append(r)
+        except Exception as e:
+            logger.error('Reaper: Queue Error "%s"' % str(e))
+
+    for p in reqs:
+        try:
+            p.join(1)
+        except Exception as e:
+            logger.error('Reaper: Thread Join Error "%s"' %str(e))
+
     harvest = [(response.url, response.status_code, response.text) for response in responses if response]
     for each in files:
         try:
