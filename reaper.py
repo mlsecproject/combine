@@ -29,10 +29,7 @@ def get_file(url, q, optional_headers=None):
         r = requests.get(url, headers=h, timeout=7.0)
     except Exception as e:
         logger.error("Requests Error: %s" % str(e))
-#        q.task_done()
-#        return
     q.put(r)
-#    q.task_done()
 
 def reap(file_name):
     config = ConfigParser.SafeConfigParser(allow_no_value=False)
@@ -83,7 +80,9 @@ def reap(file_name):
     while urlcount > 0:
         urlcount -= 1
         try:
-            responses.append(q.get(True, 10))
+            r = q.get(True, 10)
+            if r != None:
+                responses.append(r)
         except Exception as e:
             logger.error('Reaper: Queue Error "%s"' % str(e))
 
