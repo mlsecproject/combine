@@ -95,7 +95,7 @@ def reap(file_name):
         try:
             p.join(1)
         except Exception as e:
-            logger.error('Reaper: Thread Join Error "%s"' %str(e))
+            logger.error('Reaper: Thread Join Error "%s"' % str(e))
 
     harvest = [(response.url, response.status_code, response.text) for response in responses if response]
     for each in files:

@@ -70,7 +70,7 @@ def enrich_IPv4(address, geo_data, dnsdb=None):
         pass
     if hostname:
         result['hostname'] = hostname
-    return {'enriched':result}
+    return {'enriched': result}
 
 
 def enrich_FQDN(address, date, dnsdb=None):
@@ -99,11 +99,12 @@ def enrich_FQDN(address, date, dnsdb=None):
         pass
     if len(a) > 0:
         result['A'] = a
-    return {'enriched':result}
+    return {'enriched': result}
+
 
 def enrich_hash(hash):
     # TODO something useful here
-    return {'enriched':{}}
+    return {'enriched': {}}
 
 
 def filter_date(records, date):
@@ -213,7 +214,7 @@ def winnow(in_file, out_file, enr_file):
                     enriched.append(dict(each.items() + enrich_IPv4(ipaddr, geo_data).items()))
             else:
                 logger.error('Found invalid address: %s from: %s' % (indicator, each['source']))
-        elif (indicator_type == 'IPv4' or indicator_type == 'IPv6') and is_ipv6(indicator): # generic cleanup
+        elif (indicator_type == 'IPv4' or indicator_type == 'IPv6') and is_ipv6(indicator):  # generic cleanup
                 each['indicator_type'] = 'IPv6'
                 wheat.append(each)
         elif indicator_type == 'FQDN' and uniaccept.verifytldoffline(indicator, "./tld-list.txt"):
