@@ -65,7 +65,9 @@ def enrich_IPv4(address, dnsdb=None, rhost=None):
 
 def enrich_FQDN(address, date, dnsdb):
     records = dnsdb.query_rrset(address, rrtype='A')
-    records = filter_date(records, date)
+    yesterday = dt.datetime.strptime(date, '%Y-%m-%d') - dt.timedelta(days=1)
+    yesterday_str = yesterday.strftime('%Y-%m-%d')
+    records = filter_date(records, yesterday)
     ip_addr = maxhits(records)
     if ip_addr:
         logger.info('Mapped %s to %s' % (address, ip_addr))
@@ -158,7 +160,6 @@ def winnow(in_file, out_file, enr_file):
             if not reserved(ipaddr):
                 wheat.append(each)
                 if enrich_ip:
-                    print "Enriching %s" % addr
                     e_data = (addr, addr_type, direction, source, note, date) + enrich_IPv4(ipaddr, dnsdb)
                     enriched.append(e_data)
                 else:
