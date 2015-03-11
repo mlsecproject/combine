@@ -70,7 +70,7 @@ def reap(file_name):
                 files.append(url.partition('://')[2])
             else:
                 try:
-                    q = mp.Queue()
+                    q = mp.JoinableQueue()
                     p = mp.Process(target=get_file, args=(url, q, o_headers))
                     p.start()
                     reqs.append(p)
