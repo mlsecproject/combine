@@ -1,0 +1,10 @@
+[Core]
+Name = virbl
+Module = virbl
+
+[Documentation]   
+Author = sooshie@gmail.com
+Version = 0.1
+Website = http://lotsofplugins.com
+Description = virbl
+

@@ -1,0 +1,10 @@
+[Core]
+Name = clean-mx
+Module = clean-mx
+
+[Documentation]   
+Author = sooshie@gmail.com
+Version = 0.1
+Website = http://lotsofplugins.com
+Description = clean-mx
+

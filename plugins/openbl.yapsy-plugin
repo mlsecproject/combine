@@ -1,0 +1,10 @@
+[Core]
+Name = openbl
+Module = openbl
+
+[Documentation]   
+Author = sooshie@gmail.com
+Version = 0.1
+Website = http://lotsofplugins.com
+Description = openbl
+
