@@ -161,6 +161,8 @@ class PluginOne(IPlugin):
          other plugins for examples
 ```
 
+Plugins MUST implement process_data(), get_name() and get_direction(), in addition to the variables: NAME and URLS. The function get_URLs() is optional, and will ALWAYS override the values in URLS if present.
+
 ### Copyright Info
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
