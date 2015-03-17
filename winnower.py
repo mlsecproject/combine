@@ -6,13 +6,11 @@ import dnsdb_query
 import json
 import pygeoip
 import re
-import sys
 
 from netaddr import IPAddress, IPRange, IPSet
 from sortedcontainers import SortedDict
 
 from logger import get_logger
-import logging
 
 logger = get_logger('winnower')
 
