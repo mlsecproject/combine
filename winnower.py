@@ -56,7 +56,7 @@ def maxhits_rdata(dns_records):
     hmax = 0
     hostname = None
     for record in dns_records:
-        logger.info("examining %s" % record)
+        # logger.info("Examining %s" % record)
         if record['count'] > hmax:
             hmax = record['count']
             hostname = record['rdata'][0].rstrip('.')
@@ -80,9 +80,9 @@ def enrich_FQDN(address, date, dnsdb):
     records = filter_date(records, yesterday_str)
     ip_addr = maxhits_rdata(records)
     if ip_addr:
-        logger.info('Mapped %s to %s on %s' % (address, ip_addr, date))
-        ip_addr = enrich_IPv4(IPAddress(ip_addr), dnsdb, address)
-    return ip_addr
+        # logger.info('Mapped %s to %s on %s' % (address, ip_addr, date))
+        ip_addr_data = enrich_IPv4(IPAddress(ip_addr), dnsdb, address)
+    return (ip_addr,) + ip_addr_data
 
 
 def filter_date(records, date):
@@ -182,7 +182,8 @@ def winnow(in_file, out_file, enr_file):
             wheat.append(each)
             if enrich_dns and dnsdb:
                 print "Enriching %s" % addr
-                e_data = (addr, addr_type, direction, source, note, date, enrich_FQDN(addr, date, dnsdb))
+                e_data = enrich_FQDN(addr, date, dnsdb)
+                e_data = (e_data[0], "IPv4", direction, source, note, date, e_data[1:])
                 enriched.append(e_data)
         else:
             logger.error('Could not determine address type for %s listed as %s' % (addr, addr_type))
