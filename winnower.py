@@ -42,11 +42,11 @@ def org_by_addr(address):
 
 
 def maxhits(dns_records):
-    max = 0
+    hmax = 0
     hostname = None
     for record in dns_records:
-        if record['count'] > max:
-            max = record['count']
+        if record['count'] > hmax:
+            hmax = record['count']
             hostname = record['rrname'].rstrip('.')
     return hostname
 
