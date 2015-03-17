@@ -45,9 +45,21 @@ def maxhits(dns_records):
     hmax = 0
     hostname = None
     for record in dns_records:
+        #logger.info("examining %s" % record)
         if record['count'] > hmax:
             hmax = record['count']
             hostname = record['rrname'].rstrip('.')
+    return hostname
+
+
+def maxhits_rdata(dns_records):
+    hmax = 0
+    hostname = None
+    for record in dns_records:
+        logger.info("examining %s" % record)
+        if record['count'] > hmax:
+            hmax = record['count']
+            hostname = record['rdata'][0].rstrip('.')
     return hostname
 
 
@@ -65,11 +77,11 @@ def enrich_FQDN(address, date, dnsdb):
     records = dnsdb.query_rrset(address, rrtype='A')
     yesterday = dt.datetime.strptime(date, '%Y-%m-%d') - dt.timedelta(days=1)
     yesterday_str = yesterday.strftime('%Y-%m-%d')
-    records = filter_date(records, yesterday)
-    ip_addr = maxhits(records)
+    records = filter_date(records, yesterday_str)
+    ip_addr = maxhits_rdata(records)
     if ip_addr:
-        logger.info('Mapped %s to %s' % (address, ip_addr))
-        ip_addr = enrich_IPv4(ip_addr, dnsdb, address)
+        logger.info('Mapped %s to %s on %s' % (address, ip_addr, date))
+        ip_addr = enrich_IPv4(IPAddress(ip_addr), dnsdb, address)
     return ip_addr
 
 
