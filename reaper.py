@@ -1,7 +1,6 @@
 import ConfigParser
 import grequests
 import json
-import sys
 from logger import get_logger
 import logging
 
