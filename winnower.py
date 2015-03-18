@@ -6,13 +6,10 @@ import dnsdb_query
 import json
 import pygeoip
 import re
-import sys
 
 from netaddr import IPAddress, IPRange, IPSet
 from sortedcontainers import SortedDict
-
 from logger import get_logger
-import logging
 
 logger = get_logger('winnower')
 
@@ -89,14 +86,14 @@ def reserved(address):
 
 
 def is_ipv4(address):
-    if re.match('(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$', address):
+    if re.match(r'(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$', address):
         return True
     else:
         return False
 
 
 def is_fqdn(address):
-    if re.match('(?=^.{4,255}$)(^((?!-)[a-zA-Z0-9-]{1,63}(?<!-)\.)+[a-zA-Z]{2,63}$)', address):
+    if re.match(r'(?=^.{4,255}$)(^((?!-)[a-zA-Z0-9-]{1,63}(?<!-)\.)+[a-zA-Z]{2,63}$)', address):
         return True
     else:
         return False
