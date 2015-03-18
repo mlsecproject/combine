@@ -50,22 +50,25 @@ def main():
     out_type = get_type(args)
     out_file = get_file(args, out_type)
 
-    reap('harvest.json')
-    thresh('harvest.json', 'crop.json')
-    bale('crop.json', out_file, out_type, True)
+    # TODO: possibly the wrong pattern here?
+    err = reap('harvest.json')
+    if not err:
+        err = thresh('harvest.json', 'crop.json')
+    if not err:
+        err = bale('crop.json', out_file, out_type, True)
+    if not err:
+        if args.enrich or args.tiq_test:
+            winnow('crop.json', 'crop.json', 'enrich.json')
+            bale('enrich.json', 'enriched.' + out_type, out_type, False)
 
-    if args.enrich or args.tiq_test:
-        winnow('crop.json', 'crop.json', 'enrich.json')
-        bale('enrich.json', 'enriched.' + out_type, out_type, False)
+        if args.tiq_test:
+            tiq_output('crop.json', 'enrich.json')
 
-    if args.tiq_test:
-        tiq_output('crop.json', 'enrich.json')
-
-    if args.delete:
-        # be careful with this when we support a JSON output type
-        os.remove('harvest.json')
-        os.remove('crop.json')
-        os.remove('enrich.json')
+        if args.delete:
+            # be careful with this when we support a JSON output type
+            os.remove('harvest.json')
+            os.remove('crop.json')
+            os.remove('enrich.json')
 
 
 if __name__ == "__main__":
