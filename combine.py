@@ -3,7 +3,6 @@
 import argparse
 import os
 import sys
-import logging
 
 # Combine components
 from logger import get_logger
@@ -43,12 +42,13 @@ def get_file(args, out_type):
         out_file = args.file
     else:
         out_file = 'harvest.' + out_type
+    return out_file
 
 
 def main():
     args = get_args()
     out_type = get_type(args)
-    out_file = get_file(args)
+    out_file = get_file(args, out_type)
 
     reap('harvest.json')
     thresh('harvest.json', 'crop.json')
