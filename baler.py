@@ -2,11 +2,9 @@ import ConfigParser
 import datetime as dt
 import gzip
 import json
-import logging
 import os
 import re
 import requests
-import sys
 import time
 import unicodecsv
 import threading
@@ -139,7 +137,7 @@ def bale_CRITs_indicator(base_url, data, indicator_que):
             logger.info("don't yet know what to do with: %s[%s]" % (indicator[1], indicator[0]))
 
 
-def bale_CRITs(harvest, filename):
+def bale_CRITs(harvest):
     """ taking the output from combine and pushing it to the CRITs web API"""
     # checking the minimum requirements for parameters
     # it would be nice to have some metadata on the feeds that can be imported in the intel library:
