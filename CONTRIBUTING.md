@@ -1,6 +1,6 @@
 # Contributing to Combine
 
-Want to hack on Combine? Awesome! Here are instructions to get you started. They are not perfect. Please let us know if anything feels wrong or incomplete. 
+Want to hack on Combine? Awesome! Here are instructions to get you started. They are not perfect. Please let us know if anything feels wrong or incomplete.
 
 ## Reporting Security Issues
 
@@ -27,7 +27,7 @@ When considering a cleanup task, we are looking for:
   * Please note any logic changes if necessary
 * A pull request with the code
   * Please prefix the title of your PR with `Cleanup:` so we can quickly address it.
-  * Your pull request must remain up to date with dev, so rebase as
+  * Your pull request must remain up to date with `dev`, so rebase as
     necessary.
 
 ## Reporting Issues
@@ -82,7 +82,7 @@ We are always thrilled to receive pull requests. We do our best to process them 
 
 If your pull request is not accepted on the first try, don't be discouraged! If there's a problem with the implementation, we will provide feedback on what to improve.
 
-We try very hard to keep Combine lean and focused. We don't want it to do everything for everybody. This means that we might decide against incorporating a new feature. However, we might help you find a way to implement that feature *on top of* Combine.
+We try very hard to keep Combine lean and focused. We don't want it to do everything for everybody. This means that we might decide against incorporating a new feature. However, we might help you find a way to implement that feature *on top of* Combine. For example, this might take the form of an add-on tool outside of the main repository that integrates with Combine.
 
 ### Create issues...
 
@@ -91,6 +91,14 @@ Any significant improvement should be documented as [a GitHub issue](https://git
 ### ...but check for existing issues first!
 
 Please take a moment to check that an issue doesn't already exist documenting your bug report or improvement proposal. If it does, it never hurts to add a quick ":+1:" or "I have this problem too". This will help prioritize the most common problems and requests.
+
+### Branches
+
+We follow a simplified version of the popular [git flow](http://nvie.com/posts/a-successful-git-branching-model/).
+
+* `master` MUST always be production-deployable. `dev` may not be ready for production but should pass all existing tests. (At the time of this writing, a test suite is under development.)
+* The only branches that will be merged directly into master are `dev` (for a release) or hotfixes for significant bugs that need immediate attention. Hotfixes will merge into `master` and `dev`
+* All other development forks off from the `dev` branch and merges back into it.
 
 ### Conventions
 
@@ -102,13 +110,13 @@ Fork the repository and make changes on your fork in a feature branch:
 
 Update the documentation when creating or modifying features. Review your documentation changes for clarity, concision, and correctness.
 
-Write clean code. Universally formatted code promotes ease of writing, reading, and maintenance. Always run `pep8 file.py` on each changed file before committing your changes. Most editors have plug-ins that do this automatically.
+Write clean code. Universally formatted code promotes ease of writing, reading, and maintenance. Always run `pep8 file.py` on each changed file before committing your changes. Most editors have plug-ins that do this automatically. And yes, four spaces instead of tabs. We'll generally forgive long lines - but please be reasonable!
 
 Pull requests descriptions should be as clear as possible and include a reference to all the issues that they address.
 
 Commit messages should start with a short summary (max. 50 chars) written in the imperative, followed by an optional, more detailed explanatory text which is separated from the summary by an empty line.
 
-Others will review your code review and may add comments to your pull request. Discuss, then make the suggested modifications and push additional commits to your feature branch. Be sure to post a comment after pushing. The new commits will show up in the pull request automatically, but the reviewers will not be notified unless you comment.
+Others will review your code review and may add comments to your pull request. Discuss, then make the suggested modifications and push additional commits to your feature branch. Be sure to post a comment after pushing. The new commits will show up in the pull request automatically, but the reviewers will not be notified unless you comment. If you collaborate with others and they want to add commits, they should issue a PR to your fork and you can merge it into your branch.
 
 Pull requests must be cleanly rebased on top of the `dev` branch without multiple branches mixed into the PR.
 
