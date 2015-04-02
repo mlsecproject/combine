@@ -17,7 +17,6 @@ def indicator_type(indicator):
 
     if re.match(ip_regex, indicator):
         return "IPv4"
-    # TODO: Update domain name validation (cf. #15)
     elif re.match(domain_regex, indicator, re.IGNORECASE):
         return "FQDN"
     else:
@@ -183,23 +182,23 @@ def thresh(input_file, output_file):
 
     # When we have plugins, this hack won't be necessary
     for response in crop['inbound']:
-        logger.info('Evaluating %s' % response[0])
+        logger.info('Evaluating %s', response[0])
         # TODO: logging
         if response[1] == 200:
             for site in thresher_map:
                 if site in response[0]:
-                    logger.info('Parsing feed from %s' % response[0])
+                    logger.info('Parsing feed from %s', response[0])
                     harvest += thresher_map[site](response[2], response[0], 'inbound')
                 else:  # how to handle non-mapped sites?
                     pass
         else:  # how to handle non-200 non-404?
-            logger.error('Could not handle %s: %s' % (response[0], response[1]))
+            logger.error('Could not handle %s: %s', response[0], response[1])
 
     for response in crop['outbound']:
         if response[1] == 200:
             for site in thresher_map:
                 if site in response[0]:
-                    logger.info('Parsing feed from %s' % response[0])
+                    logger.info('Parsing feed from %s', response[0])
                     harvest += thresher_map[site](response[2], response[0], 'outbound')
                 else:  # how to handle non-mapped sites?
                     pass
