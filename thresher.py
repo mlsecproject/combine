@@ -155,7 +155,7 @@ def thresh(input_file, output_file):
         logger.error('HINT: edit combine-example.cfg and save as combine.cfg.')
         return
 
-    logger.info('Loading raw feed data from %s' % input_file)
+    logger.info('Loading raw feed data from %s', input_file)
     with open(input_file, 'rb') as f:
         crop = json.load(f)
 
@@ -205,7 +205,7 @@ def thresh(input_file, output_file):
         else:  # how to handle non-200 non-404?
             pass
 
-    logger.info('Storing parsed data in %s' % output_file)
+    logger.info('Storing parsed data in %s', output_file)
     with open(output_file, 'wb') as f:
         json.dump(harvest, f, indent=2)
 
