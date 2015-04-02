@@ -24,8 +24,8 @@ class PluginOne(IPlugin):
                 i = line.split('|')[2].strip()
                 if 'sshpwauth' in source:
                     data.append({'indicator':i, 'indicator_type':"IPv4", 'indicator_direction':self.DIRECTION,
-                             'source_name':self.NAME, 'source':source, 'note':'sshpwauth', 'date':current_date})
+                             'source_name':self.NAME, 'source':source, 'note':'SSHpwauth', 'date':current_date})
                 if 'vncprobe' in source:
                     data.append({'indicator':i, 'indicator_type':"IPv4", 'indicator_direction':self.DIRECTION,
-                             'source_name':self.NAME, 'source':source, 'note':'vncprobe', 'date':current_date})
+                             'source_name':self.NAME, 'source':source, 'note':'VNC Probe', 'date':current_date})
         return data

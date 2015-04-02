@@ -22,5 +22,5 @@ class PluginOne(IPlugin):
             i = entry.title.partition(' ')[0]
             i_date = entry.description.split(' ')[-1]
             data.append({'indicator':i, 'indicator_type':"IPv4", 'indicator_direction':self.DIRECTION,
-                             'source_name':self.NAME, 'source':source, 'date':i_date})
+                             'source_name':self.NAME, 'source':source, 'note':'Malicious IP', 'date':i_date})
         return data

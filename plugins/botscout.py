@@ -38,5 +38,5 @@ class PluginOne(IPlugin):
                 count += 1
             if re.match(ip_regex, ip):
                 data.append({'indicator':ip, 'indicator_type':"IPv4", 'indicator_direction':self.DIRECTION,
-                             'source_name':self.NAME, 'source':source, 'note':note, 'date':current_date})
+                             'source_name':self.NAME, 'source':source, 'note':'C2/Bot', 'date':current_date})
         return data

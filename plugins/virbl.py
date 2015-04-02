@@ -22,5 +22,5 @@ class PluginOne(IPlugin):
             if not line.startswith('#') and not line.startswith('/') and not line.startswith('Export date') and len(line) > 0:
                 i = line.split()[0]
                 data.append({'indicator':i, 'indicator_type':"IPv4", 'indicator_direction':self.DIRECTION,
-                             'source_name':self.NAME, 'source':source, 'date':current_date})
+                             'source_name':self.NAME, 'source':source, 'note':'Virus Sender', 'date':current_date})
         return data

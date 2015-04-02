@@ -40,8 +40,8 @@ class PluginOne(IPlugin):
                 i = line.split()[0]
                 if 'ssh_day' in source:
                     data.append({'indicator':i, 'indicator_type':self.indicator_type(i), 'indicator_direction':'inbound',
-                             'source_name':self.NAME, 'source':source, 'date':current_date})
+                             'source_name':self.NAME, 'source':source, 'note':'Malware', 'date':current_date})
                 else:
                     data.append({'indicator':i, 'indicator_type':self.indicator_type(i), 'indicator_direction':self.DIRECTION,
-                             'source_name':self.NAME, 'source':source, 'date':current_date})
+                             'source_name':self.NAME, 'source':source, 'note':'SSH Bruteforce', 'date':current_date})
         return data

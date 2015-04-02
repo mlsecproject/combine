@@ -21,5 +21,5 @@ class PluginOne(IPlugin):
                 i = line.partition('#')[0].strip()
                 date = line.partition('#')[2].split(' ')[1]
                 data.append({'indicator':i, 'indicator_type':"IPv4", 'indicator_direction':self.DIRECTION,
-                             'source_name':self.NAME, 'source':source, 'date':date})
+                             'source_name':self.NAME, 'source':source, 'note':'Bruteforce IP', 'date':date})
         return data

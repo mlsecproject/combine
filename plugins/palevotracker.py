@@ -24,8 +24,8 @@ class PluginOne(IPlugin):
                 i = line.split()[0]
                 if 'ipblocklist' in source:
                     data.append({'indicator':i, 'indicator_type':"IPv4", 'indicator_direction':self.DIRECTION,
-                             'source_name':self.NAME, 'source':source, 'date':current_date})
+                             'source_name':self.NAME, 'source':source, 'note':'Worm Palevo IP', 'date':current_date})
                 elif 'domainblocklist' in source:
                     data.append({'indicator':i, 'indicator_type':"FQDN", 'indicator_direction':self.DIRECTION,
-                             'source_name':self.NAME, 'source':source, 'date':current_date})
+                             'source_name':self.NAME, 'source':source, 'note':'Worm Palevo Domain', 'date':current_date})
         return data
