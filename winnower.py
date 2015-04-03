@@ -63,14 +63,14 @@ def maxhits_rdata(dns_records):
     return hostname
 
 
-def enrich_IPv4(address, dnsdb=None, rhost=None):
+def enrich_IPv4(address, dnsdb=None, hostname=None):
     as_num, as_name = org_by_addr(address)
     country = geo_data.country_code_by_addr('%s' % address)
     if dnsdb:
-        hostname = maxhits(dnsdb.query_rdata_ip('%s' % address))
+        rhost = maxhits(dnsdb.query_rdata_ip('%s' % address))
     else:
-        hostname = None
-    return (as_num, as_name, country, rhost, hostname)
+        rhost = None
+    return (as_num, as_name, country, hostname, rhost)
 
 
 def enrich_FQDN(address, date, dnsdb):
@@ -82,7 +82,9 @@ def enrich_FQDN(address, date, dnsdb):
     if ip_addr:
         # logger.info('Mapped %s to %s on %s' % (address, ip_addr, date))
         ip_addr_data = enrich_IPv4(IPAddress(ip_addr), dnsdb, address)
-    return (ip_addr,) + ip_addr_data
+        return (ip_addr,) + ip_addr_data
+    else:
+        return None
 
 
 def filter_date(records, date):
@@ -127,7 +129,7 @@ def winnow(in_file, out_file, enr_file):
     server = config.get('Winnower', 'dnsdb_server')
     api = config.get('Winnower', 'dnsdb_api')
     enrich_ip = config.get('Winnower', 'enrich_ip')
-    if enrich_ip == '1':
+    if enrich_ip == '1' or enrich_ip == 'True':
         enrich_ip = True
         logger.info('Enriching IPv4 indicators: TRUE')
     else:
@@ -135,7 +137,7 @@ def winnow(in_file, out_file, enr_file):
         logger.info('Enriching IPv4 indicators: FALSE')
 
     enrich_dns = config.get('Winnower', 'enrich_dns')
-    if enrich_dns == '1':
+    if enrich_dns == '1' or enrich_dns == 'True':
         enrich_dns = True
         logger.info('Enriching DNS indicators: TRUE')
     else:
@@ -181,10 +183,11 @@ def winnow(in_file, out_file, enr_file):
             #logger.info('Enriching %s' % addr)
             wheat.append(each)
             if enrich_dns and dnsdb:
-                print "Enriching %s" % addr
+                # print "Enriching %s" % addr
                 e_data = enrich_FQDN(addr, date, dnsdb)
-                e_data = (e_data[0], "IPv4", direction, source, note, date, e_data[1:])
-                enriched.append(e_data)
+                if e_data:
+                    e_data = (e_data[0], "IPv4", direction, source, note, date) + e_data[1:]
+                    enriched.append(e_data)
         else:
             logger.error('Could not determine address type for %s listed as %s' % (addr, addr_type))
 
