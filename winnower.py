@@ -6,6 +6,7 @@ import dnsdb_query
 import json
 import pygeoip
 import re
+import sys
 
 from netaddr import IPAddress, IPRange, IPSet
 from sortedcontainers import SortedDict
@@ -67,7 +68,8 @@ def enrich_IPv4(address, dnsdb=None, hostname=None):
     as_num, as_name = org_by_addr(address)
     country = geo_data.country_code_by_addr('%s' % address)
     if dnsdb:
-        rhost = maxhits(dnsdb.query_rdata_ip('%s' % address))
+        inaddr = address.reverse_dns
+        rhost = maxhits(dnsdb.query_rrset('%s' % inaddr))
     else:
         rhost = None
     return (as_num, as_name, country, hostname, rhost)
