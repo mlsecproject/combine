@@ -80,13 +80,13 @@ def enrich_FQDN(address, date, dnsdb):
     yesterday = dt.datetime.strptime(date, '%Y-%m-%d') - dt.timedelta(days=1)
     yesterday_str = yesterday.strftime('%Y-%m-%d')
     records = filter_date(records, yesterday_str)
-    ip_addr = maxhits_rdata(records)
-    if ip_addr:
-        # logger.info('Mapped %s to %s on %s' % (address, ip_addr, date))
-        ip_addr_data = enrich_IPv4(IPAddress(ip_addr), dnsdb, address)
-        return (ip_addr,) + ip_addr_data
-    else:
+    enrichment = []
+    if not records:
         return None
+    for ip_addr in records[0]['rdata']:
+        ip_addr_data = enrich_IPv4(IPAddress(ip_addr), dnsdb, address)
+        enrichment.append((ip_addr,) + ip_addr_data)
+    return enrichment
 
 
 def filter_date(records, date):
@@ -188,8 +188,9 @@ def winnow(in_file, out_file, enr_file):
                 # print "Enriching %s" % addr
                 e_data = enrich_FQDN(addr, date, dnsdb)
                 if e_data:
-                    e_data = (e_data[0], "IPv4", direction, source, note, date) + e_data[1:]
-                    enriched.append(e_data)
+                    for each in e_data:
+                        datum = (each[0], "IPv4", direction, source, note, date) + each[1:]
+                        enriched.append(datum)
         else:
             logger.error('Could not determine address type for %s listed as %s' % (addr, addr_type))
 
