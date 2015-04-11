@@ -119,6 +119,23 @@ set as `medium` throughout the export by default.
 
 Thanks to [@paulpc](https://github.com/paulpc) for implementing this feature and [@mgoffin](https://github.com/mgoffin) for moral support ;).
 
+### Exporting to SiLK
+
+In order to use the [SiLK](http://tools.netsa.cert.org/silk/silk.html) exporting function a single
+configuration item is necessary in the Baler section of the configuraiton file. Make sure you configure
+the following entry correctly:
+
+```
+silk_output_path = /path/to/silk/ipsets
+```
+
+Each dataset that is collected will be created in the configured directory as a unique ipset file with
+the naming convention:
+
+```
+<source host>_<list name>_<direction>.ipset
+```
+
 ### Copyright Info
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
