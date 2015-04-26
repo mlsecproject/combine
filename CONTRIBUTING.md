@@ -6,9 +6,7 @@ Want to hack on Combine? Awesome! Here are instructions to get you started. They
 
 The Combine maintainers take security very seriously. If you discover a security issue, please bring it to their attention right away!
 
-_TODO: this needs review and planning_
-
-Please send your report privately to [security@something.com](mailto:security@something.com), please **DO NOT** file a public issue.
+Please send your report privately to [security@mlsecproject.org](mailto:security@mlsecproject.org), please **DO NOT** file a public issue.
 
 Security reports are greatly appreciated and we will publicly thank you for it. We currently do not offer a paid security bounty program, but are not ruling it out in the future.
 
@@ -130,7 +128,9 @@ Combine maintainers use :+1: or :shipit: in comments on the code review to indic
 
 ### Accept the CLA
 
-_TODO: insert instructions about CLA from Alex_
+All contributors to the MLSec Project open-source repositories need to sign an CLA (Contributor License Agreement) before their first contribution is merged into the main codebase. The maintainers will reach out to you if you require to sign a CLA when you first submit a Pull Request for review.
+
+Everyone needs to sign a CLA for their code to be considered. Sadly, we will be forced to reject PRs from people that do not wish to sign one.
 
 ## Community Guidelines
 
