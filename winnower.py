@@ -69,7 +69,7 @@ def enrich_IPv4(address, dnsdb=None, hostname=None):
     country = geo_data.country_code_by_addr('%s' % address)
     if dnsdb:
         inaddr = address.reverse_dns
-        rhost = maxhits(dnsdb.query_rrset('%s' % inaddr))
+        rhost = maxhits_rdata(dnsdb.query_rrset('%s' % inaddr))
     else:
         rhost = None
     return (as_num, as_name, country, hostname, rhost)
