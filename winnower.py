@@ -12,7 +12,6 @@ from netaddr import IPAddress, IPRange, IPSet
 from sortedcontainers import SortedDict
 
 from logger import get_logger
-import logging
 
 logger = get_logger('winnower')
 
@@ -20,6 +19,7 @@ logger = get_logger('winnower')
 reserved_ranges = IPSet(['0.0.0.0/8', '100.64.0.0/10', '127.0.0.0/8', '192.88.99.0/24',
                          '198.18.0.0/15', '198.51.100.0/24', '203.0.113.0/24', '233.252.0.0/24'])
 gi_org = SortedDict()
+geo_data = pygeoip.GeoIP('data/GeoIP.dat', pygeoip.MEMORY_CACHE)
 
 
 def load_gi_org(filename):
@@ -43,32 +43,50 @@ def org_by_addr(address):
 
 
 def maxhits(dns_records):
-    max = 0
+    hmax = 0
     hostname = None
     for record in dns_records:
-        if record['count'] > max:
-            max = record['count']
+        #logger.info("examining %s" % record)
+        if record['count'] > hmax:
+            hmax = record['count']
             hostname = record['rrname'].rstrip('.')
     return hostname
 
 
-def enrich_IPv4(address, geo_data, dnsdb=None):
+def maxhits_rdata(dns_records):
+    hmax = 0
+    hostname = None
+    for record in dns_records:
+        # logger.info("Examining %s" % record)
+        if record['count'] > hmax:
+            hmax = record['count']
+            hostname = record['rdata'][0].rstrip('.')
+    return hostname
+
+
+def enrich_IPv4(address, dnsdb=None, hostname=None):
     as_num, as_name = org_by_addr(address)
     country = geo_data.country_code_by_addr('%s' % address)
     if dnsdb:
-        hostname = maxhits(dnsdb.query_rdata_ip('%s' % address))
+        inaddr = address.reverse_dns
+        rhost = maxhits_rdata(dnsdb.query_rrset('%s' % inaddr))
     else:
-        hostname = None
-    return (as_num, as_name, country, None, hostname)
+        rhost = None
+    return (as_num, as_name, country, hostname, rhost)
 
 
 def enrich_FQDN(address, date, dnsdb):
     records = dnsdb.query_rrset(address, rrtype='A')
-    records = filter_date(records, date)
-    ip_addr = maxhits(records)
-    if ip_addr:
-        logger.info('Mapped %s to %s' % (address, ip_addr))
-    return ip_addr
+    yesterday = dt.datetime.strptime(date, '%Y-%m-%d') - dt.timedelta(days=1)
+    yesterday_str = yesterday.strftime('%Y-%m-%d')
+    records = filter_date(records, yesterday_str)
+    enrichment = []
+    if not records:
+        return None
+    for ip_addr in records[0]['rdata']:
+        ip_addr_data = enrich_IPv4(IPAddress(ip_addr), dnsdb, address)
+        enrichment.append((ip_addr,) + ip_addr_data)
+    return enrichment
 
 
 def filter_date(records, date):
@@ -113,7 +131,7 @@ def winnow(in_file, out_file, enr_file):
     server = config.get('Winnower', 'dnsdb_server')
     api = config.get('Winnower', 'dnsdb_api')
     enrich_ip = config.get('Winnower', 'enrich_ip')
-    if enrich_ip == '1':
+    if enrich_ip == '1' or enrich_ip == 'True':
         enrich_ip = True
         logger.info('Enriching IPv4 indicators: TRUE')
     else:
@@ -121,7 +139,7 @@ def winnow(in_file, out_file, enr_file):
         logger.info('Enriching IPv4 indicators: FALSE')
 
     enrich_dns = config.get('Winnower', 'enrich_dns')
-    if enrich_dns == '1':
+    if enrich_dns == '1' or enrich_dns == 'True':
         enrich_dns = True
         logger.info('Enriching DNS indicators: TRUE')
     else:
@@ -132,7 +150,7 @@ def winnow(in_file, out_file, enr_file):
 
     # handle the case where we aren't using DNSDB
     dnsdb = dnsdb_query.DnsdbClient(server, api)
-    if len(dnsdb.query_rdata_name('google.com')) == 0:
+    if api == 'YOUR_API_KEY_HERE' or len(dnsdb.query_rdata_name('google.com')) == 0:
         dnsdb = None
         logger.info('Invalid DNSDB configuration found')
 
@@ -142,7 +160,6 @@ def winnow(in_file, out_file, enr_file):
     # TODO: make these locations configurable?
     logger.info('Loading GeoIP data')
     gi_org = load_gi_org('data/GeoIPASNum2.csv')
-    geo_data = pygeoip.GeoIP('data/GeoIP.dat', pygeoip.MEMORY_CACHE)
 
     wheat = []
     enriched = []
@@ -150,16 +167,17 @@ def winnow(in_file, out_file, enr_file):
     logger.info('Beginning winnowing process')
     for each in crop:
         (addr, addr_type, direction, source, note, date) = each
+        # this should be refactored into appropriate functions
         if addr_type == 'IPv4' and is_ipv4(addr):
             #logger.info('Enriching %s' % addr)
             ipaddr = IPAddress(addr)
             if not reserved(ipaddr):
                 wheat.append(each)
                 if enrich_ip:
-                    e_data = (addr, addr_type, direction, source, note, date) + enrich_IPv4(ipaddr, geo_data, dnsdb)
+                    e_data = (addr, addr_type, direction, source, note, date) + enrich_IPv4(ipaddr, dnsdb)
                     enriched.append(e_data)
                 else:
-                    e_data = (addr, addr_type, direction, source, note, date) + enrich_IPv4(ipaddr, geo_data)
+                    e_data = (addr, addr_type, direction, source, note, date) + enrich_IPv4(ipaddr)
                     enriched.append(e_data)
             else:
                 logger.error('Found invalid address: %s from: %s' % (addr, source))
@@ -167,8 +185,12 @@ def winnow(in_file, out_file, enr_file):
             #logger.info('Enriching %s' % addr)
             wheat.append(each)
             if enrich_dns and dnsdb:
-                e_data = (addr, addr_type, direction, source, note, date, enrich_FQDN(addr, date, dnsdb))
-                enriched.append(e_data)
+                # print "Enriching %s" % addr
+                e_data = enrich_FQDN(addr, date, dnsdb)
+                if e_data:
+                    for each in e_data:
+                        datum = (each[0], "IPv4", direction, source, note, date) + each[1:]
+                        enriched.append(datum)
         else:
             logger.error('Could not determine address type for %s listed as %s' % (addr, addr_type))
 
