@@ -11,3 +11,4 @@ requests>=2.3.0,<2.6.0
 sortedcontainers==0.9.4
 wsgiref==0.1.2
 unicodecsv==0.9.4
+pre-commit
