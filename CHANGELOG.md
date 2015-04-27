@@ -16,7 +16,6 @@ Bugfix release, and also making it easier to install and use the system with Ven
 * Correct enrichment of FQDN indicators - it extracts all the related IPv4s and enriches them further ([#36](https://github.com/mlsecproject/combine/issues/36))
 * Added contributing document to repository ([#127](https://github.com/mlsecproject/combine/issues/127))
 
-
 #### 0.1.2 Bouncing Capybara
 This is a bugfix release with several stability and performance improvements
 
