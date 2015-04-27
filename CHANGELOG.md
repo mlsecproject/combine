@@ -1,17 +1,20 @@
 CHANGE LOG
 ==========
 
-#### Future Release
+#### 0.1.3 Captivating Capybara
 Bugfix release, and also making it easier to install and use the system with Venv and Docker procedures. Special thanks to [@krmaxwell](https://github.com/krmaxwell) who seems to have done all the work
 
 * Updating the regex used for hostname capture on Thresher. Will be further updated on v0.2 ([#131](https://github.com/mlsecproject/combine/issues/131))
 * Sources update:
     * Updating PalevoTracker location and removing Spyeye tracker ([#123](https://github.com/mlsecproject/combine/issues/123))
     * Updating MaxMind local dataset to March 2015
+    * Adding Feodo Abuse.ch tracker
+    * Ajusted Wiki to current Threat Intelligence feeds ([#71](https://github.com/mlsecproject/combine/issues/71))
 * Docker file and usage guide ([#117](https://github.com/mlsecproject/combine/issues/117))
 * Instalation documentation using Python venv ([#115](https://github.com/mlsecproject/combine/issues/115))
 * Minor cleanup on gitignore and other files ([#109](https://github.com/mlsecproject/combine/issues/109))
 * Correct enrichment of FQDN indicators - it extracts all the related IPv4s and enriches them further ([#36](https://github.com/mlsecproject/combine/issues/36))
+* Added contributing document to repository ([#127](https://github.com/mlsecproject/combine/issues/127))
 
 #### 0.1.2 Bouncing Capybara
 This is a bugfix release with several stability and performance improvements
