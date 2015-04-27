@@ -141,6 +141,16 @@ def check_enrich_dns(config):
     return enrich_dns
 
 
+def setup_dnsdb(server, api):
+    logger.info('Setting up DNSDB client')
+    # handle the case where we aren't using DNSDB
+    dnsdb = dnsdb_query.DnsdbClient(server, api)
+    if api == 'YOUR_API_KEY_HERE' or len(dnsdb.query_rdata_name('google.com')) == 0:
+        dnsdb = None
+        logger.info('Invalid DNSDB configuration found')
+    return dnsdb
+
+
 def winnow(in_file, out_file, enr_file):
     config = ConfigParser.SafeConfigParser(allow_no_value=True)
     cfg_success = config.read('combine.cfg')
@@ -151,19 +161,17 @@ def winnow(in_file, out_file, enr_file):
 
     enrich_ip = check_enrich_ip(config)
     enrich_dns = check_enrich_dns(config)
-    if enrich_dns:
+    if enrich_dns or enrich_ip:
         server = config.get('Winnower', 'dnsdb_server')
         api = config.get('Winnower', 'dnsdb_api')
     else:
         server = None
         api = None
 
-    logger.info('Setting up DNSDB client')
-    # handle the case where we aren't using DNSDB
-    dnsdb = dnsdb_query.DnsdbClient(server, api)
-    if api == 'YOUR_API_KEY_HERE' or len(dnsdb.query_rdata_name('google.com')) == 0:
+    if server and api:
+        dnsdb = setup_dnsdb(server, api)
+    else:
         dnsdb = None
-        logger.info('Invalid DNSDB configuration found')
 
     with open(in_file, 'rb') as f:
         crop = json.load(f)
