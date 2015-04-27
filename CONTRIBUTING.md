@@ -2,9 +2,11 @@
 
 Want to hack on Combine? Awesome! Here are instructions to get you started. They are not perfect. Please let us know if anything feels wrong or incomplete.
 
+Please note that this project is released with a [Contributor Code of Conduct](http://contributor-covenant.org/version/1/0/0/code_of_conduct.md) (or see code_of_conduct.md in this source code distribution). By participating in this project, you agree to abide by its terms.
+
 ## Reporting Security Issues
 
-The Combine maintainers take security very seriously. If you discover a security issue, please bring it to their attention right away!
+The Combine maintainers take security very seriously. If you discover a security issue, please bring it to our attention right away!
 
 Please send your report privately to [security@mlsecproject.org](mailto:security@mlsecproject.org), please **DO NOT** file a public issue.
 
@@ -132,17 +134,5 @@ All contributors to the MLSec Project open-source repositories need to sign an C
 
 Everyone needs to sign a CLA for their code to be considered. Sadly, we will be forced to reject PRs from people that do not wish to sign one.
 
-## Community Guidelines
-
-We want to keep the Combine community awesome, growing, and collaborative. We need your help to keep it that way. These general guidelines for the community will assist with this:
-
-* Be nice: Be courteous, respectful and polite to fellow community members: no regional, racial, gender, orientation, or other abuse will be tolerated. We like nice people way better than mean ones!
-
-* Encourage diversity and participation: Make everyone in our community feel welcome, regardless of their background, skill level, or the extent of their contributions. Do everything possible to encourage participation in our community.
-
-* Keep it legal: Basically, don't get us in trouble. Share only content that you own, do not share private or sensitive information, and don't break the law.
-
-* Stay on topic: Make sure that you are posting to the correct repository and avoid off-topic discussions. Remember that updating an issue or responding to an email could potentially send notifications to a large number of people. Please consider this before you update. Also remember that nobody likes spam.
-
 ## References:
-We based these on the excellent [Docker contribution guidelines](https://github.com/docker/docker/blob/master/CONTRIBUTING.md).
+We based these on the excellent [Docker contribution guidelines](https://github.com/docker/docker/blob/master/CONTRIBUTING.md). And the Code of Conduct of course comes from [Contributor Covenant](http://contributor-covenant.org).
