@@ -26,4 +26,3 @@ http://www.autoshun.org/files/shunlist.csv
 http://charles.the-haleys.org/ssh_dico_attack_hdeny_format.php/hostsdeny.txt
 http://virbl.org/download/virbl.dnsbl.bit.nl.txt
 http://botscout.com/last_caught_cache.htm
-file:///path/to/your/inbound_file
