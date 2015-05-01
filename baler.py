@@ -11,6 +11,9 @@ import time
 import unicodecsv
 import threading
 from logger import get_logger
+
+from cybox.core import Observable
+from cybox.objects.address_object import Address
 from Queue import Queue
 
 logger = get_logger('baler')
@@ -136,7 +139,8 @@ def bale_CRITs_indicator(base_url, data, indicator_que):
             if not res.status_code in [201, 200, 400]:
                 logger.info("Issues with adding: %s" % data['domain'])
         else:
-            logger.info("don't yet know what to do with: %s[%s]" % (indicator[1], indicator[0]))
+            logger.info("don't yet know what to do with: %s[%s]" % (indicator[1],
+                        indicator[0]))
 
 
 def bale_CRITs(harvest, filename):
@@ -198,6 +202,22 @@ def bale_CRITs(harvest, filename):
                 (total_iocs, maxThreads, time.time() - start_time))
 
 
+def bale_cybox(harvest, filename):
+    logger.info('Output regular data as CybOX to %s' % filename)
+    for indicator in harvest:
+        if indicator[1] == "IPv4":
+            addr = Address()
+            addr.address_value = indicator[0]
+            addr.category = 'ipv4-addr'
+            if indicator[2] == 'inbound':
+                addr.is_source = True
+            else:
+                addr.is_destination = True
+        obs = Observable(addr)
+        with open(filename, 'a') as f:
+            f.write(obs.to_xml(include_namespaces=False))
+
+
 def bale(input_file, output_file, output_format, is_regular):
     config = ConfigParser.SafeConfigParser()
     cfg_success = config.read('combine.cfg')
@@ -212,9 +232,13 @@ def bale(input_file, output_file, output_format, is_regular):
 
     # TODO: also need plugins here (cf. #23)
     if is_regular:
-        format_funcs = {'csv': bale_reg_csv, 'crits': bale_CRITs}
+        format_funcs = {'csv': bale_reg_csv,
+                        'cybox': bale_cybox,
+                        'crits': bale_CRITs}
     else:
-        format_funcs = {'csv': bale_enr_csv, 'crits': bale_CRITs}
+        format_funcs = {'csv': bale_enr_csv,
+                        'cybox': bale_cybox,
+                        'crits': bale_CRITs}
     format_funcs[output_format](harvest, output_file)
 
 if __name__ == "__main__":
