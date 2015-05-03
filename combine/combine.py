@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 import argparse
 import os
-import sys
 
 from baler import bale
 from baler import tiq_output
@@ -13,44 +12,48 @@ from winnower import winnow
 
 
 def main():
+    possible_file_types = ['csv', 'json', 'crits']
+
     parser = argparse.ArgumentParser()
-    parser.add_argument('-t', '--type', help="Specify output type. Currently supported: CSV and exporting to CRITs")
-    parser.add_argument('-f', '--file', help="Specify output file. Defaults to harvest.FILETYPE")
+    parser.add_argument('-t', '--type', dest='file_type', choices=possible_file_types, default=possible_file_types[0],
+                        help="Specify output type. Currently supported: {0}".format(', '.join(possible_file_types)))
+    parser.add_argument('-f', '--file', default=None, help="Specify output file. Defaults to harvest.FILETYPE")
+    parser.add_argument('--output-dir', dest='output_dir', default='',
+                        help="Specify output direction. Default to current directory")
     parser.add_argument('-d', '--delete', help="Delete intermediate files", action="store_true")
     parser.add_argument('-e', '--enrich', help="Enrich data", action="store_true")
     parser.add_argument('--tiq-test', help="Output in tiq-test format", action="store_true")
     args = parser.parse_args()
 
-    possible_types = ['csv', 'json', 'crits']
-
-    if not args.type:
-        out_type = 'csv'
-    elif args.type.lower() not in possible_types:
-        sys.exit('Invalid file type specified. Possible types are: %s' % possible_types)
-    else:
-        out_type = args.type.lower()
+    def filepath(filename):
+        return os.path.join(args.output_dir, filename)
 
     if args.file:
-        out_file = args.file
+        out_filepath = filepath(args.file)
     else:
-        out_file = 'harvest.' + out_type
+        out_filepath = filepath('harvest.' + args.file_type)
 
-    reap('harvest.json')
-    thresh('harvest.json', 'crop.json')
-    bale('crop.json', out_file, out_type, True)
+    harvest_filepath = filepath('harvest.json')
+    crop_filepath = filepath('crop.json')
+    enrich_filepath = filepath('enrich.json')
+    enriched_filepath = filepath('enriched.' + args.file_type)
+
+    reap(harvest_filepath)
+    thresh(harvest_filepath, crop_filepath)
+    bale(crop_filepath, out_filepath, args.file_type, True)
 
     if args.enrich or args.tiq_test:
-        winnow('crop.json', 'crop.json', 'enrich.json')
-        bale('enrich.json', 'enriched.' + out_type, out_type, False)
+        winnow(crop_filepath, crop_filepath, enrich_filepath)
+        bale(enrich_filepath, enriched_filepath, args.file_type, False)
 
     if args.tiq_test:
-        tiq_output('crop.json', 'enrich.json')
+        tiq_output(crop_filepath, enrich_filepath)
 
     if args.delete:
         # be careful with this when we support a JSON output type
-        os.remove('harvest.json')
-        os.remove('crop.json')
-        os.remove('enrich.json')
+        os.remove(harvest_filepath)
+        os.remove(crop_filepath)
+        os.remove(enrich_filepath)
 
 if __name__ == "__main__":
     main()
