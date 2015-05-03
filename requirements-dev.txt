@@ -1,0 +1,10 @@
+# When using `-e .` here, tox would fail to install the external grequests
+-r requirements.txt
+
+# Testing requirements
+coverage
+mock
+pre-commit
+pyflakes
+pytest
+tox

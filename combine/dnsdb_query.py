@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-
+# -*- coding: utf-8 -*-
 # Copyright (c) 2013 by Farsight Security, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,7 +13,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 import calendar
 import errno
 import locale
@@ -37,7 +36,9 @@ options = None
 
 locale.setlocale(locale.LC_ALL, '')
 
+
 class DnsdbClient(object):
+
     def __init__(self, server, apikey, limit=None):
         self.server = server
         self.apikey = apikey
@@ -84,8 +85,10 @@ class DnsdbClient(object):
             sys.stderr.write(str(e) + '\n')
         return res
 
+
 def sec_to_text(ts):
     return time.strftime('%Y-%m-%d %H:%M:%S -0000', time.gmtime(ts))
+
 
 def rrset_to_text(m):
     s = StringIO()
@@ -113,13 +116,15 @@ def rrset_to_text(m):
     s.seek(0)
     return s.read()
 
+
 def rdata_to_text(m):
     return '%s IN %s %s' % (m['rrname'], m['rrtype'], m['rdata'])
+
 
 def parse_config(cfg_fname):
     config = {}
     cfg_files = filter(os.path.isfile,
-            (cfg_fname, os.path.expanduser('~/.dnsdb-query.conf')))
+                       (cfg_fname, os.path.expanduser('~/.dnsdb-query.conf')))
 
     if not cfg_files:
         raise IOError(errno.ENOENT, 'dnsdb_query: No config files found')
@@ -131,6 +136,7 @@ def parse_config(cfg_fname):
             config[key] = val
 
     return config
+
 
 def time_parse(s):
     try:
@@ -153,6 +159,7 @@ def time_parse(s):
 
     raise ValueError('Invalid time: "%s"' % s)
 
+
 def filter_before(res_list, before_time):
     before_time = time_parse(before_time)
     new_res_list = []
@@ -168,6 +175,7 @@ def filter_before(res_list, before_time):
             new_res_list.append(res)
 
     return new_res_list
+
 
 def filter_after(res_list, after_time):
     after_time = time_parse(after_time)
@@ -185,26 +193,27 @@ def filter_after(res_list, after_time):
 
     return new_res_list
 
+
 def main():
     global cfg
     global options
 
     parser = optparse.OptionParser()
     parser.add_option('-c', '--config', dest='config', type='string',
-        help='config file', default=DEFAULT_CONFIG_FILE)
+                      help='config file', default=DEFAULT_CONFIG_FILE)
     parser.add_option('-r', '--rrset', dest='rrset', type='string',
-        help='rrset <ONAME>[/<RRTYPE>[/BAILIWICK]]')
+                      help='rrset <ONAME>[/<RRTYPE>[/BAILIWICK]]')
     parser.add_option('-n', '--rdataname', dest='rdata_name', type='string',
-        help='rdata name <NAME>[/<RRTYPE>]')
+                      help='rdata name <NAME>[/<RRTYPE>]')
     parser.add_option('-i', '--rdataip', dest='rdata_ip', type='string',
-        help='rdata ip <IPADDRESS|IPRANGE|IPNETWORK>')
+                      help='rdata ip <IPADDRESS|IPRANGE|IPNETWORK>')
     parser.add_option('-s', '--sort', dest='sort', type='string', help='sort key')
     parser.add_option('-R', '--reverse', dest='reverse', action='store_true', default=False,
-        help='reverse sort')
+                      help='reverse sort')
     parser.add_option('-j', '--json', dest='json', action='store_true', default=False,
-        help='output in JSON format')
+                      help='output in JSON format')
     parser.add_option('-l', '--limit', dest='limit', type='int', default=0,
-        help='limit number of results')
+                      help='limit number of results')
 
     parser.add_option('', '--before', dest='before', type='string', help='only output results seen before this time')
     parser.add_option('', '--after', dest='after', type='string', help='only output results seen after this time')
@@ -220,10 +229,9 @@ def main():
         sys.stderr.write(e.message)
         sys.exit(1)
 
-
-    if not 'DNSDB_SERVER' in cfg:
+    if 'DNSDB_SERVER' not in cfg:
         cfg['DNSDB_SERVER'] = DEFAULT_DNSDB_SERVER
-    if not 'APIKEY' in cfg:
+    if 'APIKEY' not in cfg:
         sys.stderr.write('dnsdb_query: APIKEY not defined in config file\n')
         sys.exit(1)
 
@@ -246,7 +254,7 @@ def main():
 
     if len(res_list) > 0:
         if options.sort:
-            if not options.sort in res_list[0]:
+            if options.sort not in res_list[0]:
                 sort_keys = res_list[0].keys()
                 sort_keys.sort()
                 sys.stderr.write('dnsdb_query: invalid sort key "%s". valid sort keys are %s\n' % (options.sort, ', '.join(sort_keys)))
