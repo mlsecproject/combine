@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 import argparse
 import os
+import sys
 
 from baler import bale
 from baler import tiq_output
@@ -10,13 +11,16 @@ from thresher import thresh
 from winnower import winnow
 # Combine components
 
+__version__ = '0.1.4'
+
 
 def main():
     possible_file_types = ['csv', 'json', 'crits']
 
     parser = argparse.ArgumentParser()
+    parser.add_argument('--version', action='version', version='%(prog)s (version {0})'.format(__version__))
     parser.add_argument('-t', '--type', dest='file_type', choices=possible_file_types, default=possible_file_types[0],
-                        help="Specify output type. Currently supported: {0}".format(', '.join(possible_file_types)))
+                        help="Specify output file type.")
     parser.add_argument('-f', '--file', default=None, help="Specify output file. Defaults to harvest.FILETYPE")
     parser.add_argument('--output-dir', dest='output_dir', default='',
                         help="Specify output direction. Default to current directory")
@@ -24,6 +28,11 @@ def main():
     parser.add_argument('-e', '--enrich', help="Enrich data", action="store_true")
     parser.add_argument('--tiq-test', help="Output in tiq-test format", action="store_true")
     args = parser.parse_args()
+
+    if len(args.output_dir):
+        if not os.path.isdir(args.output_dir):
+            parser.print_usage()
+            sys.exit('Output directory "{0}" does not exist.'.format(args.output_dir))
 
     def filepath(filename):
         return os.path.join(args.output_dir, filename)

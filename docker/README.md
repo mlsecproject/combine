@@ -2,13 +2,19 @@
 
 A simple Dockerfile for running [Combine](https://github.com/mlsecproject/combine).
 
-To build the docker image, copy a valid `combine.cfg` next to the `Dockerfile` and:
+To build the docker container, copy a valid `combine.cfg` next to the `Dockerfile` and build:
 ```shell
 $ sudo docker build -t combine .
 ```
 
-Then run with:
+Then create a directory for the container's output:
 ```
+$ mkdir output
+$ chown 0777 output
+```
+
+Finally, run with:
+```shell
 $ sudo docker run --rm -v `pwd`/output:/home/combine/output -t combine
 ```
 

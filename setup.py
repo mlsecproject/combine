@@ -2,12 +2,9 @@
 from setuptools import find_packages
 from setuptools import setup
 
-__version__ = '1.1.1'
-
-
 setup(
     name='combine',
-    version=__version__,
+    version='0.1.4',
     provides=['combine'],
     author='MLSec Project',
     url='https://github.com/mlsecproject/combine',
