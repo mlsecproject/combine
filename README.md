@@ -26,7 +26,7 @@ python reaper.py
 python thresher.py
 python winnower.py
 python baler.py
-`````
+````
 
 The output will actually be a CSV with the following schema:
 ```
@@ -78,6 +78,24 @@ If you do not have one, you can request one [here](https://www.dnsdb.info/#Apply
 
 You should configure the API key and endpoint for DNSDB on `combine.cfg`. Copy the example configuration file from `combine-example.cfg` and add your information there.
 
+### Installation
+
+Installation on Unix and Unix-like systems is straightforward. Either clone the repository or download the [latest release](https://github.com/mlsecproject/combine/releases). You will need pip and the python development libraries. In Ubuntu, the following commands will get you prepared:
+
+```
+sudo apt-get install python-dev python-pip python-virtualenv git
+git clone https://github.com/mlsecproject/combine.git
+cd combine
+virtualenv venv
+source venv/bin/activate
+pip install -r requirements.txt
+```
+
+At this point you should be ready to run Combine.
+
+We also have a [dockerfile](https://github.com/mlsecproject/combine/tree/master/docker) available.
+
+
 ### Exporting to CRITs
 
 In order to use the [CRITs](https://crits.github.io/) exporting function, there are some configuration that is
@@ -91,7 +109,7 @@ crits_campaign = combine
 crits_maxThreads = 10
 ```
 Make sure you have the campaign created on CRITs before exporting the data. The `confidence` field is being
-set as `medium` throughout the export by default. 
+set as `medium` throughout the export by default.
 
 Thanks to [@paulpc](https://github.com/paulpc) for implementing this feature and [@mgoffin](https://github.com/mgoffin) for moral support ;).
 
