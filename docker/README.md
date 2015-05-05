@@ -1,21 +1,21 @@
 # combine-docker
 
-A simple Dockerfile for running [Combine](https://github.com/mlsecproject/combine). Also on [Docker Hub](https://registry.hub.docker.com/u/technoskald/combine/).
+A simple Dockerfile for running [Combine](https://github.com/mlsecproject/combine).
 
-The easiest way to run is simply:
-
-```
-sudo docker pull technoskald/combine
-sudo docker run --rm -v `pwd`/harvest.csv:/combine/harvest.csv technoskald/combine 
+To build the docker container, copy a valid `combine.cfg` next to the `Dockerfile` and build:
+```shell
+$ sudo docker build -t combine .
 ```
 
-This will put the results in the `/combine` directory. Replace the path after the colon in the command line if desired.
+Then create a directory for the container's output:
+```
+$ mkdir output
+$ chown 0777 output
+```
 
-If you prefer to use the Docker file rather than pull from the Docker Hub, then run with something like:
+Finally, run with:
+```shell
+$ sudo docker run --rm -v `pwd`/output:/home/combine/output -t combine
 ```
-sudo docker build .
-```
-Then note the ID at the end and run:
-```
-sudo docker run --rm -v `pwd`/harvest.csv:/combine/harvest.csv IDHERE
-```
+
+This will put the results in the `./combine` directory. Replace the path after the colon in the command line if desired.

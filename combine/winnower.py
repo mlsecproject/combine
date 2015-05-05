@@ -1,4 +1,5 @@
-#! /usr/bin/env python
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 import ConfigParser
 import csv
 import datetime as dt
@@ -221,5 +222,8 @@ def winnow(in_file, out_file, enr_file):
         f.write(e_data)
 
 
-if __name__ == "__main__":
+def main():
     winnow('crop.json', 'crop.json', 'enriched.json')
+
+if __name__ == "__main__":
+    main()

@@ -1,8 +1,11 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 import ConfigParser
-import grequests
 import json
-from logger import get_logger
 import logging
+
+import grequests
+from logger import get_logger
 
 
 logger = get_logger('reaper')
@@ -37,7 +40,7 @@ def reap(file_name):
         logger.error('Reaper: Error while opening "%s" - %s' % (outbound_url_file, e.strerror))
         return
 
-    ## Setting the User-Agent to something spiffy
+    # Setting the User-Agent to something spiffy
     headers = {'User-Agent': 'MLSecProject-Combine/0.1.2 (+https://github.com/mlsecproject/combine)'}
 
     logger.info('Fetching inbound URLs')
@@ -81,5 +84,8 @@ def reap(file_name):
         json.dump(harvest, f, indent=2)
 
 
-if __name__ == "__main__":
+def main():
     reap('harvest.json')
+
+if __name__ == "__main__":
+    main()

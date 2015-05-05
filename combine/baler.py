@@ -1,15 +1,18 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 import ConfigParser
 import datetime as dt
 import gzip
 import json
 import os
 import re
-import requests
-import time
-import unicodecsv
 import threading
-from logger import get_logger
+import time
 from Queue import Queue
+
+import requests
+import unicodecsv
+from logger import get_logger
 
 logger = get_logger('baler')
 
@@ -118,7 +121,7 @@ def bale_CRITs_indicator(base_url, data, indicator_que):
             if source:
                 data['source'] = source[0]
             res = requests.post(url, data=data, verify=False)
-            if not res.status_code in [201, 200, 400]:
+            if res.status_code not in [201, 200, 400]:
                 logger.info("Issues with adding: %s" % data['ip'])
         elif indicator[1] == "FQDN":
             # using the Domain API
@@ -131,7 +134,7 @@ def bale_CRITs_indicator(base_url, data, indicator_que):
             if source:
                 data['source'] = source[0]
             res = requests.post(url, data=data, verify=False)
-            if not res.status_code in [201, 200, 400]:
+            if res.status_code not in [201, 200, 400]:
                 logger.info("Issues with adding: %s" % data['domain'])
         else:
             logger.info("don't yet know what to do with: %s[%s]" % (indicator[1], indicator[0]))
@@ -215,5 +218,9 @@ def bale(input_file, output_file, output_format, is_regular):
         format_funcs = {'csv': bale_enr_csv, 'crits': bale_CRITs}
     format_funcs[output_format](harvest, output_file)
 
-if __name__ == "__main__":
+
+def main():
     bale('crop.json', 'harvest.csv', 'csv', True)
+
+if __name__ == "__main__":
+    main()
