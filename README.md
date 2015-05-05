@@ -5,9 +5,9 @@ Combine
 
 Combine gathers Threat Intelligence Feeds from publicly available sources
 
-You can run the core tool with `combine.py`:
+You can run the core tool with `combine`:
 ```
-usage: combine.py [-h] [-t TYPE] [-f FILE] [-d] [-e] [--tiq-test]
+usage: combine [-h] [-t TYPE] [-f FILE] [-d] [-e] [--tiq-test]
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -22,10 +22,10 @@ Alternately, you can run each phase individually:
 
 
 ````
-python reaper.py
-python thresher.py
-python winnower.py
-python baler.py
+reaper
+thresher
+winnower
+baler
 ````
 
 The output will actually be a CSV with the following schema:
@@ -84,11 +84,11 @@ Installation on Unix and Unix-like systems is straightforward. Either clone the 
 
 ```
 sudo apt-get install python-dev python-pip python-virtualenv git
+sudo pip install tox
 git clone https://github.com/mlsecproject/combine.git
 cd combine
-virtualenv venv
-source venv/bin/activate
-pip install -r requirements.txt
+make venv
+source venv-combine/bin/activate
 ```
 
 At this point you should be ready to run Combine.

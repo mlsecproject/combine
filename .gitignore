@@ -37,7 +37,7 @@ nosetests.xml
 .pydevproject
 
 # virtualenv
-venv
+venv*/
 
 # IDE config
 .idea
