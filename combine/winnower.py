@@ -1,17 +1,18 @@
-#! /usr/bin/env python
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 import ConfigParser
 import csv
 import datetime as dt
-import dnsdb_query
 import json
-import pygeoip
 import re
-import sys
 
-from netaddr import IPAddress, IPRange, IPSet
-from sortedcontainers import SortedDict
-
+import dnsdb_query
+import pygeoip
 from logger import get_logger
+from netaddr import IPAddress
+from netaddr import IPRange
+from netaddr import IPSet
+from sortedcontainers import SortedDict
 
 logger = get_logger('winnower')
 
@@ -46,7 +47,7 @@ def maxhits(dns_records):
     hmax = 0
     hostname = None
     for record in dns_records:
-        #logger.info("examining %s" % record)
+        # logger.info("examining %s" % record)
         if record['count'] > hmax:
             hmax = record['count']
             hostname = record['rrname'].rstrip('.')
@@ -169,7 +170,7 @@ def winnow(in_file, out_file, enr_file):
         (addr, addr_type, direction, source, note, date) = each
         # this should be refactored into appropriate functions
         if addr_type == 'IPv4' and is_ipv4(addr):
-            #logger.info('Enriching %s' % addr)
+            # logger.info('Enriching %s' % addr)
             ipaddr = IPAddress(addr)
             if not reserved(ipaddr):
                 wheat.append(each)
@@ -182,7 +183,7 @@ def winnow(in_file, out_file, enr_file):
             else:
                 logger.error('Found invalid address: %s from: %s' % (addr, source))
         elif addr_type == 'FQDN' and is_fqdn(addr):
-            #logger.info('Enriching %s' % addr)
+            # logger.info('Enriching %s' % addr)
             wheat.append(each)
             if enrich_dns and dnsdb:
                 # print "Enriching %s" % addr
@@ -204,5 +205,8 @@ def winnow(in_file, out_file, enr_file):
         f.write(e_data)
 
 
-if __name__ == "__main__":
+def main():
     winnow('crop.json', 'crop.json', 'enriched.json')
+
+if __name__ == "__main__":
+    main()

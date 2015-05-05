@@ -1,12 +1,15 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 import ConfigParser
-import bs4
 import datetime
-import feedparser
 import json
 import re
-from logger import get_logger
 from csv import reader
 from itertools import ifilter
+
+import bs4
+import feedparser
+from logger import get_logger
 
 logger = get_logger('thresher')
 
@@ -210,5 +213,8 @@ def thresh(input_file, output_file):
         json.dump(harvest, f, indent=2)
 
 
-if __name__ == "__main__":
+def main():
     thresh('harvest.json', 'crop.json')
+
+if __name__ == "__main__":
+    main()
