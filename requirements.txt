@@ -2,12 +2,14 @@
 CsvSchema==1.1.1
 argparse>=1.2.1,<1.4.0
 beautifulsoup4==4.3.2
+dnspython==1.12.0
 feedparser==5.1.3
-gevent==1.0.1
 greenlet>=0.4.2,<0.5.0
+logbook==0.8.1
 netaddr==0.7.12
 pygeoip>=0.3.1,<0.4.0
 requests>=2.3.0,<2.6.0
 sortedcontainers==0.9.4
 unicodecsv==0.9.4
 wsgiref==0.1.2
+yapsy==1.10.423

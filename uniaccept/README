@@ -1,0 +1,87 @@
+Universal Acceptance of TLDs
+----------------------------
+
+As ICANN has introduced new generic Top Level Domains into the DNS
+root, problems have been experienced with end users receiving errors
+from applications which try to sense the validity of a domain name.
+Traditionally all top-level domains have either been two octets long
+(for country-code top level domains like .UK and .DE), or three octets
+long (for generic top level domains like .COM and .INT). However, with
+the introduction of new domains such as .INFO and .TRAVEL this premise
+should no longer apply.
+
+This project seeks to educate software implementors to use more robust
+techniques to validate the existence of a top-level domain name.
+
+Ideally, if it is essential to an application to verify the existence
+of a domain, it should perform a DNS enquiry to see if the domain
+exists. This is the only test that can positively identify availability,
+although it is worth noting that due to transient network issues, some
+domains may not be visible from all locations at all times.
+
+If the aim of the test is purely to identify if the top-level domain
+is valid, rather than the entire host name, a similar test can be
+conducted against the DNS root servers to identify if the domain has
+been delegated.
+
+Finally, in certain applications - such as those without reliable
+connectivity to perform live DNS requests, or for those for performance
+reasons can not conduct such requests for each test, the possibility
+exists to verify against a list of know good TLDs. An implementor of
+this technique MUST ensure the application routinely updates this list,
+as new domains can come into existance, and old domains disappear. As
+the reason this problem exists is due to dated assumptions about valid
+domains, developers MUST NOT deploy a system using a fixed list that
+doesn't have mechanisms to update that list on a routine basis.
+
+We have developed a small library for a variety of development platforms
+for implementers of these three techniques. Each has the following
+approximate functions:
+
+verifytld(domain):
+
+    Verifies a top-level domain exists.
+
+    This function takes a single argument, which can either be a
+    domain name, or a TLD - and verifies its validity using the DNS
+    protocol.
+
+verifytldoffline(domain[, filename]):
+
+    Verifies a top-level domain exists against a fixed database.
+
+    The first argument supplies is either a domain name, or a TLD,
+    which is verified for validity against a fixed database that
+    has been previously obtained with the refreshtlddb() function.
+    The optional second argument is the filename where the cache
+    is stored.
+
+refreshtlddb([filename]):
+
+    Updates the copy of the fixed database of valid top-level
+    domains.
+
+    Downloads the official list of valid TLDs from the IANA website,
+    and performs consistency checking to ensure it was downloaded
+    correctly. The optional argument is the filename to store
+    the cache in.
+
+    NOTE: This function should not be called on every request or 
+    invocation, it is designed to store a cached version of the file, 
+    which can be referenced in future queries. There is no need to 
+    update this file more often than once per day.
+
+
+Dependencies
+------------
+
+This library is dependent upon the DNS Python library, which is
+available from http://www.dnspython.org/. All other libraries should be
+part of the standard Python distribution.
+
+
+Information References
+----------------------
+1. http://www.rfc-editor.org/rfc/rfc3696.txt
+
+4 December 2006

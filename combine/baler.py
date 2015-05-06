@@ -5,16 +5,15 @@ import datetime as dt
 import gzip
 import json
 import os
-import re
 import threading
 import time
+from logging import getLogger
 from Queue import Queue
 
 import requests
 import unicodecsv
-from logger import get_logger
 
-logger = get_logger('baler')
+logger = getLogger('baler')
 
 
 def tiq_output(reg_file, enr_file):
@@ -40,8 +39,8 @@ def tiq_output(reg_file, enr_file):
         os.makedirs(os.path.join(tiq_dir, 'enriched', 'public_inbound'))
         os.makedirs(os.path.join(tiq_dir, 'enriched', 'public_outbound'))
 
-    inbound_data = [row for row in reg_data if row[2] == 'inbound']
-    outbound_data = [row for row in reg_data if row[2] == 'outbound']
+    inbound_data = [row for row in reg_data if row['indicator_direction'] == 'inbound']
+    outbound_data = [row for row in reg_data if row['indicator_direction'] == 'outbound']
 
     try:
         bale_reg_csvgz(inbound_data, os.path.join(tiq_dir, 'raw', 'public_inbound', today + '.csv.gz'))
@@ -49,8 +48,8 @@ def tiq_output(reg_file, enr_file):
     except:
         pass
 
-    inbound_data = [row for row in enr_data if row[2] == 'inbound']
-    outbound_data = [row for row in enr_data if row[2] == 'outbound']
+    inbound_data = [row for row in enr_data if (row['indicator_direction'] == 'inbound' and row['indicator_type'] == 'IPv4')]
+    outbound_data = [row for row in enr_data if (row['indicator_direction'] == 'outbound' and row['indicator_type'] == 'IPv4')]
 
     try:
         bale_enr_csvgz(inbound_data, os.path.join(tiq_dir, 'enriched', 'public_inbound', today + '.csv.gz'))
@@ -69,7 +68,14 @@ def bale_reg_csvgz(harvest, output_file):
 
         # header row
         bale_writer.writerow(('entity', 'type', 'direction', 'source', 'notes', 'date'))
-        bale_writer.writerows(harvest)
+        for row in harvest:
+            r = []
+            for key in ['indicator', 'indicator_type', 'indicator_direction', 'source_name', 'note', 'date']:
+                if key in row:
+                    r.append(row[key])
+                else:
+                    r.append('')
+            bale_writer.writerow(r)
 
 
 def bale_reg_csv(harvest, output_file):
@@ -80,7 +86,14 @@ def bale_reg_csv(harvest, output_file):
 
         # header row
         bale_writer.writerow(('entity', 'type', 'direction', 'source', 'notes', 'date'))
-        bale_writer.writerows(harvest)
+        for row in harvest:
+            r = []
+            for key in ['indicator', 'indicator_type', 'indicator_direction', 'source_name', 'note', 'date']:
+                if key in row:
+                    r.append(row[key])
+                else:
+                    r.append('')
+            bale_writer.writerow(r)
 
 
 def bale_enr_csv(harvest, output_file):
@@ -90,8 +103,26 @@ def bale_enr_csv(harvest, output_file):
         bale_writer = unicodecsv.writer(csv_file, quoting=unicodecsv.QUOTE_ALL)
 
         # header row
-        bale_writer.writerow(('entity', 'type', 'direction', 'source', 'notes', 'date', 'asnumber', 'asname', 'country', 'host', 'rhost'))
-        bale_writer.writerows(harvest)
+        bale_writer.writerow(('entity', 'type', 'direction', 'source', 'notes', 'date', 'url', 'domain', 'ip', 'asnumber', 'asname', 'country', 'hostname', 'ips', 'mx'))
+        for row in harvest:
+            r = []
+            for key in ['indicator', 'indicator_type', 'indicator_direction', 'source_name', 'note', 'date', 'domain', 'ip', 'url']:
+                if key in row:
+                    r.append(row[key])
+                else:
+                    r.append('')
+            if not row['enriched']:
+                r += ['', '', '', '', '', '']
+            else:
+                for key in ['as_num', 'as_name', 'country', 'hostname', 'A', 'MX']:
+                    if key in row['enriched']:
+                        if key == 'A' or key == 'MX':
+                            r.append("|".join(row['enriched'][key]))
+                        else:
+                            r.append(row['enriched'][key])
+                    else:
+                        r.append('')
+            bale_writer.writerow(r)
 
 
 def bale_enr_csvgz(harvest, output_file):
@@ -101,43 +132,58 @@ def bale_enr_csvgz(harvest, output_file):
         bale_writer = unicodecsv.writer(csv_file, quoting=unicodecsv.QUOTE_ALL)
 
         # header row
-        bale_writer.writerow(('entity', 'type', 'direction', 'source', 'notes', 'date', 'asnumber', 'asname', 'country', 'host', 'rhost'))
-        bale_writer.writerows(harvest)
+        bale_writer.writerow(('entity', 'type', 'direction', 'source', 'notes', 'date', 'url', 'domain', 'ip', 'asnumber', 'asname', 'country', 'hostname', 'ips', 'mx'))
+        for row in harvest:
+            r = []
+            for key in ['indicator', 'indicator_type', 'indicator_direction', 'source_name', 'note', 'date', 'domain', 'ip', 'url']:
+                if key in row:
+                    r.append(row[key])
+                else:
+                    r.append('')
+            if not row['enriched']:
+                r += ['', '', '', '', '', '']
+            else:
+                for key in ['as_num', 'as_name', 'country', 'hostname', 'A', 'MX']:
+                    if key in row['enriched']:
+                        if key == 'A' or key == 'MX':
+                            r.append("|".join(row['enriched'][key]))
+                        else:
+                            r.append(row['enriched'][key])
+                    else:
+                        r.append('')
+            bale_writer.writerow(r)
 
 
 def bale_CRITs_indicator(base_url, data, indicator_que):
     """ One thread of adding indicators to CRITs"""
     while not indicator_que.empty():
         indicator = indicator_que.get()
-        if indicator[1] == 'IPv4':
+        if indicator['indicator_type'] == 'IPv4':
             # using the IP API
             url = base_url + 'ips/'
             data['add_indicator'] = "true"
-            data['ip'] = indicator[0]
+            data['ip'] = indicator['indicator']
             data['ip_type'] = 'Address - ipv4-addr'
-            data['reference'] = indicator[3]
-            # getting the source automatically:
-            source = re.findall(r'\/\/(.*?)\/', data['reference'])
-            if source:
-                data['source'] = source[0]
+            # source = the actual URL and source_name = name in the plugin
+            data['reference'] = indicator['source']
+            if 'source_name' in indicator:
+                data['source'] = indicator['source_name']
             res = requests.post(url, data=data, verify=False)
             if res.status_code not in [201, 200, 400]:
                 logger.info("Issues with adding: %s" % data['ip'])
-        elif indicator[1] == "FQDN":
+        elif indicator['indicator_type'] == "FQDN":
             # using the Domain API
             url = base_url + 'domains/'
             data['add_indicator'] = "true"
-            data['domain'] = indicator[0]
-            data['reference'] = indicator[3]
-            # getting the source automatically:
-            source = re.findall(r'\/\/(.*?)\/', data['reference'])
-            if source:
-                data['source'] = source[0]
+            data['domain'] = indicator['indicator']
+            data['reference'] = indicator['source']
+            if 'source_name' in indicator:
+                data['source'] = indicator['source_name']
             res = requests.post(url, data=data, verify=False)
             if res.status_code not in [201, 200, 400]:
                 logger.info("Issues with adding: %s" % data['domain'])
         else:
-            logger.info("don't yet know what to do with: %s[%s]" % (indicator[1], indicator[0]))
+            logger.info("don't yet know what to do with: %s[%s]" % (indicator['indicator_type'], indicator['indicator']))
 
 
 def bale_CRITs(harvest):

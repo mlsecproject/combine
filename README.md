@@ -54,24 +54,27 @@ An output example:
 "bgr.runk.pl","FQDN","outbound","mtc_malwaredns","Malware","2014-06-01"
 ```
 
-The output can optionally be filtered and enriched with additional data. The enrichments look like the following:
+The output can optionally be filtered and enriched with additional data. The enrichments look like the following:<br/>
+(url, domain, and ip have been added as additional fields if they're present in the original feed)
 ```
-"entity","type","direction","source","notes","date","asnumber","asname","country","host","rhost"
-"1.234.23.28","IPv4","outbound","alienvault","MLSec-Export","2014-04-03","9318","Hanaro Telecom Inc.","KR",,
-"1.234.35.198","IPv4","outbound","alienvault","MLSec-Export","2014-04-03","9318","Hanaro Telecom Inc.","KR",,
-"1.25.36.76","IPv4","outbound","alienvault","MLSec-Export","2014-04-03","4837","CNCGROUP China169 Backbone","CN",,
-"1.93.1.162","IPv4","outbound","alienvault","MLSec-Export","2014-04-03","4808","CNCGROUP IP network China169 Beijing Province Network","CN",,
-"1.93.44.147","IPv4","outbound","alienvault","MLSec-Export","2014-04-03","4808","CNCGROUP IP network China169 Beijing Province Network","CN",,
-"100.42.218.250","IPv4","outbound","alienvault","MLSec-Export","2014-04-03","18450","WebNX, Inc.","US",,"100-42-218-250.static.webnx.com"
-"100.42.55.2","IPv4","outbound","alienvault","MLSec-Export","2014-04-03","36351","SoftLayer Technologies Inc.","US",,"stats.wren.arvixe.com"
-"100.42.55.220","IPv4","outbound","alienvault","MLSec-Export","2014-04-03","36351","SoftLayer Technologies Inc.","US",,"stats.warthog.arvixe.com"
-"100.42.58.137","IPv4","outbound","alienvault","MLSec-Export","2014-04-03","36351","SoftLayer Technologies Inc.","US",,"100.42.58.137-static.reverse.mysitehosted.com"
+"entity","type","direction","source","notes","date","url","domain","ip","asnumber","asname","country","hostname","ips","mx"
+"gmail.com","FQDN","outbound","nothink","","2015-02-13","","","","","","","","173.194.37.54|173.194.37.53","alt3.gmail-smtp-in.l.google.com.|alt4.gmail-smtp-in.l.google.com.|alt1.gmail-smtp-in.l.google.com.|alt2.gmail-smtp-in.l.google.com.|gmail-smtp-in.l.google.com."
+"google.com","FQDN","outbound","nothink","","2015-02-13","","","","","","","","74.125.196.113|74.125.196.100|74.125.196.101|74.125.196.138|74.125.196.102|74.125.196.139","aspmx.l.google.com.|alt3.aspmx.l.google.com.|alt2.aspmx.l.google.com.|alt4.aspmx.l.google.com.|alt1.aspmx.l.google.com."
+"146.185.246.96","IPv4","outbound","nothink","","2015-02-13","","","","201781","Unikalnie Technologii ltd.","RU","","",""
+"173.45.105.218","IPv4","outbound","nothink","","2015-02-13","","","","10297","eNET Inc.","US","","",""
+"173.45.106.170","IPv4","outbound","nothink","","2015-02-13","","","","10297","eNET Inc.","US","","",""
+"193.106.175.180","IPv4","outbound","nothink","","2015-02-13","","","","50465","IQHost Ltd","RU","","",""
+"91.236.74.164","IPv4","inbound","nothink","","2015-02-13","","","","198540","Przedsiebiorstwo Uslug Specjalistycznych ELAN mgr inz. Andrzej Niechcial","PL","","",""
+"116.255.215.240","IPv4","inbound","openbl","","2015-02-13","","","","37943","ZhengZhou GIANT Computer Network Technology Co., Ltd","CN","","",""
 ```
 
 The enrichments include:
 * AS Name and Number information gathered from [MaxMind GeoIP ASN Database](http://dev.maxmind.com/geoip/legacy/geolite/)
 * Country Code information gathered from [MaxMind GeoIP Database](http://dev.maxmind.com/geoip/legacy/geolite/)
 * Host resolution and Reverse Host information is gathered from [Farsight Security's DNSDB](https://api.dnsdb.info/)
+* PTR DNS lookup - non-Farsight
+* A DNS lookup - non-Farsight
+* MX DNS lookup - non-Farsight
 
 In order to use the DNSDB's information you will require an API key from Farsight Security to use the enrichment.
 If you do not have one, you can request one [here](https://www.dnsdb.info/#Apply).
@@ -91,10 +94,13 @@ make venv
 source venv-combine/bin/activate
 ```
 
+To use some of the plugins you should also grab [uniaccept-python](https://github.com/icann/uniaccept-python), and install it.
+
 At this point you should be ready to run Combine.
 
-We also have a [dockerfile](https://github.com/mlsecproject/combine/tree/master/docker) available.
+We also have a [dockerfile](https://github.com/mlsecproject/combine/tree/master/docker) available *Non-Plugin version*.
 
+*Note, there is an issue running this under Python 2.7.9 that will cause all HTTPS URLs to fail*
 
 ### Exporting to CRITs
 
@@ -112,6 +118,52 @@ Make sure you have the campaign created on CRITs before exporting the data. The 
 set as `medium` throughout the export by default.
 
 Thanks to [@paulpc](https://github.com/paulpc) for implementing this feature and [@mgoffin](https://github.com/mgoffin) for moral support ;).
+
+### Creating a plugin
+
+The plugin system uses yapsy, you will need a .py and a .yapsy-plugin file in the plugins directory in order for your plugin to be recognized.
+To create a .yapsy-plugin file you need the following:
+
+```
+[Core]
+Name = plugin name
+Module = name of the .py file without the .py extension
+
+[Documentation]
+Author = plugin author
+Version = plugin version
+Website = website for reference, yours or another one
+Description = what the plugin does
+```
+
+Then create a .py file you can use this as a skeleton.
+
+```
+from yapsy.IPlugin import IPlugin
+
+class PluginOne(IPlugin):
+    NAME = name of the plugin from above
+    DIRECTION = can be 'inbound', 'outbound', or 'file'
+    URLS = ['a', 'list', 'of', 'urls']
+
+    def get_URLs(self):
+        return self.URLS
+
+    def get_direction(self):
+        return self.DIRECTION
+
+    def get_name(self):
+        return self.NAME
+
+    def process_data(self, source, response)
+        code you need to process the response (eg website text)
+        this should return a list of dicts, look at some of the
+        other plugins for examples
+```
+
+Plugins MUST implement process_data(), get_name() and get_direction(), in addition to the variables: NAME and URLS. The function get_URLs() is optional, and will ALWAYS override the values in URLS if present.
+
+process_data() MUST return a list of dicts. Each dict MUST possess the following keys: indicator (the IP address, hostname, etc...), indicator_type (IPv4, IPv6, HASH, URL, FQDN), indicator_direction (inbound or outbound), source_name (the name of the plugin/source), source (the URL that the data was retrieved from), date (Year-2digitMonth-2digitDay). Other keys will be passed through, but the listed ones are required for most of the various output formats.
 
 ### Copyright Info
 
