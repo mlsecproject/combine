@@ -29,12 +29,12 @@ geo_data = pygeoip.GeoIP('data/GeoIP.dat', pygeoip.MEMORY_CACHE)
 
 
 def load_gi_org(filename):
+    # no return function because gi_org is scoped to the module
+    # ugly hack
     with open(filename, 'rb') as f:
         org_reader = csv.DictReader(f, fieldnames=['start', 'end', 'org'])
         for row in org_reader:
             gi_org[row['start']] = (IPRange(row['start'], row['end']), unicode(row['org'], errors='replace'))
-
-    return gi_org
 
 
 def org_by_addr(address):
@@ -52,7 +52,6 @@ def maxhits(dns_records):
     hmax = 0
     hostname = None
     for record in dns_records:
-        # logger.info("examining %s" % record)
         if record['count'] > hmax:
             hmax = record['count']
             hostname = record['rrname'].rstrip('.')
@@ -119,10 +118,16 @@ def reserved(address):
 
 
 def is_ipv4(address):
-    if re.match('(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$', address):
+    if re.match(r'(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$', address):
         return True
     else:
         return False
+
+
+def is_fqdn(address):
+    if re.match(r'(?=^.{4,255}$)(^((?!-)[a-zA-Z0-9-]{1,63}(?<!-)\.)+[a-zA-Z]{2,63}$)', address):
+        return True
+    return False
 
 
 def is_ipv6(address):
@@ -130,6 +135,44 @@ def is_ipv6(address):
     if re.match(ipv6_address, address):
         return True
     return False
+
+
+def check_enrich_ip(config):
+    enrich_ip = config.getboolean('Winnower', 'enrich_ip')
+    if enrich_ip:
+        logger.info('Enriching IPv4 indicators: TRUE')
+    else:
+        logger.info('Enriching IPv4 indicators: FALSE')
+    return enrich_ip
+
+
+def check_enrich_dns(config):
+    enrich_dns = config.getboolean('Winnower', 'enrich_dns')
+    if enrich_dns:
+        logger.info('Enriching DNS indicators: TRUE')
+    else:
+        logger.info('Enriching DNS indicators: FALSE')
+    return enrich_dns
+
+
+def check_enrich_hash(config):
+    enrich_hash = config.getboolean('Winnower', 'enrich_hash')
+    if enrich_hash:
+        logger.info('Enriching Hash indicators: TRUE')
+    else:
+        logger.info('Enriching Hash indicators: FALSE')
+
+    logger.info('Setting up DNSDB client')
+
+
+def setup_dnsdb(server, api):
+    logger.info('Setting up DNSDB client')
+    # handle the case where we aren't using DNSDB
+    dnsdb = dnsdb_query.DnsdbClient(server, api)
+    if api == 'YOUR_API_KEY_HERE' or len(dnsdb.query_rdata_name('google.com')) == 0:
+        dnsdb = None
+        logger.info('Invalid DNSDB configuration found')
+    return dnsdb
 
 
 def winnow(in_file, out_file, enr_file):
@@ -145,31 +188,20 @@ def winnow(in_file, out_file, enr_file):
 
     server = config.get('Winnower', 'dnsdb_server')
     api = config.get('Winnower', 'dnsdb_api')
-    enrich_ip = config.getboolean('Winnower', 'enrich_ip')
-    if enrich_ip:
-        logger.info('Enriching IPv4 indicators: TRUE')
+
+    enrich_ip = check_enrich_ip(config)
+    enrich_dns = check_enrich_dns(config)
+    if enrich_dns or enrich_ip:
+        server = config.get('Winnower', 'dnsdb_server')
+        api = config.get('Winnower', 'dnsdb_api')
     else:
-        logger.info('Enriching IPv4 indicators: FALSE')
+        server = None
+        api = None
 
-    enrich_dns = config.getboolean('Winnower', 'enrich_dns')
-    if enrich_dns:
-        logger.info('Enriching DNS indicators: TRUE')
+    if server and api:
+        dnsdb = setup_dnsdb(server, api)
     else:
-        logger.info('Enriching DNS indicators: FALSE')
-
-    enrich_hash = config.getboolean('Winnower', 'enrich_hash')
-    if enrich_hash:
-        logger.info('Enriching Hash indicators: TRUE')
-    else:
-        logger.info('Enriching Hash indicators: FALSE')
-
-    logger.info('Setting up DNSDB client')
-
-    # handle the case where we aren't using DNSDB
-    dnsdb = dnsdb_query.DnsdbClient(server, api)
-    if api == 'YOUR_API_KEY_HERE' or len(dnsdb.query_rdata_name('google.com')) == 0:
         dnsdb = None
-        logger.info('Invalid DNSDB configuration found')
 
     with open(in_file, 'rb') as f:
         crop = json.load(f)
@@ -207,7 +239,7 @@ def winnow(in_file, out_file, enr_file):
                 else:
                     enriched.append(dict(each.items() + enrich_IPv4(ipaddr, geo_data).items()))
             else:
-                logger.error('Found invalid address: %s from: %s' % (indicator, each['source']))
+                logger.error('Found invalid address: %s', indicator)
         elif (indicator_type == 'IPv4' or indicator_type == 'IPv6') and is_ipv6(indicator):  # generic cleanup
             each['indicator_type'] = 'IPv6'
             wheat.append(each)

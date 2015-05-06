@@ -10,7 +10,6 @@
     -   id: name-tests-test
     -   id: requirements-txt-fixer
     -   id: flake8
-
 -   repo: git://github.com/asottile/reorder_python_imports
     sha: 3d86483455ab5bd06cc1069fdd5ac57be5463f10
     hooks:

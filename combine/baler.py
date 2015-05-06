@@ -186,7 +186,7 @@ def bale_CRITs_indicator(base_url, data, indicator_que):
             logger.info("don't yet know what to do with: %s[%s]" % (indicator['indicator_type'], indicator['indicator']))
 
 
-def bale_CRITs(harvest, filename):
+def bale_CRITs(harvest):
     """ taking the output from combine and pushing it to the CRITs web API"""
     # checking the minimum requirements for parameters
     # it would be nice to have some metadata on the feeds that can be imported in the intel library:
