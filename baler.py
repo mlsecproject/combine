@@ -1,17 +1,16 @@
+#!/usr/bin/env python
 import ConfigParser
 import datetime as dt
 import gzip
 import json
-import logging
 import os
 import re
-import requests
-import sys
+import threading
 import time
 import unicodecsv
-import threading
-from logger import get_logger
+from pycrits import pycrits
 from Queue import Queue
+from logger import get_logger
 
 logger = get_logger('baler')
 
@@ -104,43 +103,43 @@ def bale_enr_csvgz(harvest, output_file):
         bale_writer.writerows(harvest)
 
 
+def get_source(reference):
+    """ Try to extract the source automatically from the data."""
+    source = re.findall(r'\/\/(.*?)\/', reference)
+    if source:
+        return source[0]
+
+
 def bale_CRITs_indicator(base_url, data, indicator_que):
     """ One thread of adding indicators to CRITs"""
+    crits = pycrits(base_url, data['username'], data['api_key'])
     while not indicator_que.empty():
         indicator = indicator_que.get()
+        data['reference'] = indicator[3]
+        data['source'] = get_source(data['reference'])
+        data['crits_source'] = 'combine'
         if indicator[1] == 'IPv4':
-            # using the IP API
-            url = base_url + 'ips/'
-            data['add_indicator'] = "true"
+            pass
             data['ip'] = indicator[0]
             data['ip_type'] = 'Address - ipv4-addr'
-            data['reference'] = indicator[3]
-            # getting the source automatically:
-            source = re.findall(r'\/\/(.*?)\/', data['reference'])
-            if source:
-                data['source'] = source[0]
-            res = requests.post(url, data=data, verify=False)
-            if not res.status_code in [201, 200, 400]:
-                logger.info("Issues with adding: %s" % data['ip'])
+            try:
+                logger.info(crits.add_ip(data['ip'], data['ip_type'], data['crits_source']))
+                logger.info(crits.add_indicator('ip', data['ip'], data['crits_source']))
+            except Exception as e:
+                logger.info("Issues with adding: {0}.".format(data['ip']))
+                logger.info(e)
+
         elif indicator[1] == "FQDN":
-            # using the Domain API
-            url = base_url + 'domains/'
-            data['add_indicator'] = "true"
             data['domain'] = indicator[0]
-            data['reference'] = indicator[3]
-            # getting the source automatically:
-            source = re.findall(r'\/\/(.*?)\/', data['reference'])
-            if source:
-                data['source'] = source[0]
-            res = requests.post(url, data=data, verify=False)
-            if not res.status_code in [201, 200, 400]:
-                logger.info("Issues with adding: %s" % data['domain'])
-        else:
-            logger.info("don't yet know what to do with: %s[%s]" % (indicator[1], indicator[0]))
+            try:
+                logger.info(crits.add_domain(data['domain'], data['crits_source']))
+                logger.info(crits.add_indicator('domain', data['domain'], data['crits_source']))
+            except Exception as e:
+                logger.info("Issues with adding: {0}.".format(data['domain']))
+                logger.info(e)
 
 
 def bale_CRITs(harvest, filename):
-    """ taking the output from combine and pushing it to the CRITs web API"""
     # checking the minimum requirements for parameters
     # it would be nice to have some metadata on the feeds that can be imported in the intel library:
     #   -> confidence
