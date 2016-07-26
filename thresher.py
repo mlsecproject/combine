@@ -117,7 +117,11 @@ def process_autoshun(response, source, direction):
     if response.startswith("Couldn't select database"):
         return data
     for line in response.splitlines():
-        if not line.startswith('S') and len(line) > 0:
+		# Fixed unauthenticated sites, please test accordingly
+        if line.startswith("Please"):
+            logger.info("Skipping site " + source)
+            break
+        elif not line.startswith('S') and len(line) > 0:
             i = line.partition(',')[0].strip()
             date = line.split(',')[1].split()[0]
             note = line.split(',')[-1]
