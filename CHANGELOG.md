@@ -1,6 +1,11 @@
 CHANGE LOG
 ==========
 
+#### 0.1.3.9000 Delayed Capybara - WIP
+Bugfix release
+
+* Updating `requirements.txt` and issue with authenticated site ([#162](https://github.com/mlsecproject/combine/pull/162)) - thanks to [@Darkan](https://github.com/Darkan)
+
 #### 0.1.3 Captivating Capybara
 Bugfix release, and also making it easier to install and use the system with Venv and Docker procedures. Special thanks to [@krmaxwell](https://github.com/krmaxwell) who seems to have done all the work
 
