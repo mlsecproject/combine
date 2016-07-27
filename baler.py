@@ -113,12 +113,16 @@ def bale_CRITs_indicator(base_url, data, indicator_que):
             url = base_url + 'ips/'
             data['add_indicator'] = "true"
             data['ip'] = indicator[0]
-            data['ip_type'] = 'Address - ipv4-addr'
+            data['ip_type'] = 'IPv4 Address'
             data['reference'] = indicator[3]
+            data['bucket_list'] = indicator[2]
+            data['indicator_reference'] = indicator[3]
             # getting the source automatically:
             source = re.findall(r'\/\/(.*?)\/', data['reference'])
             if source:
                 data['source'] = source[0]
+            else:
+                data['source'] = 'Combine'
             res = requests.post(url, data=data, verify=False)
             if not res.status_code in [201, 200, 400]:
                 logger.info("Issues with adding: %s" % data['ip'])
@@ -127,11 +131,14 @@ def bale_CRITs_indicator(base_url, data, indicator_que):
             url = base_url + 'domains/'
             data['add_indicator'] = "true"
             data['domain'] = indicator[0]
-            data['reference'] = indicator[3]
+            data['bucket_list'] = indicator[2]
+            data['description'] = indicator[3]
             # getting the source automatically:
             source = re.findall(r'\/\/(.*?)\/', data['reference'])
             if source:
                 data['source'] = source[0]
+            else:
+                data['source'] = 'Combine'
             res = requests.post(url, data=data, verify=False)
             if not res.status_code in [201, 200, 400]:
                 logger.info("Issues with adding: %s" % data['domain'])
