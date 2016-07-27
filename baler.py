@@ -198,6 +198,69 @@ def bale_CRITs(harvest, filename):
                 (total_iocs, maxThreads, time.time() - start_time))
 
 
+def bale_silk(harvest, output_file):
+    """ Output the data as SiLK IPSet files"""
+    try:
+        from silk import IPSet
+    except:
+        raise ImportError('Failed to import IPSet from silk package. You probably need to install silk or reconfigure virtualenv with: --system-site-packages')
+    config = ConfigParser.SafeConfigParser()
+    cfg_success = config.read('combine.cfg')
+    if not cfg_success:
+        logger.error('bale_SiLK: Could not read combine.cfg.\n')
+        logger.error('HINT: edit combine-example.cfg and save as combine.cfg.\n')
+        return
+
+    if config.has_option('Baler', 'silk_output_path'):
+        path = config.get('Baler', 'silk_output_path')
+    else:
+        raise 'Please check the combine.cfg file for the silk_output_path field in the [Baler] section'
+
+    ipsets = {}
+    # Ugly regex to parse out source host and filename
+    # might be nice to rewrite the URL lists as config files, e.g.
+    # [source_name]
+    # url = <url>
+    # direction = <inbound|outbound|bidirectional>
+    # confidence = <rating>
+    source_pattern = re.compile('(?:https?|file)://(.*?)/.*?([^/.]*)')
+    for indicator in harvest:
+        if indicator[1] == 'IPv4':
+            # add indicator to IPSet - one per direction, per source
+            data = {}
+            data['ip'] = indicator[0]
+            data['reference'] = indicator[3]
+            data['direction'] = indicator[2]
+            # getting the source automatically:
+            source_match = source_pattern.match(data['reference'])
+            if source_match:
+                # Generate an IPSet filename based on source and direction
+                setname = str(source_match.group(1) + "_" + source_match.group(2) + "_" + data['direction'])
+
+                # define IPSet if not already defined
+                if setname not in ipsets:
+                    ipsets[setname] = IPSet()
+
+                # add ipv4 address to ipset
+                ipsets[setname].add(data['ip'])
+            else:
+                logger.info("can't determine source from ref (%s) so don't know what to do with: %s[%s]" % (indicator[3], indicator[1], indicator[0]))
+        elif indicator[1] == "FQDN":
+            # Not dealing with FQDNs
+            True
+        else:
+            logger.info("don't yet know what to do with: %s[%s]" % (indicator[1], indicator[0]))
+
+    for ipset in ipsets:
+        outfile = path + "/" + ipset + ".set"
+        logger.info("saving IPSet to: %s" % outfile)
+        if os.path.isfile(outfile):
+            ipsets[ipset].save(outfile + ".tmp")
+            os.rename(outfile + ".tmp", outfile)
+        else:
+            ipsets[ipset].save(outfile)
+
+
 def bale(input_file, output_file, output_format, is_regular):
     config = ConfigParser.SafeConfigParser()
     cfg_success = config.read('combine.cfg')
@@ -212,9 +275,9 @@ def bale(input_file, output_file, output_format, is_regular):
 
     # TODO: also need plugins here (cf. #23)
     if is_regular:
-        format_funcs = {'csv': bale_reg_csv, 'crits': bale_CRITs}
+        format_funcs = {'csv': bale_reg_csv, 'crits': bale_CRITs, 'silk': bale_silk}
     else:
-        format_funcs = {'csv': bale_enr_csv, 'crits': bale_CRITs}
+        format_funcs = {'csv': bale_enr_csv, 'crits': bale_CRITs, 'silk': bale_silk}
     format_funcs[output_format](harvest, output_file)
 
 if __name__ == "__main__":

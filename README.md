@@ -86,9 +86,15 @@ Installation on Unix and Unix-like systems is straightforward. Either clone the 
 sudo apt-get install python-dev python-pip python-virtualenv git
 git clone https://github.com/mlsecproject/combine.git
 cd combine
-virtualenv venv
+virtualenv --system-site-packages venv
 source venv/bin/activate
 pip install -r requirements.txt
+```
+
+In RHEL/Centos, use the following line instead of apt-get:
+
+```
+sudo yum install python-dev python-pip python-virtualenv git gcc
 ```
 
 At this point you should be ready to run Combine.
@@ -112,6 +118,23 @@ Make sure you have the campaign created on CRITs before exporting the data. The 
 set as `medium` throughout the export by default.
 
 Thanks to [@paulpc](https://github.com/paulpc) for implementing this feature and [@mgoffin](https://github.com/mgoffin) for moral support ;).
+
+### Exporting to SiLK
+
+In order to use the [SiLK](http://tools.netsa.cert.org/silk/silk.html) exporting function a single
+configuration item is necessary in the Baler section of the configuraiton file. Make sure you configure
+the following entry correctly:
+
+```
+silk_output_path = /path/to/silk/ipsets
+```
+
+Each dataset that is collected will be created in the configured directory as a unique ipset file with
+the naming convention:
+
+```
+<source host>_<list name>_<direction>.ipset
+```
 
 ### Copyright Info
 
