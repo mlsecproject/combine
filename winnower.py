@@ -7,6 +7,7 @@ import json
 import pygeoip
 import re
 import sys
+import os
 
 from netaddr import IPAddress, IPRange, IPSet
 from sortedcontainers import SortedDict
@@ -19,7 +20,9 @@ logger = get_logger('winnower')
 reserved_ranges = IPSet(['0.0.0.0/8', '100.64.0.0/10', '127.0.0.0/8', '192.88.99.0/24',
                          '198.18.0.0/15', '198.51.100.0/24', '203.0.113.0/24', '233.252.0.0/24'])
 gi_org = SortedDict()
-geo_data = pygeoip.GeoIP('data/GeoIP.dat', pygeoip.MEMORY_CACHE)
+base_path = os.path.dirname(__file__)
+full_path = base_path + '/data/GeoIP.dat'
+geo_data = pygeoip.GeoIP(full_path, pygeoip.MEMORY_CACHE)
 
 
 def load_gi_org(filename):
@@ -122,7 +125,9 @@ def is_fqdn(address):
 
 def winnow(in_file, out_file, enr_file):
     config = ConfigParser.SafeConfigParser(allow_no_value=True)
-    cfg_success = config.read('combine.cfg')
+    base_path = os.path.dirname(__file__)
+    full_path = base_path + '/combine.cfg'
+    cfg_success = config.read(full_path)
     if not cfg_success:
         logger.error('Winnower: Could not read combine.cfg.')
         logger.error('HINT: edit combine-example.cfg and save as combine.cfg.')
@@ -205,4 +210,6 @@ def winnow(in_file, out_file, enr_file):
 
 
 if __name__ == "__main__":
-    winnow('crop.json', 'crop.json', 'enriched.json')
+    base_path = os.path.dirname(__file__) + '/'
+    bp = base_path
+    winnow(bp + 'crop.json', bp + 'crop.json', bp + 'enriched.json')

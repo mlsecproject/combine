@@ -36,19 +36,22 @@ if args.file:
 else:
     out_file = 'harvest.'+out_type
 
-reap('harvest.json')
-thresh('harvest.json', 'crop.json')
-bale('crop.json', out_file, out_type, True)
+base_path = os.path.dirname(__file__) + '/'
+bp = base_path
+
+reap(bp + 'harvest.json')
+thresh(bp + 'harvest.json', bp + 'crop.json')
+bale(bp + 'crop.json', out_file, out_type, True)
 
 if args.enrich or args.tiq_test:
-    winnow('crop.json', 'crop.json', 'enrich.json')
-    bale('enrich.json', 'enriched.'+out_type, out_type, False)
+    winnow(bp + 'crop.json', bp + 'crop.json', bp +'enrich.json')
+    bale(bp + 'enrich.json', bp + 'enriched.'+out_type, out_type, False)
 
 if args.tiq_test:
-    tiq_output('crop.json', 'enrich.json')
+    tiq_output(bp + 'crop.json', bp + 'enrich.json')
 
 if args.delete:
     # be careful with this when we support a JSON output type
-    os.remove('harvest.json')
-    os.remove('crop.json')
-    os.remove('enrich.json')
+    os.remove(bp + 'harvest.json')
+    os.remove(bp + 'crop.json')
+    os.remove(bp + 'enrich.json')

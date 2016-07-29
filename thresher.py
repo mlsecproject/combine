@@ -1,3 +1,5 @@
+#! /usr/bin/env python
+
 import ConfigParser
 import bs4
 import datetime
@@ -7,6 +9,7 @@ import re
 from logger import get_logger
 from csv import reader
 from itertools import ifilter
+import os
 
 logger = get_logger('thresher')
 
@@ -153,7 +156,9 @@ def process_malwaregroup(response, source, direction):
 def thresh(input_file, output_file):
 
     config = ConfigParser.SafeConfigParser(allow_no_value=False)
-    cfg_success = config.read('combine.cfg')
+    base_path = os.path.dirname(__file__)
+    full_path = base_path + '/combine.cfg'
+    cfg_success = config.read(full_path)
     if not cfg_success:
         logger.error('Thresher: Could not read combine.cfg.')
         logger.error('HINT: edit combine-example.cfg and save as combine.cfg.')
@@ -215,4 +220,6 @@ def thresh(input_file, output_file):
 
 
 if __name__ == "__main__":
-    thresh('harvest.json', 'crop.json')
+    base_path = os.path.dirname(__file__) + '/'
+    bp = base_path
+    thresh(bp + 'harvest.json', bp + 'crop.json')

@@ -1,3 +1,5 @@
+#! /usr/bin/env python
+
 import ConfigParser
 import datetime as dt
 import gzip
@@ -18,7 +20,9 @@ logger = get_logger('baler')
 
 def tiq_output(reg_file, enr_file):
     config = ConfigParser.SafeConfigParser()
-    cfg_success = config.read('combine.cfg')
+    base_path = os.path.dirname(__file__)
+    full_path = base_path + '/combine.cfg'
+    cfg_success = config.read(full_path)
     if not cfg_success:
         logger.error('tiq_output: Could not read combine.cfg.')
         logger.error('HINT: edit combine-example.cfg and save as combine.cfg.')
@@ -148,7 +152,9 @@ def bale_CRITs(harvest, filename):
     data = {'confidence': 'medium'}
     start_time = time.time()
     config = ConfigParser.SafeConfigParser()
-    cfg_success = config.read('combine.cfg')
+    base_path = os.path.dirname(__file__)
+    full_path = base_path + '/combine.cfg'
+    cfg_success = config.read(full_path)
     if not cfg_success:
         logger.error('tiq_output: Could not read combine.cfg.\n')
         logger.error('HINT: edit combine-example.cfg and save as combine.cfg.\n')
@@ -200,7 +206,9 @@ def bale_CRITs(harvest, filename):
 
 def bale(input_file, output_file, output_format, is_regular):
     config = ConfigParser.SafeConfigParser()
-    cfg_success = config.read('combine.cfg')
+    base_path = os.path.dirname(__file__)
+    full_path = base_path + '/combine.cfg'
+    cfg_success = config.read(full_path)
     if not cfg_success:
         logger.error('Baler: Could not read combine.cfg.')
         logger.error('HINT: edit combine-example.cfg and save as combine.cfg.')
@@ -218,4 +226,6 @@ def bale(input_file, output_file, output_format, is_regular):
     format_funcs[output_format](harvest, output_file)
 
 if __name__ == "__main__":
-    bale('crop.json', 'harvest.csv', 'csv', True)
+    base_path = os.path.dirname(__file__) + '/'
+    bp = base_path
+    bale(bp + 'crop.json', bp + 'harvest.csv', 'csv', True)

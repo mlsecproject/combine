@@ -1,9 +1,12 @@
+#! /usr/bin/env python
+
 import ConfigParser
 import grequests
 import json
 import sys
 from logger import get_logger
 import logging
+import os
 
 
 logger = get_logger('reaper')
@@ -13,18 +16,22 @@ def exception_handler(request, exception):
 
 def reap(file_name):
     config = ConfigParser.SafeConfigParser(allow_no_value=False)
-    cfg_success = config.read('combine.cfg')
+    base_path = os.path.dirname(__file__)
+    full_path = base_path + '/combine.cfg'
+    cfg_success = config.read(full_path)
     if not cfg_success:
         logger.error('Reaper: Could not read combine.cfg.')
         logger.error('HINT: edit combine-example.cfg and save as combine.cfg.')
         return
 
     inbound_url_file = config.get('Reaper', 'inbound_urls')
+    inbound_url_file = base_path + '/' + inbound_url_file
     outbound_url_file = config.get('Reaper', 'outbound_urls')
+    outbound_url_file = base_path + '/' + outbound_url_file
 
     try:
         with open(inbound_url_file, 'rb') as f:
-    	    inbound_urls = [url.rstrip('\n') for url in f.readlines()]
+            inbound_urls = [url.rstrip('\n') for url in f.readlines()]
     except EnvironmentError as e:
         logger.error('Reaper: Error while opening "%s" - %s' % (inbound_url_file, e.strerror))
         return
@@ -81,4 +88,6 @@ def reap(file_name):
 
 
 if __name__ == "__main__":
-    reap('harvest.json')
+    base_path = os.path.dirname(__file__) + '/'
+    bp = base_path
+    reap(bp + 'harvest.json')
