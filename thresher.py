@@ -73,6 +73,16 @@ def process_drg(response, source, direction):
     return data
 
 
+def process_dataplane(response, source, direction):
+    data = []
+    current_date = str(datetime.date.today())
+    for line in response.splitlines():
+        if not line.startswith('#') and len(line) > 0:
+            i = line.split('|')[2].strip()
+            data.append((i, indicator_type(i), direction, source, "", current_date))
+    return data
+
+
 def process_alienvault(response, source, direction):
     data = []
     current_date = str(datetime.date.today())
@@ -180,6 +190,7 @@ def thresh(input_file, output_file):
                     'the-haleys': process_haleys,
                     'virbl': process_simple_list,
                     'dragonresearchgroup': process_drg,
+                    'dataplane': process_dataplane,
                     'malwaregroup': process_malwaregroup,
                     'malc0de': process_simple_list,
                     'file://': process_simple_list}
