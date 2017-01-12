@@ -113,7 +113,7 @@ def bale_CRITs_indicator(base_url, data, indicator_que):
             url = base_url + 'ips/'
             data['add_indicator'] = "true"
             data['ip'] = indicator[0]
-            data['ip_type'] = 'Address - ipv4-addr'
+            data['ip_type'] = 'IPv4 Address'
             data['reference'] = indicator[3]
             # getting the source automatically:
             source = re.findall(r'\/\/(.*?)\/', data['reference'])
