@@ -120,6 +120,10 @@ def is_fqdn(address):
         return False
 
 
+def rdns_to_ip(address):
+    return '.'.join(address.replace('.in-addr.arpa.', '').split('.')[::-1])
+    
+
 def winnow(in_file, out_file, enr_file):
     config = ConfigParser.SafeConfigParser(allow_no_value=True)
     cfg_success = config.read('combine.cfg')
@@ -167,6 +171,12 @@ def winnow(in_file, out_file, enr_file):
     logger.info('Beginning winnowing process')
     for each in crop:
         (addr, addr_type, direction, source, note, date) = each
+        
+        # handle rDNS as an IP, we don't know which DNS A rec it was so don't use PTR
+        if addr.endswith('.in-addr.arpa.'):
+            addr = rdns_to_ip(addr)
+            addr_type = 'IPv4'
+            
         # this should be refactored into appropriate functions
         if addr_type == 'IPv4' and is_ipv4(addr):
             #logger.info('Enriching %s' % addr)
