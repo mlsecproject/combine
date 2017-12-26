@@ -1,4 +1,4 @@
-import ConfigParser
+import configparser as ConfigParser
 import grequests
 import json
 import sys
@@ -23,14 +23,14 @@ def reap(file_name):
     outbound_url_file = config.get('Reaper', 'outbound_urls')
 
     try:
-        with open(inbound_url_file, 'rb') as f:
+        with open(inbound_url_file, 'r') as f:
     	    inbound_urls = [url.rstrip('\n') for url in f.readlines()]
     except EnvironmentError as e:
         logger.error('Reaper: Error while opening "%s" - %s' % (inbound_url_file, e.strerror))
         return
 
     try:
-        with open(outbound_url_file, 'rb') as f:
+        with open(outbound_url_file, 'r') as f:
             outbound_urls = [url.rstrip('\n') for url in f.readlines()]
     except EnvironmentError as e:
         logger.error('Reaper: Error while opening "%s" - %s' % (outbound_url_file, e.strerror))
@@ -76,7 +76,7 @@ def reap(file_name):
     logger.info('Storing raw feeds in %s' % file_name)
     harvest = {'inbound': inbound_harvest, 'outbound': outbound_harvest}
 
-    with open(file_name, 'wb') as f:
+    with open(file_name, 'w') as f:
         json.dump(harvest, f, indent=2)
 
 

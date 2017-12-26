@@ -1,4 +1,4 @@
-import ConfigParser
+import configparser as ConfigParser
 import datetime as dt
 import gzip
 import json
@@ -11,7 +11,7 @@ import time
 import unicodecsv
 import threading
 from logger import get_logger
-from Queue import Queue
+import queue as Queue
 
 logger = get_logger('baler')
 

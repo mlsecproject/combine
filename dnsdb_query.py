@@ -21,8 +21,8 @@ import optparse
 import os
 import sys
 import time
-import urllib2
-from cStringIO import StringIO
+import urllib
+import io
 
 try:
     import json
@@ -70,17 +70,17 @@ class DnsdbClient(object):
         url = '%s/lookup/%s' % (self.server, path)
         if self.limit:
             url += '?limit=%d' % self.limit
-        req = urllib2.Request(url)
+        req = urllib.request(url)
         req.add_header('Accept', 'application/json')
         req.add_header('X-Api-Key', self.apikey)
         try:
-            http = urllib2.urlopen(req)
+            http = urllib.request.urlopen(req)
             while True:
                 line = http.readline()
                 if not line:
                     break
                 res.append(json.loads(line))
-        except (urllib2.HTTPError, urllib2.URLError), e:
+        except (urllib.HTTPError, urllib.URLError) as e:
             sys.stderr.write(str(e) + '\n')
         return res
 
@@ -88,7 +88,7 @@ def sec_to_text(ts):
     return time.strftime('%Y-%m-%d %H:%M:%S -0000', time.gmtime(ts))
 
 def rrset_to_text(m):
-    s = StringIO()
+    s = io()
 
     if 'bailiwick' in m:
         s.write(';;  bailiwick: %s\n' % m['bailiwick'])
@@ -216,7 +216,7 @@ def main():
 
     try:
         cfg = parse_config(options.config)
-    except IOError, e:
+    except IOError as e:
         sys.stderr.write(e.message)
         sys.exit(1)
 

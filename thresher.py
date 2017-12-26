@@ -1,4 +1,4 @@
-import ConfigParser
+import configparser as ConfigParser
 import bs4
 import datetime
 import feedparser
@@ -6,10 +6,8 @@ import json
 import re
 from logger import get_logger
 from csv import reader
-from itertools import ifilter
 
 logger = get_logger('thresher')
-
 
 def indicator_type(indicator):
     ip_regex = r'^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$'
@@ -102,7 +100,7 @@ def process_packetmail(response, source, direction):
     data = []
     filter_comments = lambda x: not x[0].startswith('#')
     try:
-        for line in ifilter(filter_comments,
+        for line in filter(filter_comments,
                             reader(response.splitlines(), delimiter=';')):
             i = line[0]
             date = line[1].split(' ')[1]
@@ -210,7 +208,7 @@ def thresh(input_file, output_file):
             pass
 
     logger.info('Storing parsed data in %s', output_file)
-    with open(output_file, 'wb') as f:
+    with open(output_file, 'w') as f:
         json.dump(harvest, f, indent=2)
 
 

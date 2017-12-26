@@ -9,5 +9,6 @@ netaddr>=0.7.12,<0.8.0
 pygeoip>=0.3.1,<0.4.0
 requests>=2.10.0,<3.0.0
 sortedcontainers>=0.9.4,<1.6.0
-wsgiref==0.1.2
 unicodecsv>=0.9.4,<0.15.0
+urllib3
+configparser

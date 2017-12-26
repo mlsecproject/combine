@@ -1,5 +1,5 @@
 #! /usr/bin/env python
-import ConfigParser
+import configparser as ConfigParser
 import csv
 import datetime as dt
 import dnsdb_query
