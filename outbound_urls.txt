@@ -6,4 +6,4 @@ http://reputation.alienvault.com/reputation.data
 http://www.nothink.org/blacklist/blacklist_malware_dns.txt
 http://www.nothink.org/blacklist/blacklist_malware_http.txt
 http://www.nothink.org/blacklist/blacklist_malware_irc.txt
-https://feodotracker.abuse.ch/blocklist/?download=ipblocklist
+https://feodotracker.abuse.ch/downloads/ipblocklist.csv

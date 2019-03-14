@@ -117,7 +117,7 @@ def process_autoshun(response, source, direction):
     if response.startswith("Couldn't select database"):
         return data
     for line in response.splitlines():
-		# Fixed unauthenticated sites, please test accordingly
+	# Fixed unauthenticated sites, please test accordingly
         if line.startswith("Please"):
             logger.info("Skipping site " + source)
             break
@@ -149,6 +149,18 @@ def process_malwaregroup(response, source, direction):
             data.append((i, indicator_type(i), direction, source, '', date))
     return data
 
+def process_feodo(response, source, direction):
+    data = []
+    for data_item in response.split('\n'):
+        data_item_list = data_item.split(',')
+        try:
+            if not re.search('DstIP', data_item_list[1]):
+                ip = data_item_list[1]
+                date = data_item_list[0].split(' ')[0]
+                data.append((data_item_list[1], indicator_type(ip), 'outbound', source, '', date))
+        except IndexError:
+            continue
+    return data
 
 def thresh(input_file, output_file):
 
@@ -174,7 +186,6 @@ def thresh(input_file, output_file):
                     'sans': process_sans,
                     'http://www.nothink.org/blacklist/blacklist_ssh': process_simple_list,
                     'http://www.nothink.org/blacklist/blacklist_malware': process_simple_list,
-                    'abuse.ch': process_simple_list,
                     'packetmail': process_packetmail,
                     'autoshun': process_autoshun,
                     'the-haleys': process_haleys,
@@ -182,7 +193,8 @@ def thresh(input_file, output_file):
                     'dragonresearchgroup': process_drg,
                     'malwaregroup': process_malwaregroup,
                     'malc0de': process_simple_list,
-                    'file://': process_simple_list}
+                    'file://': process_simple_list,
+                    'feodotracker': process_feodo}
 
     # When we have plugins, this hack won't be necessary
     for response in crop['inbound']:
